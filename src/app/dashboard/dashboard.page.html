@@ -14,7 +14,7 @@
           <span></span><span></span><span></span>
         </button>
         <a class="active" href="#home">⌂&nbsp; Home</a>
-        <a routerLink="/shop">♧&nbsp; Shop</a>
+        <button type="button" (click)="goToShop()">♧&nbsp; Shop</button>
         <a href="#profile">♙&nbsp; Profile</a>
         <a routerLink="/home">↪&nbsp; Log Out</a>
       </header>
@@ -43,18 +43,20 @@
           <article class="book-card">
             <div class="book-cover warm-cover">📖</div>
             <h3>His Unwritten Promise</h3>
-            <p>By Gabrielle Reyes</p>
+            <p>By Caleb Reed</p>
             <div class="rating">★★★★★ <span>4.6 &nbsp; (15 reviews)</span></div>
-            <p class="description">A moving and emotional elegant, heartwarming romance that lingers...</p>
-            <div class="book-actions"><button>▶ Start Reading</button><button>□ Add archive</button></div>
+            <p class="description">A profoundly moving and elegant reimagining of a much loved classic.</p>
+            <hr />
+            <div class="book-actions"><button>▶ Start Reading</button><button>▣ Add Archive</button></div>
           </article>
           <article class="book-card">
             <div class="book-cover stack-cover">📚</div>
             <h3>Dear Future Ex</h3>
             <p>By Matt Kingly</p>
             <div class="rating">★★★★★ <span>4.6 &nbsp; (15 reviews)</span></div>
-            <p class="description">Between life and death there is a library of infinite second choices...</p>
-            <div class="book-actions"><button>▶ Start Reading</button><button>□ Add archive</button></div>
+            <p class="description">Between life and death there is a library of infinite second choices.</p>
+            <hr />
+            <div class="book-actions"><button>▶ Start Reading</button><button>▣ Add Archive</button></div>
           </article>
         </div>
       </section>

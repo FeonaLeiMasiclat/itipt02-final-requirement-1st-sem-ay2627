@@ -65,6 +65,18 @@ ion-content {
     white-space: nowrap;
   }
 
+  button {
+    border: 0;
+    border-radius: 18px;
+    padding: 8px 9px;
+    background: #d3cec4;
+    color: #3d3d3b;
+    font-size: 9px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
   a.active { background: #9dad87; }
   .mobile-menu { padding: 8px 9px; cursor: pointer; }
   .mobile-menu span { display: block; width: 16px; height: 2px; margin: 2px 0; background: #2c2c2a; }
@@ -95,34 +107,46 @@ ion-content {
 }
 
 .book-section {
-  margin-bottom: 10px;
-  padding: 11px 10px 12px;
-  border-radius: 16px;
+  margin-bottom: 14px;
+  padding: 16px 14px 15px;
+  border-radius: 24px;
   background: #e6d2b3;
 
-  h2 { margin: 0 0 9px; color: #5a5049; font-size: 12px; font-weight: 600; }
+  h2 { margin: 0 0 13px; color: #344d31; font-size: 16px; font-weight: 700; letter-spacing: .4px; }
 }
 
-.book-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.book-grid {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 0 1px 5px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar { display: none; }
+}
 
 .book-card {
+  flex: 0 0 calc(50% - 7px);
   min-width: 0;
-  padding: 8px;
-  border-radius: 15px;
+  padding: 11px;
+  border-radius: 20px;
   background: #debea1;
+  scroll-snap-align: start;
 
-  h3 { margin: 6px 0 1px; color: #6a5648; font-size: 7px; font-weight: 600; }
-  p { margin: 0; color: #76645a; font-size: 6px; }
-  .description { min-height: 19px; margin: 5px 0; line-height: 1.2; }
+  h3 { margin: 8px 0 2px; color: #62554d; font-size: 11px; font-weight: 500; }
+  p { margin: 0; color: #76645a; font-size: 8px; }
+  .description { min-height: 31px; margin: 7px 0; line-height: 1.25; }
+  hr { margin: 6px 0 11px; border: 0; border-top: 1px solid #4f453d; }
 }
 
 .book-cover {
   display: grid;
   place-items: center;
-  height: 87px;
-  border-radius: 12px;
+  height: 126px;
+  border-radius: 17px;
   background: #f0e0c6;
-  font-size: 57px;
+  font-size: 78px;
   filter: saturate(1.05);
 }
 
@@ -130,13 +154,13 @@ ion-content {
 .stack-cover { background: #ead5b7; }
 .gold-cover { background: #dcc99b; }
 .blue-cover { background: #cbd7d2; }
-.rating { margin-top: 4px; color: #f3bf21; font-size: 8px; white-space: nowrap; }
-.rating span { color: #806b5c; font-size: 5px; }
+.rating { margin-top: 6px; color: #f3bf21; font-size: 11px; white-space: nowrap; }
+.rating span { color: #62564e; font-size: 7px; }
 
 .book-actions {
   display: flex;
-  gap: 4px;
-  button { min-width: 0; flex: 1; border: 0; border-radius: 8px; padding: 4px 2px; background: #8ca071; color: #f5f0e9; font-size: 5px; white-space: nowrap; }
+  gap: 6px;
+  button { min-width: 0; flex: 1; border: 0; border-radius: 13px; padding: 8px 2px; background: #8ca071; color: #f5f0e9; font-size: 6px; white-space: nowrap; }
   button + button { background: #d2967a; }
 }
 
