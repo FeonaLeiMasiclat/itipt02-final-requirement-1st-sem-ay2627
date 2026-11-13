@@ -22,21 +22,17 @@
         </div>
 
         <!-- Date of Birth -->
-        <div class="date-row">
-          <div class="date-label">
-            <span>DATE OF BIRTH</span>
-          </div>
-
-          <div class="date-input-wrapper" (click)="dateInput.showPicker()">
-            <ion-icon name="calendar"></ion-icon>
-            <input
-              #dateInput
-              class="date-input"
-              type="date"
-              [(ngModel)]="birthDate"
-              name="birthDate"
-              required />
-          </div>
+        <div class="input-box date-of-birth" (click)="dateInput.showPicker()">
+          <ion-icon name="calendar"></ion-icon>
+          <span class="date-label">DATE OF BIRTH</span>
+          <span class="date-divider">|</span>
+          <input
+            #dateInput
+            class="date-input"
+            type="date"
+            [(ngModel)]="birthDate"
+            name="birthDate"
+            required />
         </div>
 
         <!-- Address -->
