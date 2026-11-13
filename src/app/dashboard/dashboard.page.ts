@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { IonContent } from '@ionic/angular';
 
@@ -7,6 +8,21 @@ import { IonContent } from '@ionic/angular';
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
   standalone: true,
-  imports: [IonContent, RouterLink],
+  imports: [CommonModule, IonContent, RouterLink],
 })
-export class DashboardPage {}
+export class DashboardPage {
+  menuOpen = false;
+  displayName = 'Reader';
+
+  ngOnInit() {
+    this.displayName = localStorage.getItem('lmsDisplayName') || 'Reader';
+  }
+
+  toggleMenu() {
+    this.menuOpen = !this.menuOpen;
+  }
+
+  closeMenu() {
+    this.menuOpen = false;
+  }
+}

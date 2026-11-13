@@ -4,21 +4,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
-import {
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonIcon
-} from '@ionic/angular';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonIcon } from '@ionic/angular';
 
 import { addIcons } from 'ionicons';
-import {
-  person,
-  lockClosed,
-  eye,
-  eyeOff
-} from 'ionicons/icons';
+import {person, lockClosed, eye, eyeOff} from 'ionicons/icons';
 
 @Component({
   selector: 'app-home',
@@ -26,14 +15,7 @@ import {
   styleUrls: ['home.page.scss'],
   standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonContent,
-    IonIcon,
-    RouterLink
+    CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent, IonIcon, RouterLink
   ],
 })
 export class HomePage {
@@ -52,6 +34,13 @@ export class HomePage {
     });
   }
 
+  ngOnInit() {
+    const savedEmail = localStorage.getItem('lmsEmail');
+    if (savedEmail) {
+      this.username = savedEmail;
+    }
+  }
+
   togglePassword() {
     this.showPassword = !this.showPassword;
   }
@@ -62,6 +51,12 @@ export class HomePage {
       return;
     }
 
+    if (this.username !== 'admin' || this.password !== 'admin') {
+      alert('Invalid username or password.');
+      return;
+    }
+
+    localStorage.setItem('lmsDisplayName', 'admin');
     this.router.navigate(['/dashboard']);
   }
 

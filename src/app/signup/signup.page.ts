@@ -72,6 +72,8 @@ export class SignupPage {
 
     alert('Registration successful! You can now log in.');
 
+    localStorage.setItem('lmsDisplayName', this.fullName.trim());
+    localStorage.setItem('lmsEmail', this.email.trim());
     this.router.navigate(['/home']);
   }
 }
