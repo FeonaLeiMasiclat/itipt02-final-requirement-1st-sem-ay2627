@@ -1,0 +1,16 @@
+ion-content { --background: #f4ead7; }
+
+.shop-page { width: min(100%, 390px); min-height: 100%; box-sizing: border-box; margin: 0 auto; padding: 21px 14px 30px; background: #f2eadb; color: #4d4a45; }
+.top-navigation { display: flex; align-items: center; gap: 5px; margin-bottom: 21px;
+  a, button { border: 0; border-radius: 18px; padding: 8px 9px; background: #d3cec4; color: #3d3d3b; font-size: 9px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+  a.active { background: #9dad87; } .hamburger { padding: 7px 10px; font-size: 17px; line-height: 1; } .icon-button { position: relative; padding: 8px; font-size: 11px; } sup { position: absolute; top: -4px; right: -2px; display: grid; place-items: center; width: 10px; height: 10px; border-radius: 50%; background: #e15951; color: #fff; font-size: 6px; }
+}
+.shop-hero { padding: 18px 25px 13px; border-radius: 22px; background: #a7b58f;
+  h1 { margin: 0; font-family: Georgia, serif; font-size: 15px; } > p { margin: 4px 0 15px; font-size: 8px; color: #5f6b58; } blockquote { margin: 0 0 15px; padding: 10px 20px; border-radius: 15px; background: #799761; color: #3d5736; font-family: Georgia, serif; font-size: 11px; } cite { float: right; margin-top: 4px; font-family: Arial, sans-serif; font-size: 8px; font-style: normal; } button { width: 100%; border: 0; border-radius: 16px; padding: 7px; background: #9e9b76; color: #5c624e; font-size: 8px; }
+}
+.search-box { height: 38px; display: flex; align-items: center; gap: 8px; margin: 19px 1px 9px; padding: 0 13px; border-radius: 18px; background: #e7d7bd; span { font-size: 27px; transform: rotate(-20deg); } input { width: 100%; border: 0; outline: 0; background: transparent; font-size: 12px; } }
+.filters { display: flex; gap: 5px; overflow: auto; padding-bottom: 19px; scrollbar-width: none; button { flex: 0 0 auto; border: 0; border-radius: 10px; padding: 5px 9px; background: #d1ccc4; color: #666; font-size: 7px; } .selected { background: #a9b78e; color: #546044; } }
+.books-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; h2 { margin: 0; font-size: 11px; } span { font-size: 7px; color: #8b857b; } }
+.book-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px 10px; }
+.book-card { position: relative; min-width: 0; padding: 9px; border-radius: 15px; background: #e7d4b7; h3 { margin: 6px 0 1px; font-size: 7px; } p { margin: 0; font-size: 6px; color: #75655c; } strong { display: block; margin: 7px 0; color: #74925a; font-size: 11px; } }
+.book-cover { display: grid; place-items: center; height: 92px; border-radius: 12px; background: #f2e4cc; font-size: 58px; }.warm-cover { background: #f8e3c2; }.stack-cover { background: #ead4b7; }.gold-cover { background: #dcc99b; }.blue-cover { background: #cbd7d2; }.favorite { position: absolute; top: 14px; right: 14px; border: 0; border-radius: 50%; padding: 3px; background: #d7e4d0; color: #557353; font-size: 8px; }.rating { margin-top: 4px; color: #f3bf21; font-size: 8px; white-space: nowrap; }.rating span { color: #806b5c; font-size: 5px; }.book-actions { display: flex; gap: 4px; button { min-width: 0; flex: 1; border: 0; border-radius: 8px; padding: 5px 2px; background: #8ca071; color: #f5f0e9; font-size: 5px; white-space: nowrap; } button + button { background: #df8578; } }

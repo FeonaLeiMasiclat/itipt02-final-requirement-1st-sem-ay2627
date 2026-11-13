@@ -1,0 +1,40 @@
+<ion-content [fullscreen]="true">
+  <main class="shop-page">
+    <header class="top-navigation">
+      <button type="button" class="hamburger" aria-label="Menu">☰</button>
+      <a routerLink="/dashboard">⌂&nbsp; Home</a>
+      <a class="active" href="#shop">♧&nbsp; Shop</a>
+      <a href="#profile">♙&nbsp; Profile</a>
+      <button type="button" class="icon-button">♥<sup>3</sup></button>
+      <button type="button" class="icon-button">🛒</button>
+    </header>
+
+    <section class="shop-hero">
+      <h1>♜ Library Book Shop</h1>
+      <p>Purchase and Add New to Your Personal collection</p>
+      <blockquote>“A book is a dream you hold in<br />your hands” <cite>— Neil Gaiman</cite></blockquote>
+      <button type="button">⊕ &nbsp; Request Acquisition</button>
+    </section>
+
+    <label class="search-box">
+      <span>⌕</span>
+      <input type="search" placeholder="Search books..." />
+    </label>
+
+    <div class="filters">
+      <button class="selected">All Owned</button><button>Recently Added</button><button>By Series</button><button>Reading Progress</button><button>On Sale</button>
+    </div>
+
+    <section class="books-heading"><h2>♧ &nbsp; Available Books for Reserve</h2><span>50 Items</span></section>
+    <section class="book-grid">
+      <article class="book-card">
+        <button class="favorite">♥</button><div class="book-cover warm-cover">📖</div><h3>His Unwritten Promise</h3><p>By Gabrielle Reyes</p><div class="rating">★★★★★ <span>4.6 &nbsp; (15 reviews)</span></div><strong>₱ 520</strong><div class="book-actions"><button>Add to Cart</button><button>Buy Now</button></div>
+      </article>
+      <article class="book-card">
+        <button class="favorite">♥</button><div class="book-cover stack-cover">📚</div><h3>Dear Future Ex</h3><p>By Matt Kingly</p><div class="rating">★★★★★ <span>4.6 &nbsp; (15 reviews)</span></div><strong>₱ 435</strong><div class="book-actions"><button>Add to Cart</button><button>Buy Now</button></div>
+      </article>
+      <article class="book-card"><button class="favorite">♥</button><div class="book-cover gold-cover">📖</div><h3>How great Books Go</h3><p>By Gabrielle Reyes</p></article>
+      <article class="book-card"><button class="favorite">♥</button><div class="book-cover blue-cover">📖</div><h3>The Midnight Library</h3><p>By Matt Kingly</p></article>
+    </section>
+  </main>
+</ion-content>
