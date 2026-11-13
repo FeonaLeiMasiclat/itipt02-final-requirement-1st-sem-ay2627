@@ -2,8 +2,16 @@ ion-content { --background: #f4ead7; }
 
 .shop-page { width: min(100%, 390px); min-height: 100%; box-sizing: border-box; margin: 0 auto; padding: 21px 14px 30px; background: #f2eadb; color: #4d4a45; }
 .top-navigation { display: flex; align-items: center; gap: 5px; margin-bottom: 21px;
-  a, button { border: 0; border-radius: 18px; padding: 8px 9px; background: #d3cec4; color: #3d3d3b; font-size: 9px; font-weight: 600; text-decoration: none; white-space: nowrap; }
-  a.active { background: #9dad87; } .hamburger { padding: 7px 10px; font-size: 17px; line-height: 1; } .icon-button { position: relative; padding: 8px; font-size: 11px; } sup { position: absolute; top: -4px; right: -2px; display: grid; place-items: center; width: 10px; height: 10px; border-radius: 50%; background: #e15951; color: #fff; font-size: 6px; }
+  a, button { display: inline-flex; align-items: center; justify-content: center; gap: 4px; border: 0; border-radius: 18px; padding: 8px 9px; background: #d3cec4; color: #3d3d3b; font-family: Arial, Helvetica, sans-serif; font-size: 9px; font-weight: 600; line-height: normal; text-decoration: none; white-space: nowrap; cursor: pointer; }
+  a.active { background: #9dad87; }
+  .hamburger { width: 36px; height: 36px; flex: 0 0 36px; flex-direction: column; gap: 3px; padding: 0; }
+  .hamburger span { display: block; width: 16px; height: 2px; background: #30312d; }
+  svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .icon-button { position: relative; width: 36px; height: 36px; flex: 0 0 36px; padding: 8px; border: 0; border-radius: 50%; }
+  .wishlist-button { margin-left: 16px; }
+  .wishlist-button svg { fill: #194a30; stroke: #194a30; }
+  .cart-button svg { width: 18px; height: 18px; stroke: #242522; stroke-width: 1.8; }
+  sup { position: absolute; top: -4px; right: -2px; display: grid; place-items: center; width: 10px; height: 10px; border-radius: 50%; background: #e15951; color: #fff; font-size: 6px; }
 }
 .shop-hero { padding: 18px 25px 13px; border-radius: 22px; background: #a7b58f;
   h1 { margin: 0; font-family: Georgia, serif; font-size: 15px; } > p { margin: 4px 0 15px; font-size: 8px; color: #5f6b58; } blockquote { margin: 0 0 15px; padding: 10px 20px; border-radius: 15px; background: #799761; color: #3d5736; font-family: Georgia, serif; font-size: 11px; } cite { float: right; margin-top: 4px; font-family: Arial, sans-serif; font-size: 8px; font-style: normal; } button { width: 100%; border: 0; border-radius: 16px; padding: 7px; background: #9e9b76; color: #5c624e; font-size: 8px; }
@@ -23,3 +31,9 @@ ion-content { --background: #f4ead7; }
   header { display: flex; align-items: center; justify-content: space-between; padding: 0 4px 14px; border-bottom: 1px solid #756d60; h2 { margin: 0; color: #3b5540; font-size: 14px; } button { border: 0; background: transparent; color: #71695d; font-size: 30px; font-weight: 200; cursor: pointer; } }
   article { display: flex; align-items: center; justify-content: space-between; margin-top: 13px; padding: 13px 14px; border-radius: 15px; background: #f7f0e4; strong { display: block; color: #52504a; font-size: 10px; } span { display: block; margin-top: 3px; color: #5d8a4b; font-size: 8px; font-weight: 700; } button { border: 0; background: transparent; color: #b7b3aa; font-size: 15px; cursor: pointer; } }
 }
+
+.shop-menu { position: fixed; z-index: 6; top: 0; bottom: 0; left: 0; width: min(78vw, 290px); box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; padding: 22px 20px; background: #e8d9bf; box-shadow: 3px 0 12px #0003; transform: translateX(-105%); transition: transform .25s ease; }
+.shop-menu.open { transform: translateX(0); }
+.shop-menu h2 { margin: 5px 0 8px; font: 22px Georgia, serif; }
+.shop-menu a { color: #45463e; font-size: 14px; text-decoration: none; }
+.shop-menu-close { align-self: flex-end; border: 0; background: transparent; font-size: 25px; cursor: pointer; }

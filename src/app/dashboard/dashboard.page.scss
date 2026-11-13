@@ -54,6 +54,10 @@ ion-content {
 
   a,
   .mobile-menu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
     border: 0;
     border-radius: 18px;
     padding: 8px 9px;
@@ -61,11 +65,17 @@ ion-content {
     color: #3d3d3b;
     font-size: 9px;
     font-weight: 600;
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: normal;
     text-decoration: none;
     white-space: nowrap;
   }
 
   button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
     border: 0;
     border-radius: 18px;
     padding: 8px 9px;
@@ -73,6 +83,8 @@ ion-content {
     color: #3d3d3b;
     font-size: 9px;
     font-weight: 600;
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: normal;
     cursor: pointer;
     white-space: nowrap;
   }
@@ -80,6 +92,10 @@ ion-content {
   a.active { background: #9dad87; }
   .mobile-menu { padding: 8px 9px; cursor: pointer; }
   .mobile-menu span { display: block; width: 16px; height: 2px; margin: 2px 0; background: #2c2c2a; }
+  .hamburger { width: 36px; height: 36px; flex: 0 0 36px; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0; }
+  .hamburger span { display: block; width: 16px; height: 2px; margin: 0; background: #30312d; }
+  svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  a:last-child { margin-left: 16px; }
 }
 
 .welcome-card {

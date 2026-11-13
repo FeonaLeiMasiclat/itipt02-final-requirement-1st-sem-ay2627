@@ -1,0 +1,43 @@
+:host { display: block; font-family: Arial, Helvetica, sans-serif; }
+ion-content { --background: #f4ead7; }
+.profile-page { min-height: 100%; display: flex; justify-content: center; color: #282923; background: radial-gradient(ellipse at 18% 28%, #fff8ea, transparent 60%), #f4ead7; }
+.profile-content { width: min(100%, 390px); min-height: 100%; box-sizing: border-box; padding: 21px 14px 30px; background: #f2eadb; }
+.top-navigation { display: flex; align-items: center; gap: 5px; margin-bottom: 21px; }
+.top-navigation a,.top-navigation button { height: auto; display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 8px 9px; border: 0; border-radius: 18px; background: #d3cec4; color: #3d3d3b; font-family: Arial, Helvetica, sans-serif; font-size: 9px; font-weight: 600; line-height: normal; text-decoration: none; white-space: nowrap; cursor: pointer; }
+.top-navigation a.active { background: #9dad87; }
+.top-navigation .hamburger { width: 36px; height: 36px; flex: 0 0 36px; flex-direction: column; gap: 3px; padding: 0; }
+.top-navigation .hamburger span { width: 16px; height: 2px; background: #30312d; }
+.top-navigation svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.top-navigation .cart-button { width: 36px; height: 36px; flex: 0 0 36px; padding: 8px; border-radius: 50%; }
+.top-navigation .cart-button svg { width: 18px; height: 18px; stroke: #242522; stroke-width: 1.8; }
+.top-navigation a:last-child { margin-left: 16px; }
+.account-card { padding: 16px 20px 17px; border: 2px solid #a49a89; border-radius: 27px; background: #eadac0; }
+.identity { display: flex; align-items: center; gap: 11px; margin: 0 9px 18px; }.identity h1 { margin: 0 0 3px; font: 20px Georgia, 'Times New Roman', serif; }.identity p { margin: 0 0 4px; font-size: 10px; }.identity strong { font-size: 9px; }
+.avatar { position: relative; width: 58px; height: 58px; flex: 0 0 58px; overflow: hidden; border-radius: 17px; background: #f8f1e6; }.avatar::before { content: ''; position: absolute; top: 8px; left: 18px; width: 24px; height: 24px; border-radius: 50%; background: #111; }.avatar span { position: absolute; bottom: 6px; left: 12px; width: 37px; height: 21px; border-radius: 22px 22px 8px 8px; background: #111; }.avatar i { position: absolute; right: -1px; bottom: -1px; width: 10px; height: 10px; border-radius: 50%; background: #1bc64a; }
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }.stat { min-height: 63px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid #948b7c; border-radius: 17px; background: #f4ead9; color: #263650; font: 14px Georgia, 'Times New Roman', serif; letter-spacing: .7px; text-decoration: none; }.stat strong { font-size: 18px; font-weight: 500; line-height: 1.2; }.stat span { font-size: 12px; }.stat.filled,.stat.archive { background: #e2ccb0; }.stat.muted { background: #cbb79b; }.stat.archive { grid-column: 1 / -1; justify-self: center; width: 42%; min-height: 58px; }
+.orders-section { margin-top: 20px; }.section-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }.section-heading h2 { margin: 0; font-size: 14px; font-weight: 700; }.clock { color: #466a40; font-size: 19px; vertical-align: -1px; }.ready-chip,.price-chip { padding: 5px 12px; border-radius: 12px; background: #f5d77f; color: #65532b; font-size: 10px; white-space: nowrap; }.order-meta { display: flex; align-items: flex-start; justify-content: space-between; margin: 8px 0 9px; padding: 0 10px 8px; border-bottom: 1px solid #d2c7b3; }.order-meta div { display: grid; gap: 3px; }.order-meta strong { font-size: 11px; }.order-meta span { font-size: 9px; }.price-chip { background: #f8f2e6; color: #605b52; }.order-book { display: flex; align-items: center; gap: 8px; min-height: 52px; padding: 6px 9px; border: 1px solid #d3c3aa; border-radius: 13px; background: #f7edde; }.book-icon { font-size: 24px; line-height: 1; }.book-details { min-width: 0; display: grid; gap: 2px; }.book-details strong { font-size: 10px; }.book-details span,.book-details small { font-size: 8px; }.book-details small { color: #765141; }.order-status { margin-left: auto; padding: 7px 9px; border-radius: 12px; background: #b9c1a1; font-size: 7px; line-height: 1.2; text-align: center; }.receipt-button { width: 100%; height: 25px; margin-top: 6px; border: 0; border-radius: 7px; background: #526c4e; color: #f9f4e9; font-size: 10px; font-weight: 600; cursor: pointer; }
+.owned-section { margin-top: 16px; padding: 12px; border-radius: 22px; background: #eadac0; }.borrowed-count { color: #746c61; font-size: 10px; white-space: nowrap; }.owned-book { margin-top: 9px; padding: 10px; border: 1px solid #e0ceb2; border-radius: 15px; background: #f5ead6; }.owned-main { display: flex; align-items: center; gap: 7px; }.owned-main > div { display: grid; gap: 3px; }.owned-main strong { font-size: 10px; font-weight: 500; }.owned-main span { font-size: 9px; }.progress-label { display: flex; justify-content: space-between; margin-top: 8px; font-size: 9px; }.progress-label b { color: #587047; }.progress-track { height: 8px; overflow: hidden; margin-top: 3px; border: 1px solid #8d8975; border-radius: 6px; background: #e2d7c1; }.progress-track span { display: block; width: 62%; height: 100%; background: #a0a88b; }.due-line { display: flex; justify-content: space-between; margin-top: 7px; font-size: 8px; }.due-line b { color: #4f6d3f; font-size: 8px; }.book-buttons { display: flex; gap: 8px; margin-top: 13px; }.book-buttons button { flex: 1; height: 30px; border: 1px solid #a49985; border-radius: 17px; background: #f5ecdc; color: #385333; font-size: 10px; font-weight: 600; cursor: pointer; }.book-buttons button + button { border-color: #8e9777; background: #9fa987; color: #65714f; }
+.extra-links { display: flex; justify-content: flex-end; gap: 13px; margin-top: 11px; }.extra-links a { color: #596d4c; font-size: 9px; }
+.menu-backdrop { position: fixed; z-index: 4; inset: 0; border: 0; background: #0005; }.side-menu { position: fixed; z-index: 5; top: 0; bottom: 0; left: 0; width: min(78vw, 290px); box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; padding: 22px 20px; background: #e8d9bf; box-shadow: 3px 0 12px #0003; transform: translateX(-105%); transition: transform .25s ease; }.side-menu.open { transform: translateX(0); }.side-menu h2 { margin: 5px 0 8px; font: 22px Georgia, serif; }.side-menu a { color: #45463e; font-size: 14px; text-decoration: none; }.side-menu .logout { margin-top: auto; }.menu-close { align-self: flex-end; border: 0; background: transparent; font-size: 25px; cursor: pointer; }
+@media(max-width:420px) { .profile-content { padding-inline: 13px; }.account-card { padding: 13px 12px; }.identity h1 { font-size: 17px; }.section-heading h2 { font-size: 12px; } }
+
+/* Keep profile copy in the same compact type scale as the library screens. */
+.identity h1 { font-size: 15px; }
+.identity p { font-size: 8px; }
+.identity strong { font-size: 7px; }
+.stat { font-size: 11px; }
+.stat strong { font-size: 14px; }
+.stat span { font-size: 9px; }
+.section-heading h2 { font-size: 12px; }
+.ready-chip,.price-chip { font-size: 8px; }
+.order-meta strong { font-size: 9px; }
+.order-meta span { font-size: 7px; }
+.book-details strong { font-size: 8px; }
+.book-details span,.book-details small { font-size: 6px; }
+.receipt-button { font-size: 8px; }
+.borrowed-count { font-size: 8px; }
+.owned-main strong { font-size: 8px; }
+.owned-main span { font-size: 7px; }
+.progress-label,.due-line,.due-line b { font-size: 7px; }
+.book-buttons button { font-size: 8px; }
+.extra-links a { font-size: 8px; }
