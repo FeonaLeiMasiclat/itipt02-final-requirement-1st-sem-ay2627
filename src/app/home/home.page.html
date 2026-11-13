@@ -1,21 +1,69 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title> Blank </ion-title>
-  </ion-toolbar>
-</ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <div class="login-page">
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>
-      Start with Ionic
-      <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a>
-    </p>
+    <h1 class="login-title">Login</h1>
+
+    <div class="login-card">
+
+      <form (ngSubmit)="login()">
+
+        <!-- Username -->
+        <div class="input-box">
+          <ion-icon name="person" class="input-icon"></ion-icon>
+          <input
+            type="text"
+            placeholder="Username or Email"
+            [(ngModel)]="username"
+            name="username"
+            required
+          />
+        </div>
+
+        <!-- Password -->
+        <div class="input-box">
+          <ion-icon name="lock-closed" class="input-icon"></ion-icon>
+
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            placeholder="Password"
+            [(ngModel)]="password"
+            name="password"
+            required
+          />
+
+          <ion-icon
+            [name]="showPassword ? 'eye' : 'eye-off'"
+            class="eye-icon"
+            (click)="togglePassword()">
+          </ion-icon>
+        </div>
+
+        <!-- Remember and Forgot -->
+        <div class="options">
+          <label class="remember">
+            <input type="checkbox" [(ngModel)]="rememberMe"
+              name="rememberMe" />
+            <span>Remember Me</span>
+          </label>
+
+          <a href="#" (click)="forgotPassword($event)">
+            Forgot Password?
+          </a>
+        </div>
+
+        <!-- Login Button -->
+        <button type="submit" class="login-button">
+          Log in
+        </button>
+
+        <!-- Sign Up -->
+        <p class="signup-text">
+          Don't have an Account?
+          <a routerLink="/signup">Sign Up</a>
+        </p>
+
+      </form>
+    </div>
   </div>
 </ion-content>

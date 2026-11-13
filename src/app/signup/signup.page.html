@@ -1,0 +1,95 @@
+
+<ion-content [fullscreen]="true">
+  <div class="signup-page">
+
+    <div class="signup-heading">
+      <h1>Sign Up</h1>
+      <p>Create Your LMS Account</p>
+    </div>
+
+    <div class="signup-card">
+      <form (ngSubmit)="register()">
+
+        <!-- Full Name -->
+        <div class="input-box">
+          <ion-icon name="person"></ion-icon>
+          <input
+            type="text"
+            placeholder="FULL NAME"
+            [(ngModel)]="fullName"
+            name="fullName"
+            required />
+        </div>
+
+        <!-- Date of Birth -->
+        <div class="date-row">
+          <div class="date-label">
+            <span>DATE OF BIRTH</span>
+          </div>
+
+          <div class="date-input-wrapper" (click)="dateInput.showPicker()">
+            <ion-icon name="calendar"></ion-icon>
+            <input
+              #dateInput
+              class="date-input"
+              type="date"
+              [(ngModel)]="birthDate"
+              name="birthDate"
+              required />
+          </div>
+        </div>
+
+        <!-- Address -->
+        <div class="input-box">
+          <ion-icon name="home"></ion-icon>
+          <input
+            type="text"
+            placeholder="Address"
+            [(ngModel)]="address"
+            name="address"
+            required />
+        </div>
+
+        <!-- Email -->
+        <div class="input-box">
+          <ion-icon name="mail-outline"></ion-icon>
+          <input
+            type="email"
+            placeholder="EMAIL ADDRESS"
+            [(ngModel)]="email"
+            name="email"
+            required />
+        </div>
+
+        <!-- Password -->
+        <div class="input-box">
+          <ion-icon name="lock-closed"></ion-icon>
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            placeholder="PASSWORD"
+            [(ngModel)]="password"
+            name="password"
+            required />
+
+          <ion-icon
+            [name]="showPassword ? 'eye' : 'eye-off'"
+            class="eye-icon"
+            (click)="togglePassword()">
+          </ion-icon>
+        </div>
+
+        <!-- Register -->
+        <button type="submit" class="register-button">
+          <ion-icon name="play"></ion-icon>
+          REGISTER
+        </button>
+
+        <p class="login-link">
+          Already Registered?
+          <a routerLink="/home">Log in here.</a>
+        </p>
+
+      </form>
+    </div>
+  </div>
+</ion-content>
