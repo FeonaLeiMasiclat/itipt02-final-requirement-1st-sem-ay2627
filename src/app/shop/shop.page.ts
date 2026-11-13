@@ -9,4 +9,14 @@ import { IonContent } from '@ionic/angular';
   standalone: true,
   imports: [IonContent, RouterLink],
 })
-export class ShopPage {}
+export class ShopPage {
+  wishlistOpen = false;
+
+  toggleWishlist() {
+    this.wishlistOpen = !this.wishlistOpen;
+  }
+
+  closeWishlist() {
+    this.wishlistOpen = false;
+  }
+}

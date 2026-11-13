@@ -5,7 +5,7 @@
       <a routerLink="/dashboard">⌂&nbsp; Home</a>
       <a class="active" href="#shop">♧&nbsp; Shop</a>
       <a href="#profile">♙&nbsp; Profile</a>
-      <button type="button" class="icon-button">♥<sup>3</sup></button>
+      <button type="button" class="icon-button" aria-label="Open wishlist" (click)="toggleWishlist()">♥<sup>3</sup></button>
       <button type="button" class="icon-button">🛒</button>
     </header>
 
@@ -36,5 +36,17 @@
       <article class="book-card"><button class="favorite">♥</button><div class="book-cover gold-cover">📖</div><h3>How great Books Go</h3><p>By Gabrielle Reyes</p></article>
       <article class="book-card"><button class="favorite">♥</button><div class="book-cover blue-cover">📖</div><h3>The Midnight Library</h3><p>By Matt Kingly</p></article>
     </section>
+
+    <button class="wishlist-backdrop" [class.visible]="wishlistOpen" type="button" aria-label="Close wishlist" (click)="closeWishlist()"></button>
+
+    <aside class="wishlist-panel" [class.open]="wishlistOpen" aria-label="Wishlist items">
+      <header>
+        <h2>♥ &nbsp; Wishlist Items</h2>
+        <button type="button" aria-label="Close wishlist" (click)="closeWishlist()">×</button>
+      </header>
+      <article><div><strong>The Rain In Espana</strong><span>₱ 520</span></div><button type="button" aria-label="Remove The Rain In Espana">♲</button></article>
+      <article><div><strong>Safe Skies, Archer</strong><span>₱ 520</span></div><button type="button" aria-label="Remove Safe Skies, Archer">♲</button></article>
+      <article><div><strong>Golden Scenery of Tomorrow</strong><span>₱ 520</span></div><button type="button" aria-label="Remove Golden Scenery of Tomorrow">♲</button></article>
+    </aside>
   </main>
 </ion-content>
