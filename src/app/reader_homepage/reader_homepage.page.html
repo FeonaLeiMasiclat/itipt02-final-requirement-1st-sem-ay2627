@@ -26,9 +26,12 @@
           </svg>
           Profile</a
         >
-        <a routerLink="/login"
-          ><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11 3h6v14h-6M3 10h11M9 6l4 4-4 4" /></svg> Log Out</a
-        >
+        <button type="button" class="logout-trigger" (click)="openLogoutModal()">
+          <svg viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M11 3h6v14h-6M3 10h11M9 6l4 4-4 4" />
+          </svg>
+          Log Out
+        </button>
       </header>
 
       <section class="welcome-card">
@@ -134,8 +137,46 @@
         <div class="book-mark">♧</div>
         <strong>Library Management System</strong>
         <span>Headquarters Library</span>
-        <a routerLink="/login" (click)="closeMenu()">Log out</a>
+        <button type="button" class="logout-trigger" (click)="openLogoutModal()">Log out</button>
       </footer>
     </aside>
+
+    @if (logoutModalOpen) {
+    <div class="logout-modal-backdrop">
+      <section
+        class="logout-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="logout-dialog-title"
+        aria-describedby="logout-dialog-description"
+      >
+        <div class="logout-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M13 4h6v16h-6M3 12h12m-5-5 5 5-5 5" />
+          </svg>
+        </div>
+        <h2 id="logout-dialog-title">Log Out account?</h2>
+        <p id="logout-dialog-description">
+          Are you sure you want to log out? Your Saved Cart and Counter Orders will remain safely stored.
+        </p>
+        <div class="logout-account">
+          <div class="logout-avatar" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21a8 8 0 0 1 16 0z" />
+            </svg>
+          </div>
+          <div class="logout-account-details">
+            <strong>{{ displayName }}</strong>
+            <span>Card ID: #LMS-2026-8812</span>
+          </div>
+        </div>
+        <div class="logout-actions">
+          <button type="button" class="cancel-logout" (click)="cancelLogout()">Cancel</button>
+          <button type="button" class="confirm-logout" (click)="confirmLogout()">Log Out</button>
+        </div>
+      </section>
+    </div>
+    }
   </main>
 </ion-content>
