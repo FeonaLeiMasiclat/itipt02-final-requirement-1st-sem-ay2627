@@ -51,12 +51,15 @@ export class HomePage {
       return;
     }
 
-    if (this.username !== 'admin' || this.password !== 'admin') {
+    const isAdmin = this.username === 'admin' && this.password === 'admin';
+    const isUser = this.username === 'user' && this.password === 'user';
+
+    if (!isAdmin && !isUser) {
       alert('Invalid username or password.');
       return;
     }
 
-    localStorage.setItem('lmsDisplayName', 'admin');
+    localStorage.setItem('lmsDisplayName', this.username);
     this.router.navigate(['/dashboard']);
   }
 
