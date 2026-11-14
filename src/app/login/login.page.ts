@@ -35,10 +35,7 @@ export class LoginPage {
   }
 
   ngOnInit() {
-    const savedEmail = localStorage.getItem('lmsEmail');
-    if (savedEmail) {
-      this.username = savedEmail;
-    }
+    localStorage.removeItem('lmsUserRole');
   }
 
   togglePassword() {
@@ -48,13 +45,15 @@ export class LoginPage {
   login() {
     const username = this.username.trim();
     const password = this.password;
+    const normalizedUsername = username.toLowerCase();
+    const demoPassword = password.trim();
 
     if (!username || !password) {
       alert('Please enter your username and password.');
       return;
     }
 
-    if (username === 'admin' && password === 'admin') {
+    if (normalizedUsername === 'admin' && demoPassword === 'admin') {
       localStorage.setItem('lmsDisplayName', 'admin');
       localStorage.setItem('lmsUserRole', 'admin');
       this.router.navigate(['/admin_homepage']);
@@ -63,9 +62,9 @@ export class LoginPage {
 
     const savedEmail = localStorage.getItem('lmsEmail');
     const savedPassword = localStorage.getItem('lmsPassword');
-    const isHardcodedUser = username === 'user' && password === 'user';
+    const isHardcodedUser = normalizedUsername === 'user' && demoPassword === 'user';
     const isRegisteredUser =
-      username.toLowerCase() === savedEmail?.toLowerCase() && password === savedPassword;
+      normalizedUsername === savedEmail?.trim().toLowerCase() && password === savedPassword;
 
     if (!isHardcodedUser && !isRegisteredUser) {
       alert('Invalid username or password.');
