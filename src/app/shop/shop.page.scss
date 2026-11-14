@@ -270,6 +270,18 @@ ion-content {
   background: #d4d0c5;
   color: #195232;
   font-size: 11px;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+  &:hover {
+    transform: scale(1.08);
+  }
+  &:focus-visible {
+    outline: 2px solid #8d9a74;
+    outline-offset: 2px;
+  }
+  &.in-wishlist {
+    background: #a9b78e;
+  }
 }
 .rating {
   margin-top: 6px;
@@ -409,6 +421,37 @@ ion-content {
   color: #75655c;
   font-size: 10px;
   text-align: center;
+}
+.wishlist-undo {
+  position: fixed;
+  z-index: 20;
+  bottom: 16px;
+  left: 50%;
+  width: min(390px, calc(100% - 32px));
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #d3c3a8;
+  color: #4b453b;
+  font-size: 10px;
+  box-shadow: 0 3px 12px rgba(49, 41, 28, .2);
+  transform: translateX(-50%);
+  left: 50%;
+
+  button {
+    border: 0;
+    padding: 4px 6px;
+    background: transparent;
+    color: #385b32;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+  }
 }
 
 .shop-menu {

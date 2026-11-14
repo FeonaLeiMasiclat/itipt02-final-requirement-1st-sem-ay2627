@@ -44,6 +44,33 @@ describe('ShopPage checkout', () => {
     ]);
   });
 
+  it('restores a removed wishlist item when undo is selected', () => {
+    const page = TestBed.createComponent(ShopPage).componentInstance;
+    const removedItem = page.wishlistItems[1];
+
+    page.removeWishlistItem(removedItem.title);
+    page.undoWishlistRemoval();
+
+    expect(page.wishlistItems).toContain(removedItem);
+    expect(page.recentlyRemovedWishlistItem).toBeNull();
+    expect(page.wishlistOpen).toBe(false);
+  });
+
+  it('saves and removes a book through its heart button', () => {
+    const page = TestBed.createComponent(ShopPage).componentInstance;
+    const book = page.availableBooks[0];
+
+    page.toggleWishlistItem(book);
+
+    expect(page.isInWishlist(book.title)).toBe(true);
+    expect(page.wishlistOpen).toBe(false);
+
+    page.toggleWishlistItem(book);
+
+    expect(page.isInWishlist(book.title)).toBe(false);
+    expect(page.recentlyRemovedWishlistItem).toEqual({ title: book.title, price: book.price });
+  });
+
   it('saves the confirmed order, removes purchased books, and shows its receipt', () => {
     const page = TestBed.createComponent(ShopPage).componentInstance;
     page.checkout();

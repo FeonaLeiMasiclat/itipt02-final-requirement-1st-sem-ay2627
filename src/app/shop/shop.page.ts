@@ -113,6 +113,7 @@ export class ShopPage {
     { title: 'Safe Skies, Archer', price: 520 },
     { title: 'Golden Scenery of Tomorrow', price: 520 },
   ];
+  recentlyRemovedWishlistItem: WishlistItem | null = null;
 
   constructor() {
     this.route.queryParamMap.subscribe((params) => {
@@ -236,8 +237,36 @@ export class ShopPage {
     this.wishlistOpen = false;
   }
 
+  toggleWishlistItem(book: ShopBook): void {
+    if (this.isInWishlist(book.title)) {
+      this.removeWishlistItem(book.title);
+      return;
+    }
+
+    this.recentlyRemovedWishlistItem = null;
+    this.wishlistItems = [...this.wishlistItems, { title: book.title, price: book.price }];
+  }
+
+  isInWishlist(title: string): boolean {
+    return this.wishlistItems.some((item) => item.title === title);
+  }
+
   removeWishlistItem(title: string): void {
+    const removedItem = this.wishlistItems.find((item) => item.title === title);
+    if (!removedItem) return;
+
+    this.recentlyRemovedWishlistItem = removedItem;
     this.wishlistItems = this.wishlistItems.filter((item) => item.title !== title);
+  }
+
+  undoWishlistRemoval(): void {
+    const item = this.recentlyRemovedWishlistItem;
+    if (!item) return;
+
+    if (!this.isInWishlist(item.title)) {
+      this.wishlistItems = [...this.wishlistItems, item];
+    }
+    this.recentlyRemovedWishlistItem = null;
   }
 
   selectFilter(filter: ShopFilter): void {

@@ -58,7 +58,14 @@
     <section class="book-grid" aria-live="polite">
       @for (book of visibleBooks; track book.title) {
       <article class="book-card">
-        <button class="favorite" type="button" [attr.aria-label]="'Add ' + book.title + ' to wishlist'">♥</button>
+        <button
+          class="favorite"
+          [class.in-wishlist]="isInWishlist(book.title)"
+          type="button"
+          [attr.aria-label]="isInWishlist(book.title) ? 'Remove ' + book.title + ' from wishlist' : 'Save ' + book.title + ' to wishlist'"
+          [attr.aria-pressed]="isInWishlist(book.title)"
+          (click)="toggleWishlistItem(book)"
+        >♥</button>
         <div class="book-cover" [class]="book.cover">📖</div>
         <h3>{{ book.title }}</h3><p>By {{ book.author }}</p>
         <div class="rating">★★★★★ <span>4.6 &nbsp; (1.5k reviews)</span></div>
@@ -94,6 +101,12 @@
       <p class="wishlist-empty">Your wishlist is empty.</p>
       }
     </aside>
+    @if (recentlyRemovedWishlistItem; as removedItem) {
+    <div class="wishlist-undo" role="status">
+      <span>{{ removedItem.title }} removed from wishlist</span>
+      <button type="button" (click)="undoWishlistRemoval()">Undo</button>
+    </div>
+    }
 
     @if (cartOpen) {
     <button class="cart-backdrop" type="button" aria-label="Close cart" (click)="closeCart()"></button>
