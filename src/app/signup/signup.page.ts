@@ -74,6 +74,7 @@ export class SignupPage {
 
     localStorage.setItem('lmsDisplayName', this.fullName.trim());
     localStorage.setItem('lmsEmail', this.email.trim());
-    this.router.navigate(['/home']);
+    localStorage.setItem('lmsPassword', this.password);
+    this.router.navigate(['/login']);
   }
 }

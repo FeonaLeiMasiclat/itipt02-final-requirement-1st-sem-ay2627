@@ -10,13 +10,13 @@
 
     <section class="dashboard-content">
       <header class="top-navigation">
-        <button type="button" class="mobile-menu" aria-label="Open navigation menu" (click)="toggleMenu()">
+        <button type="button" class="mobile-menu hamburger" aria-label="Open navigation menu" (click)="toggleMenu()">
           <span></span><span></span><span></span>
         </button>
-        <a class="active" href="#home">⌂&nbsp; Home</a>
-        <button type="button" (click)="goToShop()">♧&nbsp; Shop</button>
-        <a href="#profile">♙&nbsp; Profile</a>
-        <a routerLink="/home">↪&nbsp; Log Out</a>
+        <a class="active" routerLink="/home"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 9.2 10 3l7.5 6.2M5 8.5V17h10V8.5M8 17v-5h4v5" /></svg> Home</a>
+        <a routerLink="/shop"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7h12l1 10H3L4 7ZM7 7V5a3 3 0 0 1 6 0v2" /></svg> Shop</a>
+        <a routerLink="/profile"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="6" r="3.5"/><path d="M3 18a7 7 0 0 1 14 0" /></svg> Profile</a>
+        <a routerLink="/login"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11 3h6v14h-6M3 10h11M9 6l4 4-4 4" /></svg> Log Out</a>
       </header>
 
       <section class="welcome-card">
@@ -111,11 +111,13 @@
         <a href="#help">❔ &nbsp; Need Help?</a>
       </section>
 
+      <a routerLink="/profile" (click)="closeMenu()">Profile</a>
+      <a routerLink="/shop" [queryParams]="{ wishlist: true }" (click)="closeMenu()">Wishlist</a>
       <footer>
         <div class="book-mark">♧</div>
         <strong>Library Management System</strong>
         <span>Headquarters Library</span>
-        <a routerLink="/home" (click)="closeMenu()">Log out</a>
+        <a routerLink="/login" (click)="closeMenu()">Log out</a>
       </footer>
     </aside>
   </main>

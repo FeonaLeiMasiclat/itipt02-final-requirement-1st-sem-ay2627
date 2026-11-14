@@ -1,12 +1,12 @@
 <ion-content [fullscreen]="true">
   <main class="shop-page">
     <header class="top-navigation">
-      <button type="button" class="hamburger" aria-label="Menu">☰</button>
-      <a routerLink="/dashboard">⌂&nbsp; Home</a>
-      <a class="active" href="#shop">♧&nbsp; Shop</a>
-      <a href="#profile">♙&nbsp; Profile</a>
-      <button type="button" class="icon-button" aria-label="Open wishlist" (click)="toggleWishlist()">♥<sup>3</sup></button>
-      <button type="button" class="icon-button">🛒</button>
+      <button type="button" class="hamburger" aria-label="Open navigation" (click)="toggleMenu()"><span></span><span></span><span></span></button>
+      <a routerLink="/home"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 9.2 10 3l7.5 6.2M5 8.5V17h10V8.5M8 17v-5h4v5" /></svg> Home</a>
+      <a class="active" routerLink="/shop"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7h12l1 10H3L4 7ZM7 7V5a3 3 0 0 1 6 0v2" /></svg> Shop</a>
+      <a routerLink="/profile"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="6" r="3.5"/><path d="M3 18a7 7 0 0 1 14 0" /></svg> Profile</a>
+      <button type="button" class="icon-button wishlist-button" aria-label="Open wishlist" (click)="toggleWishlist()"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 17s-7-4.4-7-9.1A3.9 3.9 0 0 1 10 5a3.9 3.9 0 0 1 7 2.9C17 12.6 10 17 10 17Z" /></svg><sup>3</sup></button>
+      <button type="button" class="icon-button cart-button" aria-label="Open shopping cart" (click)="toggleCart()"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 3h2l2 10h9l2-7H5M8 17a1 1 0 1 0 0 .1M14 17a1 1 0 1 0 0 .1" /></svg></button>
     </header>
 
     <section class="shop-hero">
@@ -47,6 +47,21 @@
       <article><div><strong>The Rain In Espana</strong><span>₱ 520</span></div><button type="button" aria-label="Remove The Rain In Espana">♲</button></article>
       <article><div><strong>Safe Skies, Archer</strong><span>₱ 520</span></div><button type="button" aria-label="Remove Safe Skies, Archer">♲</button></article>
       <article><div><strong>Golden Scenery of Tomorrow</strong><span>₱ 520</span></div><button type="button" aria-label="Remove Golden Scenery of Tomorrow">♲</button></article>
+    </aside>
+
+    <button *ngIf="cartOpen" class="cart-backdrop" type="button" aria-label="Close cart" (click)="closeCart()"></button>
+    <aside class="cart-panel" [class.open]="cartOpen" aria-label="Selected book cart">
+      <header class="cart-header"><h2><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 3h2l2 10h9l2-7H5M8 17a1 1 0 1 0 0 .1M14 17a1 1 0 1 0 0 .1" /></svg> Selected Book Cart</h2><button type="button" aria-label="Close cart" (click)="closeCart()">×</button></header>
+      <div class="cart-items"><article class="cart-item" *ngFor="let item of cartItems"><input type="checkbox" [(ngModel)]="item.selected" [attr.aria-label]="'Select ' + item.title"/><span class="cart-cover"><i></i></span><div class="cart-item-info"><strong>{{ item.title }}</strong><b>₱ {{ item.price }}</b></div><button class="remove-cart-item" type="button" [attr.aria-label]="'Remove ' + item.title" (click)="removeCartItem(item.title)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 6h12M8 6V4h4v2m3 0-.7 11H5.7L5 6m3 3v5m4-5v5" /></svg></button></article></div>
+      <footer class="cart-summary"><div><span>Book Price</span><span>₱ 520</span></div><div><span>Processing Fee</span><span>₱ 15</span></div><hr/><strong><span>Total Amount</span><span>₱ 535</span></strong><button type="button" (click)="checkout()">Proceed to Checkout <span>➜</span></button></footer>
+    </aside>
+
+    <button *ngIf="menuOpen" class="library-menu-backdrop" type="button" aria-label="Close navigation" (click)="closeMenu()"></button>
+    <aside class="library-menu" [class.open]="menuOpen" aria-label="Library navigation">
+      <header class="library-menu-header"><div class="library-mark">📚</div><div><h2>LMS</h2><p>READ . BORROW . LEARN</p></div><button type="button" class="library-menu-close" aria-label="Close navigation" (click)="closeMenu()"><span></span><span></span><span></span></button></header>
+      <label class="library-search"><span>⌕</span><input type="search" placeholder="Search books..." /></label>
+      <nav class="genre-list"><h3>BOOK GENRES</h3><a href="#genres" (click)="closeMenu()">✨ &nbsp; All Genres</a><a href="#romance" (click)="closeMenu()">❤️ &nbsp; Romance</a><a href="#horror" (click)="closeMenu()">👻 &nbsp; Horror</a><a href="#sci-fi" (click)="closeMenu()">🛸 &nbsp; Sci-fi</a><a href="#comedy" (click)="closeMenu()">🎭 &nbsp; Comedy</a><a href="#mythology" (click)="closeMenu()">🐉 &nbsp; Mythology</a></nav>
+      <section class="library-menu-bottom"><h3>SUPPORT &amp; INFO</h3><a href="#about" (click)="closeMenu()">ⓘ &nbsp; About Us</a><a href="#help" (click)="closeMenu()">❔ &nbsp; Need Help?</a><div class="library-shortcuts"><a routerLink="/profile" (click)="closeMenu()">Profile</a><a routerLink="/shop" [queryParams]="{ wishlist: true }" (click)="closeMenu()">Wishlist</a></div><footer><div>♧</div><strong>Library Management System</strong><span>Headquarters Library</span><a routerLink="/login" (click)="closeMenu()">Log out</a></footer></section>
     </aside>
   </main>
 </ion-content>

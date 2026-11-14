@@ -2,12 +2,34 @@ import type { Routes } from '@angular/router';
 
 export const routes: Routes = [
   {
+    path: 'profile',
+    loadComponent: () => import('./profile/profile.page').then((m) => m.ProfilePage),
+  },
+  {
+    path: 'login',
+    loadComponent: () => import('./login/login.page').then((m) => m.LoginPage),
+  },
+  {
+    path: 'reader_homepage',
+    loadComponent: () =>
+      import('./reader_homepage/reader_homepage.page').then((m) => m.ReaderHomepagePage),
+  },
+  {
+    path: 'admin_homepage',
+    loadComponent: () =>
+      import('./admin_homepage/admin_homepage.page').then((m) => m.AdminHomepagePage),
+  },
+  {
     path: 'home',
-    loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
+    redirectTo: () =>
+      localStorage.getItem('lmsUserRole') === 'admin'
+        ? '/admin_homepage'
+        : '/reader_homepage',
+    pathMatch: 'full',
   },
   {
     path: '',
-    redirectTo: 'home',
+    redirectTo: 'login',
     pathMatch: 'full',
   },
   {
@@ -19,11 +41,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./forgot-password/forgot-password.page').then((m) => m.ForgotPasswordPage),
   },
-  {
-    path: 'dashboard',
-    loadComponent: () =>
-      import('./dashboard/dashboard.page').then((m) => m.DashboardPage),
-  },
+  { path: 'dashboard', redirectTo: 'reader_homepage', pathMatch: 'full' },
   {
     path: 'shop',
     loadComponent: () => import('./shop/shop.page').then((m) => m.ShopPage),

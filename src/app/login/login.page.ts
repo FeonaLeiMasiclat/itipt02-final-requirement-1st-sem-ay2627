@@ -10,15 +10,15 @@ import { addIcons } from 'ionicons';
 import {person, lockClosed, eye, eyeOff} from 'ionicons/icons';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: 'home.page.html',
-  styleUrls: ['home.page.scss'],
+  selector: 'app-login',
+  templateUrl: './login.page.html',
+  styleUrls: ['./login.page.scss'],
   standalone: true,
   imports: [
     CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent, IonIcon, RouterLink
   ],
 })
-export class HomePage {
+export class LoginPage {
 
   username: string = '';
   password: string = '';
@@ -46,21 +46,42 @@ export class HomePage {
   }
 
   login() {
-    if (!this.username || !this.password) {
+    const username = this.username.trim();
+    const password = this.password;
+
+    if (!username || !password) {
       alert('Please enter your username and password.');
       return;
     }
 
+<<<<<<< HEAD:src/app/home/home.page.ts
     const isAdmin = this.username === 'admin' && this.password === 'admin';
     const isUser = this.username === 'user' && this.password === 'user';
 
     if (!isAdmin && !isUser) {
+=======
+    if (username === 'admin' && password === 'admin') {
+      localStorage.setItem('lmsDisplayName', 'admin');
+      localStorage.setItem('lmsUserRole', 'admin');
+      this.router.navigate(['/admin_homepage']);
+      return;
+    }
+
+    const savedEmail = localStorage.getItem('lmsEmail');
+    const savedPassword = localStorage.getItem('lmsPassword');
+    if (username.toLowerCase() !== savedEmail?.toLowerCase() || password !== savedPassword) {
+>>>>>>> 5b63650b3aca012379d8beb80a0cff6ad3dff0bf:src/app/login/login.page.ts
       alert('Invalid username or password.');
       return;
     }
 
+<<<<<<< HEAD:src/app/home/home.page.ts
     localStorage.setItem('lmsDisplayName', this.username);
     this.router.navigate(['/dashboard']);
+=======
+    localStorage.setItem('lmsUserRole', 'reader');
+    this.router.navigate(['/reader_homepage']);
+>>>>>>> 5b63650b3aca012379d8beb80a0cff6ad3dff0bf:src/app/login/login.page.ts
   }
 
   forgotPassword(event: Event) {
