@@ -1,9 +1,31 @@
-import type { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router, type CanActivateFn, type Routes } from '@angular/router';
+
+const readerGuard: CanActivateFn = () => {
+  const role = localStorage.getItem('lmsUserRole');
+
+  if (role === 'reader') {
+    return true;
+  }
+
+  return inject(Router).createUrlTree([role === 'admin' ? '/admin_homepage' : '/login']);
+};
+
+const adminGuard: CanActivateFn = () => {
+  const role = localStorage.getItem('lmsUserRole');
+
+  if (role === 'admin') {
+    return true;
+  }
+
+  return inject(Router).createUrlTree([role === 'reader' ? '/reader_homepage' : '/login']);
+};
 
 export const routes: Routes = [
   {
     path: 'profile',
     loadComponent: () => import('./profile/profile.page').then((m) => m.ProfilePage),
+    canActivate: [readerGuard],
   },
   {
     path: 'login',
@@ -13,18 +35,29 @@ export const routes: Routes = [
     path: 'reader_homepage',
     loadComponent: () =>
       import('./reader_homepage/reader_homepage.page').then((m) => m.ReaderHomepagePage),
+    canActivate: [readerGuard],
   },
   {
     path: 'admin_homepage',
     loadComponent: () =>
       import('./admin_homepage/admin_homepage.page').then((m) => m.AdminHomepagePage),
+    canActivate: [adminGuard],
   },
   {
     path: 'home',
-    redirectTo: () =>
-      localStorage.getItem('lmsUserRole') === 'admin'
-        ? '/admin_homepage'
-        : '/reader_homepage',
+    redirectTo: () => {
+      const role = localStorage.getItem('lmsUserRole');
+
+      if (role === 'admin') {
+        return '/admin_homepage';
+      }
+
+      if (role === 'reader') {
+        return '/reader_homepage';
+      }
+
+      return '/login';
+    },
     pathMatch: 'full',
   },
   {
@@ -41,9 +74,10 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./forgot-password/forgot-password.page').then((m) => m.ForgotPasswordPage),
   },
-  { path: 'dashboard', redirectTo: 'reader_homepage', pathMatch: 'full' },
+  { path: 'dashboard', redirectTo: 'home', pathMatch: 'full' },
   {
     path: 'shop',
     loadComponent: () => import('./shop/shop.page').then((m) => m.ShopPage),
+    canActivate: [readerGuard],
   },
 ];
