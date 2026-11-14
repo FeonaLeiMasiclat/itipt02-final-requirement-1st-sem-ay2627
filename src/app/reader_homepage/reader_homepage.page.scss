@@ -96,6 +96,7 @@ ion-content {
   .hamburger span { display: block; width: 16px; height: 2px; margin: 0; background: #30312d; }
   svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
   a:last-child { margin-left: 16px; }
+  .logout-trigger { margin-left: 16px; background: #e8877b; color: #4a312c; }
 }
 
 .welcome-card {
@@ -274,4 +275,105 @@ footer {
   strong { margin-top: 9px; font-family: Georgia, serif; font-size: 13px; }
   span { margin-top: 4px; font-size: 11px; color: #555; }
   a { margin-top: 11px; color: #705438; font-size: 11px; }
+  .logout-trigger { margin-top: 11px; padding: 0; border: 0; background: transparent; color: #705438; font-size: 11px; text-decoration: underline; }
+}
+
+.logout-modal-backdrop {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow-y: auto;
+  padding: 16px;
+  background: rgba(36, 32, 25, .16);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.logout-modal {
+  width: min(100%, 430px);
+  box-sizing: border-box;
+  padding: 24px 20px 20px;
+  border: 1px solid #a49a89;
+  border-radius: 17px;
+  background: #e6d8c0;
+  box-shadow: 0 12px 35px rgba(49, 41, 28, .2);
+  color: #292923;
+  text-align: center;
+}
+
+.logout-icon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  margin: 0 auto 11px;
+  border-radius: 50%;
+  background: #a7b58f;
+
+  svg { width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+}
+
+.logout-modal h2 {
+  margin: 0 0 8px;
+  font: 700 17px Georgia, serif;
+}
+
+.logout-modal > p {
+  max-width: 34ch;
+  margin: 0 auto 17px;
+  color: #655b4f;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.logout-account {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 19px;
+  padding: 11px 13px;
+  border-radius: 14px;
+  background: #d2c8b7;
+  text-align: left;
+}
+
+.logout-avatar {
+  display: grid;
+  width: 49px;
+  height: 49px;
+  flex: 0 0 49px;
+  place-items: center;
+  border-radius: 12px;
+  background: #9eaa85;
+
+  svg { width: 31px; height: 31px; fill: #171817; }
+}
+
+.logout-account-details {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+
+  strong { overflow-wrap: anywhere; font-size: 12px; }
+  span { color: #665c50; font-size: 9px; }
+}
+
+.logout-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+
+  button {
+    min-height: 38px;
+    border: 1px solid #a49a89;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .cancel-logout { background: #f3eadc; color: #4b453b; }
+  .confirm-logout { border-color: #8d9a74; background: #9eaa85; color: #4c5741; }
 }

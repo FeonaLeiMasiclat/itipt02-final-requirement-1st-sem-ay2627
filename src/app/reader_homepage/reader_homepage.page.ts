@@ -21,6 +21,7 @@ export class ReaderHomepagePage implements OnInit {
   displayName = 'Reader';
   homeRoute = '/reader_homepage';
   acquisitionMessage = '';
+  logoutModalOpen = false;
 
   ngOnInit(): void {
     this.displayName = localStorage.getItem('lmsDisplayName') || 'Reader';
@@ -40,6 +41,22 @@ export class ReaderHomepagePage implements OnInit {
 
   closeMenu(): void {
     this.menuOpen = false;
+  }
+
+  openLogoutModal(): void {
+    this.menuOpen = false;
+    this.logoutModalOpen = true;
+  }
+
+  cancelLogout(): void {
+    this.logoutModalOpen = false;
+  }
+
+  confirmLogout(): void {
+    this.logoutModalOpen = false;
+    localStorage.removeItem('lmsUserRole');
+    localStorage.removeItem('lmsDisplayName');
+    void this.router.navigate(['/login']);
   }
 
   async requestAcquisition(): Promise<void> {

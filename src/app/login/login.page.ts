@@ -32,6 +32,10 @@ export class LoginPage implements OnInit {
 
   ngOnInit(): void {
     localStorage.removeItem('lmsUserRole');
+    const savedEmail = localStorage.getItem('lmsEmail');
+    if (savedEmail) {
+      this.username = savedEmail;
+    }
   }
 
   togglePassword(): void {
@@ -60,8 +64,7 @@ export class LoginPage implements OnInit {
     const savedEmail = localStorage.getItem('lmsEmail');
     const savedPassword = localStorage.getItem('lmsPassword');
     const isHardcodedUser = normalizedUsername === 'user' && demoPassword === 'user';
-    const isRegisteredUser =
-      normalizedUsername === savedEmail?.trim().toLowerCase() && password === savedPassword;
+    const isRegisteredUser = normalizedUsername === savedEmail?.trim().toLowerCase() && password === savedPassword;
 
     if (!isHardcodedUser && !isRegisteredUser) {
       alert('Invalid username or password.');
