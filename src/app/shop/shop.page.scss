@@ -166,16 +166,21 @@ ion-content {
   scrollbar-width: none;
   button {
     flex: 0 0 auto;
-    border: 0;
+    border: 1px solid transparent;
     border-radius: 10px;
     padding: 5px 9px;
     background: #d1ccc4;
     color: #666;
     font-size: 7px;
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, transform .18s ease;
   }
-  .selected {
+  button:hover { border-color: #9da68c; transform: translateY(-1px); }
+  button.selected {
+    border-color: #8b9a73;
     background: #a9b78e;
-    color: #546044;
+    color: #405039;
+    font-weight: 700;
   }
 }
 .books-heading {
@@ -204,6 +209,7 @@ ion-content {
     display: none;
   }
 }
+.empty-books { min-width: 100%; margin: 12px 0; color: #76645a; font-size: 9px; text-align: center; }
 .book-card {
   position: relative;
   flex: 0 0 calc(50% - 9px);
@@ -366,13 +372,43 @@ ion-content {
       font-weight: 700;
     }
     button {
+      display: grid;
+      width: 24px;
+      height: 24px;
+      place-items: center;
       border: 0;
+      border-radius: 50%;
+      padding: 4px;
       background: transparent;
       color: #b7b3aa;
-      font-size: 15px;
       cursor: pointer;
+      transition: background 0.18s ease, color 0.18s ease;
+
+      &:hover {
+        background: #ead9c5;
+        color: #765343;
+      }
+      &:focus-visible {
+        outline: 2px solid #8d9a74;
+        outline-offset: 2px;
+      }
+      svg {
+        width: 15px;
+        height: 15px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
     }
   }
+}
+.wishlist-empty {
+  margin: 18px 4px;
+  color: #75655c;
+  font-size: 10px;
+  text-align: center;
 }
 
 .shop-menu {

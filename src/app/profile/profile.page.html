@@ -3,9 +3,9 @@
     <section class="profile-content">
       <header class="top-navigation">
         <button type="button" class="hamburger" aria-label="Open navigation" (click)="toggleMenu()"><span></span><span></span><span></span></button>
-        <a routerLink="/home"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 9.2 10 3l7.5 6.2M5 8.5V17h10V8.5M8 17v-5h4v5" /></svg> Home</a>
-        <a routerLink="/shop"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7h12l1 10H3L4 7ZM7 7V5a3 3 0 0 1 6 0v2" /></svg> Shop</a>
-        <a class="active" routerLink="/profile"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="6" r="3.5"/><path d="M3 18a7 7 0 0 1 14 0" /></svg> Profile</a>
+        <a routerLink="/reader_homepage" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 9.2 10 3l7.5 6.2M5 8.5V17h10V8.5M8 17v-5h4v5" /></svg> Home</a>
+        <a routerLink="/shop" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7h12l1 10H3L4 7ZM7 7V5a3 3 0 0 1 6 0v2" /></svg> Shop</a>
+        <a routerLink="/profile" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="6" r="3.5"/><path d="M3 18a7 7 0 0 1 14 0" /></svg> Profile</a>
         <button type="button" class="logout-trigger" (click)="openLogoutModal()"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11 3h6v14h-6M3 10h11M9 6l4 4-4 4" /></svg> Log Out</button>
       </header>
 
@@ -47,7 +47,7 @@
       <header class="library-menu-header"><div class="library-mark">📚</div><div><h2>LMS</h2><p>READ . BORROW . LEARN</p></div><button type="button" class="library-menu-close" aria-label="Close navigation" (click)="closeMenu()"><span></span><span></span><span></span></button></header>
       <label class="library-search"><span>⌕</span><input type="search" placeholder="Search books..." /></label>
       <nav class="genre-list"><h3>BOOK GENRES</h3><a href="#genres" (click)="closeMenu()">✨ &nbsp; All Genres</a><a href="#romance" (click)="closeMenu()">❤️ &nbsp; Romance</a><a href="#horror" (click)="closeMenu()">👻 &nbsp; Horror</a><a href="#sci-fi" (click)="closeMenu()">🛸 &nbsp; Sci-fi</a><a href="#comedy" (click)="closeMenu()">🎭 &nbsp; Comedy</a><a href="#mythology" (click)="closeMenu()">🐉 &nbsp; Mythology</a></nav>
-      <section class="library-menu-bottom"><h3>SUPPORT &amp; INFO</h3><a href="#about" (click)="closeMenu()">ⓘ &nbsp; About Us</a><a href="#help" (click)="closeMenu()">❔ &nbsp; Need Help?</a><div class="library-shortcuts"><a routerLink="/profile" (click)="closeMenu()">Profile</a><a [routerLink]="['/shop']" [queryParams]="{ wishlist: true }" (click)="closeMenu()">Wishlist</a></div><footer><div>♧</div><strong>Library Management System</strong><span>Headquarters Library</span><a routerLink="/login" (click)="closeMenu()">Log out</a></footer></section>
+      <section class="library-menu-bottom"><h3>SUPPORT &amp; INFO</h3><a href="#about" (click)="closeMenu()">ⓘ &nbsp; About Us</a><a href="#help" (click)="closeMenu()">❔ &nbsp; Need Help?</a><footer><div>♧</div><strong>Library Management System</strong><span>Headquarters Library</span></footer></section>
     </aside>
     <!-- Legacy profile cart removed from the profile navigation. -->
     <!--

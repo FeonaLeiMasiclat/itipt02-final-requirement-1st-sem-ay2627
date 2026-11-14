@@ -33,6 +33,17 @@ describe('ShopPage checkout', () => {
     expect(page.checkoutOrderId).toMatch(/^LMS-\d{4}-0001$/);
   });
 
+  it('removes only the selected book from the wishlist', () => {
+    const page = TestBed.createComponent(ShopPage).componentInstance;
+
+    page.removeWishlistItem('Safe Skies, Archer');
+
+    expect(page.wishlistItems.map((item) => item.title)).toEqual([
+      'The Rain In Espana',
+      'Golden Scenery of Tomorrow',
+    ]);
+  });
+
   it('saves the confirmed order, removes purchased books, and shows its receipt', () => {
     const page = TestBed.createComponent(ShopPage).componentInstance;
     page.checkout();

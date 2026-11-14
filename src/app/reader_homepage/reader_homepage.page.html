@@ -1,42 +1,34 @@
 <ion-content [fullscreen]="true">
   <main class="dashboard-page">
-    <button type="button" class="hamburger-button" aria-label="Open navigation menu" (click)="toggleMenu()">
-      <span></span><span></span><span></span>
-    </button>
-
     <section class="dashboard-content">
       <header class="top-navigation">
         <button type="button" class="mobile-menu hamburger" aria-label="Open navigation menu" (click)="toggleMenu()">
           <span></span><span></span><span></span>
         </button>
-        <a class="active" routerLink="/home"
+        <a [routerLink]="homeRoute" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
           ><svg viewBox="0 0 20 20" aria-hidden="true">
             <path d="M2.5 9.2 10 3l7.5 6.2M5 8.5V17h10V8.5M8 17v-5h4v5" />
           </svg>
           Home</a
         >
-        <a routerLink="/shop"
+        <a routerLink="/shop" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
           ><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7h12l1 10H3L4 7ZM7 7V5a3 3 0 0 1 6 0v2" /></svg>
           Shop</a
         >
-        <a routerLink="/profile"
+        <a routerLink="/profile" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
           ><svg viewBox="0 0 20 20" aria-hidden="true">
             <circle cx="10" cy="6" r="3.5" />
             <path d="M3 18a7 7 0 0 1 14 0" />
           </svg>
           Profile</a
         >
-        <button type="button" class="logout-trigger" (click)="openLogoutModal()">
-          <svg viewBox="0 0 20 20" aria-hidden="true">
-            <path d="M11 3h6v14h-6M3 10h11M9 6l4 4-4 4" />
-          </svg>
-          Log Out
-        </button>
+        <a class="icon-button wishlist-button" routerLink="/shop" [queryParams]="{ wishlist: true }" aria-label="Open wishlist"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 17s-7-4.4-7-9.1A3.9 3.9 0 0 1 10 5a3.9 3.9 0 0 1 7 2.9C17 12.6 10 17 10 17Z" /></svg><sup>3</sup></a>
+        <a class="icon-button cart-button" routerLink="/shop" aria-label="Open shopping cart"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 3h2l2 10h9l2-7H5M8 17a1 1 0 1 0 0 .1M14 17a1 1 0 1 0 0 .1" /></svg></a>
       </header>
 
       <section class="welcome-card">
-        <h1>♜ Hello, {{ displayName }}!</h1>
-        <p>Keep reading and explore more books!</p>
+        <h1>♟ Library Book Shop</h1>
+        <p>Purchase and Add New to Your Personal collection</p>
         <blockquote>
           “A book is a dream you hold in<br />your hands”
           <cite>— Neil Gaiman</cite>
@@ -47,49 +39,43 @@
         }
       </section>
 
+      <label class="search-box">
+        <span aria-hidden="true">⌕</span>
+        <input type="search" placeholder="Search books..." aria-label="Search books" [(ngModel)]="searchTerm" />
+      </label>
+
       <div class="filters" aria-label="Book filters">
-        <button class="selected">All Owned</button>
-        <button>Recently Added</button>
-        <button>By Series</button>
-        <button>Reading Progress</button>
-        <button>On Sale</button>
+        @for (filter of bookFilters; track filter) {
+        <button type="button" [class.selected]="activeFilter === filter" (click)="selectFilter(filter)">{{ filter }}</button>
+        }
       </div>
 
       <section class="book-section">
         <h2>♥ &nbsp; Favorites</h2>
         <div class="book-grid">
+          @for (book of visibleFavoriteBooks; track book.title) {
           <article class="book-card">
-            <div class="book-cover warm-cover">📖</div>
-            <h3>His Unwritten Promise</h3>
-            <p>By Caleb Reed</p>
-            <div class="rating">★★★★★ <span>4.6 &nbsp; (15 reviews)</span></div>
-            <p class="description">A profoundly moving and elegant reimagining of a much loved classic.</p>
-            <hr />
+            <div class="book-cover" [class]="book.cover">📖</div>
+            <h3>{{ book.title }}</h3><p>By {{ book.author }}</p>
+            <div class="rating">★★★★★ <span>{{ book.rating }}</span></div>
+            <p class="description">{{ book.description }}</p><hr />
             <div class="book-actions"><button>▶ Start Reading</button><button>▣ Add Archive</button></div>
           </article>
-          <article class="book-card">
-            <div class="book-cover stack-cover">📚</div>
-            <h3>Dear Future Ex</h3>
-            <p>By Matt Kingly</p>
-            <div class="rating">★★★★★ <span>4.6 &nbsp; (15 reviews)</span></div>
-            <p class="description">Between life and death there is a library of infinite second choices.</p>
-            <hr />
-            <div class="book-actions"><button>▶ Start Reading</button><button>▣ Add Archive</button></div>
-          </article>
+          } @if (!visibleFavoriteBooks.length) { <p class="empty-books">No favorite books match this filter.</p> }
         </div>
       </section>
 
       <section class="book-section purchase-section">
         <h2>🛒 &nbsp; Purchase</h2>
         <div class="book-grid">
+          @for (book of visiblePurchaseBooks; track book.title) {
           <article class="book-card">
-            <div class="book-cover gold-cover">📖</div>
-            <h3>How great Books Go</h3>
+            <div class="book-cover" [class]="book.cover">📖</div>
+            <h3>{{ book.title }}</h3><p>By {{ book.author }}</p>
+            <div class="rating">★★★★★ <span>{{ book.rating }}</span></div>
+            <p class="description">{{ book.description }}</p>
           </article>
-          <article class="book-card">
-            <div class="book-cover blue-cover">📖</div>
-            <h3>The Midnight Library</h3>
-          </article>
+          } @if (!visiblePurchaseBooks.length) { <p class="empty-books">No purchase books match this filter.</p> }
         </div>
       </section>
     </section>
@@ -131,13 +117,10 @@
         <a href="#help">❔ &nbsp; Need Help?</a>
       </section>
 
-      <a routerLink="/profile" (click)="closeMenu()">Profile</a>
-      <a routerLink="/shop" [queryParams]="{ wishlist: true }" (click)="closeMenu()">Wishlist</a>
       <footer>
         <div class="book-mark">♧</div>
         <strong>Library Management System</strong>
         <span>Headquarters Library</span>
-        <button type="button" class="logout-trigger" (click)="openLogoutModal()">Log out</button>
       </footer>
     </aside>
 

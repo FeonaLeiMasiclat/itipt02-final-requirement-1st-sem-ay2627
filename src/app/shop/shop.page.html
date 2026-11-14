@@ -4,17 +4,17 @@
       <button type="button" class="hamburger" aria-label="Open navigation" (click)="toggleMenu()">
         <span></span><span></span><span></span>
       </button>
-      <a routerLink="/home"
+      <a routerLink="/reader_homepage" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
         ><svg viewBox="0 0 20 20" aria-hidden="true">
           <path d="M2.5 9.2 10 3l7.5 6.2M5 8.5V17h10V8.5M8 17v-5h4v5" />
         </svg>
         Home</a
       >
-      <a class="active" routerLink="/shop"
+      <a routerLink="/shop" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
         ><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7h12l1 10H3L4 7ZM7 7V5a3 3 0 0 1 6 0v2" /></svg>
         Shop</a
       >
-      <a routerLink="/profile"
+      <a routerLink="/profile" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
         ><svg viewBox="0 0 20 20" aria-hidden="true">
           <circle cx="10" cy="6" r="3.5" />
           <path d="M3 18a7 7 0 0 1 14 0" />
@@ -42,57 +42,30 @@
 
     <label class="search-box">
       <span>⌕</span>
-      <input type="search" placeholder="Search books..." />
+      <input type="search" placeholder="Search books..." [(ngModel)]="searchTerm" />
     </label>
 
     <div class="filters">
-      <button class="selected">All Owned</button><button>Recently Added</button><button>By Series</button
-      ><button>Reading Progress</button><button>On Sale</button>
+      @for (filter of shopFilters; track filter) {
+      <button type="button" [class.selected]="activeFilter === filter" (click)="selectFilter(filter)">{{ filter }}</button>
+      }
     </div>
 
     <section class="books-heading">
       <h2>📖 &nbsp; Available Books for Reserve</h2>
       <span>50 Items</span>
     </section>
-    <section class="book-grid">
+    <section class="book-grid" aria-live="polite">
+      @for (book of visibleBooks; track book.title) {
       <article class="book-card">
-        <button class="favorite">♥</button>
-        <div class="book-cover warm-cover">📖</div>
-        <h3>His Unwritten Promise</h3>
-        <p>By Caleb Reed</p>
+        <button class="favorite" type="button" [attr.aria-label]="'Add ' + book.title + ' to wishlist'">♥</button>
+        <div class="book-cover" [class]="book.cover">📖</div>
+        <h3>{{ book.title }}</h3><p>By {{ book.author }}</p>
         <div class="rating">★★★★★ <span>4.6 &nbsp; (1.5k reviews)</span></div>
-        <strong>₱ 520</strong>
-        <hr />
-        <div class="book-actions">
-          <button type="button" (click)="addToCart('His Unwritten Promise', 'Caleb Reed', 520)">Add to Cart</button
-          ><button type="button" (click)="buyNow('His Unwritten Promise', 'Caleb Reed', 520)">Buy Now</button>
-        </div>
+        <strong>₱ {{ book.price }}</strong><hr />
+        <div class="book-actions"><button type="button" (click)="addToCart(book.title, book.author, book.price)">Add to Cart</button><button type="button" (click)="buyNow(book.title, book.author, book.price)">Buy Now</button></div>
       </article>
-      <article class="book-card">
-        <button class="favorite">♥</button>
-        <div class="book-cover stack-cover">📚</div>
-        <h3>Dear Future Ex</h3>
-        <p>By Matt Haig</p>
-        <div class="rating">★★★★★ <span>4.6 &nbsp; (1.5k reviews)</span></div>
-        <strong>₱ 435</strong>
-        <hr />
-        <div class="book-actions">
-          <button type="button" (click)="addToCart('Dear Future Ex', 'Matt Haig', 435)">Add to Cart</button
-          ><button type="button" (click)="buyNow('Dear Future Ex', 'Matt Haig', 435)">Buy Now</button>
-        </div>
-      </article>
-      <article class="book-card">
-        <button class="favorite">♥</button>
-        <div class="book-cover gold-cover">📖</div>
-        <h3>How great Books Go</h3>
-        <p>By Gabrielle Reyes</p>
-      </article>
-      <article class="book-card">
-        <button class="favorite">♥</button>
-        <div class="book-cover blue-cover">📖</div>
-        <h3>The Midnight Library</h3>
-        <p>By Matt Kingly</p>
-      </article>
+      } @if (!visibleBooks.length) { <p class="empty-books">No books match this filter.</p> }
     </section>
 
     <button
@@ -108,18 +81,18 @@
         <h2>♥ &nbsp; Wishlist Items</h2>
         <button type="button" aria-label="Close wishlist" (click)="closeWishlist()">×</button>
       </header>
+      @for (item of wishlistItems; track item.title) {
       <article>
-        <div><strong>The Rain In Espana</strong><span>₱ 520</span></div>
-        <button type="button" aria-label="Remove The Rain In Espana">♲</button>
+        <div><strong>{{ item.title }}</strong><span>₱ {{ item.price }}</span></div>
+        <button type="button" [attr.aria-label]="'Remove ' + item.title + ' from wishlist'" (click)="removeWishlistItem(item.title)">
+          <svg viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M3 5h14M8 5V3h4v2m3 0-.8 12H5.8L5 5m2.5 3v6m5-6v6" />
+          </svg>
+        </button>
       </article>
-      <article>
-        <div><strong>Safe Skies, Archer</strong><span>₱ 520</span></div>
-        <button type="button" aria-label="Remove Safe Skies, Archer">♲</button>
-      </article>
-      <article>
-        <div><strong>Golden Scenery of Tomorrow</strong><span>₱ 520</span></div>
-        <button type="button" aria-label="Remove Golden Scenery of Tomorrow">♲</button>
-      </article>
+      } @if (!wishlistItems.length) {
+      <p class="wishlist-empty">Your wishlist is empty.</p>
+      }
     </aside>
 
     @if (cartOpen) {
@@ -284,14 +257,10 @@
         <h3>SUPPORT &amp; INFO</h3>
         <a href="#about" (click)="closeMenu()">ⓘ &nbsp; About Us</a
         ><a href="#help" (click)="closeMenu()">❔ &nbsp; Need Help?</a>
-        <div class="library-shortcuts">
-          <a routerLink="/profile" (click)="closeMenu()">Profile</a
-          ><a routerLink="/shop" [queryParams]="{ wishlist: true }" (click)="closeMenu()">Wishlist</a>
-        </div>
         <footer>
           <div>♧</div>
           <strong>Library Management System</strong><span>Headquarters Library</span
-          ><a routerLink="/login" (click)="closeMenu()">Log out</a>
+          >
         </footer>
       </section>
     </aside>

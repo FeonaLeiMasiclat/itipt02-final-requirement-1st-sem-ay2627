@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
 import { IonContent } from '@ionic/angular';
 
 import { loadBorrowRequests, saveBorrowRequests } from '../shared/borrow-requests';
@@ -32,6 +32,21 @@ interface CounterOrder {
   createdAt: string;
 }
 
+type ShopFilter = 'All Available' | 'Recently Added' | 'By Series' | 'Reading Progress' | 'On Sale';
+
+interface ShopBook {
+  title: string;
+  author: string;
+  price: number;
+  cover: string;
+  filters: ShopFilter[];
+}
+
+interface WishlistItem {
+  title: string;
+  price: number;
+}
+
 const COUNTER_ORDERS_STORAGE_KEY = 'lmsCounterOrders';
 
 function isCounterOrder(value: unknown): value is CounterOrder {
@@ -53,7 +68,7 @@ function isCounterOrder(value: unknown): value is CounterOrder {
   templateUrl: './shop.page.html',
   styleUrls: ['./shop.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonContent, RouterLink],
+  imports: [CommonModule, FormsModule, IonContent, RouterLink, RouterLinkActive],
 })
 export class ShopPage {
   private readonly route = inject(ActivatedRoute);
@@ -65,6 +80,15 @@ export class ShopPage {
   acquisitionModalOpen = false;
   selectedBookTitle = '';
   selectedAuthor = '';
+  searchTerm = '';
+  activeFilter: ShopFilter = 'All Available';
+  readonly shopFilters: ShopFilter[] = ['All Available', 'Recently Added', 'By Series', 'Reading Progress', 'On Sale'];
+  readonly availableBooks: ShopBook[] = [
+    { title: 'His Unwritten Promise', author: 'Caleb Reed', price: 520, cover: 'warm-cover', filters: ['All Available', 'Recently Added', 'By Series', 'Reading Progress'] },
+    { title: 'Dear Future Ex', author: 'Matt Haig', price: 435, cover: 'stack-cover', filters: ['All Available', 'Recently Added', 'By Series'] },
+    { title: 'How Great Books Go', author: 'Gabrielle Reyes', price: 490, cover: 'gold-cover', filters: ['All Available', 'On Sale'] },
+    { title: 'The Midnight Library', author: 'Matt Kingly', price: 450, cover: 'blue-cover', filters: ['All Available', 'On Sale', 'Reading Progress'] },
+  ];
   readonly acquisitionBooks = [
     { title: 'The Midnight Library', author: 'Matt Haig' },
     { title: 'His Unwritten Promise', author: 'Caleb Reed' },
@@ -83,6 +107,11 @@ export class ShopPage {
       selected: true,
       quantity: 1,
     },
+  ];
+  wishlistItems: WishlistItem[] = [
+    { title: 'The Rain In Espana', price: 520 },
+    { title: 'Safe Skies, Archer', price: 520 },
+    { title: 'Golden Scenery of Tomorrow', price: 520 },
   ];
 
   constructor() {
@@ -205,6 +234,23 @@ export class ShopPage {
 
   closeWishlist(): void {
     this.wishlistOpen = false;
+  }
+
+  removeWishlistItem(title: string): void {
+    this.wishlistItems = this.wishlistItems.filter((item) => item.title !== title);
+  }
+
+  selectFilter(filter: ShopFilter): void {
+    this.activeFilter = filter;
+  }
+
+  get visibleBooks(): ShopBook[] {
+    const term = this.searchTerm.trim().toLocaleLowerCase();
+    return this.availableBooks.filter((book) => {
+      const matchesFilter = this.activeFilter === 'All Available' || book.filters.includes(this.activeFilter);
+      const matchesSearch = !term || `${book.title} ${book.author}`.toLocaleLowerCase().includes(term);
+      return matchesFilter && matchesSearch;
+    });
   }
 
   requestAcquisition(): void {

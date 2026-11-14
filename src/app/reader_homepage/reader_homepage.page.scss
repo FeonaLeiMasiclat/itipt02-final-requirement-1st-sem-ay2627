@@ -16,7 +16,6 @@ ion-content {
   }
 }
 
-.hamburger-button,
 .menu-close {
   border: 0;
   background: transparent;
@@ -31,10 +30,6 @@ ion-content {
   }
 }
 
-.hamburger-button {
-  display: none;
-}
-
 .dashboard-content {
   position: relative;
   z-index: 0;
@@ -42,7 +37,7 @@ ion-content {
   min-height: 100%;
   box-sizing: border-box;
   margin: 0 auto;
-  padding: 38px 17px 30px;
+  padding: 21px 14px 30px;
   background: #f2eadb;
 }
 
@@ -95,8 +90,11 @@ ion-content {
   .hamburger { width: 36px; height: 36px; flex: 0 0 36px; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 0; }
   .hamburger span { display: block; width: 16px; height: 2px; margin: 0; background: #30312d; }
   svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-  a:last-child { margin-left: 16px; }
-  .logout-trigger { margin-left: 16px; background: #e8877b; color: #4a312c; }
+  .icon-button { position: relative; width: 36px; height: 36px; flex: 0 0 36px; padding: 8px; border-radius: 50%; }
+  .wishlist-button { margin-left: 16px; }
+  .wishlist-button svg { fill: #194a30; stroke: #194a30; }
+  .cart-button svg { width: 18px; height: 18px; stroke: #242522; stroke-width: 1.8; }
+  sup { position: absolute; top: -4px; right: -2px; display: grid; place-items: center; width: 10px; height: 10px; border-radius: 50%; background: #e15951; color: #fff; font-size: 6px; }
 }
 
 .welcome-card {
@@ -108,7 +106,7 @@ ion-content {
   h1 { margin: 0; font-family: Georgia, serif; font-size: 15px; }
   > p { margin: 4px 0 15px; font-size: 8px; color: #5f6b58; }
   blockquote { margin: 0 0 15px; padding: 10px 20px; border-radius: 15px; background: #799761; color: #3d5736; font-family: Georgia, serif; font-size: 11px; }
-  cite { display: block; margin-top: 4px; text-align: right; font-family: Arial, sans-serif; font-size: 8px; font-style: normal; }
+  cite { float: right; margin-top: 4px; font-family: Arial, sans-serif; font-size: 8px; font-style: normal; }
   button { width: 100%; border: 0; border-radius: 16px; padding: 7px; background: #9e9b76; color: #5c624e; font-size: 8px; }
 }
 .welcome-card > .acquisition-message {
@@ -121,27 +119,43 @@ ion-content {
   display: flex;
   gap: 5px;
   overflow-x: auto;
-  padding: 21px 0 9px;
+  padding: 0 0 19px;
   scrollbar-width: none;
 
-  button { flex: 0 0 auto; border: 0; border-radius: 10px; padding: 5px 9px; background: #d1ccc4; color: #666; font-size: 7px; }
-  .selected { background: #a9b78e; color: #546044; }
+  button { flex: 0 0 auto; border: 1px solid transparent; border-radius: 10px; padding: 5px 9px; background: #d1ccc4; color: #666; font-size: 7px; cursor: pointer; transition: background .18s ease, border-color .18s ease, transform .18s ease; }
+  button:hover { border-color: #9da68c; transform: translateY(-1px); }
+  button.selected { border-color: #8b9a73; background: #a9b78e; color: #405039; font-weight: 700; }
+}
+
+.dashboard-content > .search-box {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 19px 1px 9px;
+  padding: 0 13px;
+  border-radius: 18px;
+  background: #e7d7bd;
+
+  span { font-size: 27px; transform: rotate(-20deg); }
+  input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: #4d4a45; font-size: 12px; }
+  input::placeholder { color: #7d786f; }
 }
 
 .book-section {
-  margin-bottom: 14px;
-  padding: 16px 14px 15px;
-  border-radius: 24px;
+  margin-bottom: 8px;
+  padding: 10px 10px 11px;
+  border-radius: 17px;
   background: #e6d2b3;
 
-  h2 { margin: 0 0 13px; color: #344d31; font-size: 16px; font-weight: 700; letter-spacing: .4px; }
+  h2 { margin: 0 0 8px; color: #344d31; font-size: 12px; font-weight: 700; letter-spacing: .4px; }
 }
 
 .book-grid {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   overflow-x: auto;
-  padding: 0 1px 5px;
+  padding: 0 1px 2px;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
 
@@ -151,42 +165,47 @@ ion-content {
 .book-card {
   flex: 0 0 calc(50% - 7px);
   min-width: 0;
-  padding: 11px;
-  border-radius: 20px;
+  padding: 8px;
+  border-radius: 14px;
   background: #debea1;
   scroll-snap-align: start;
 
-  h3 { margin: 8px 0 2px; color: #62554d; font-size: 11px; font-weight: 500; }
-  p { margin: 0; color: #76645a; font-size: 8px; }
-  .description { min-height: 31px; margin: 7px 0; line-height: 1.25; }
-  hr { margin: 6px 0 11px; border: 0; border-top: 1px solid #4f453d; }
+  h3 { margin: 6px 0 1px; color: #62554d; font-size: 8px; font-weight: 600; }
+  p { margin: 0; color: #76645a; font-size: 6px; }
+  .description { min-height: 26px; margin: 5px 0; line-height: 1.25; }
+  hr { margin: 5px 0 7px; border: 0; border-top: 1px solid #4f453d; }
 }
 
 .book-cover {
   display: grid;
   place-items: center;
-  height: 126px;
-  border-radius: 17px;
+  height: 94px;
+  border-radius: 13px;
   background: #f0e0c6;
-  font-size: 78px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 82% 82%;
+  font-size: 0;
   filter: saturate(1.05);
 }
 
-.warm-cover { background: #f7dfbd; }
-.stack-cover { background: #ead5b7; }
-.gold-cover { background: #dcc99b; }
-.blue-cover { background: #cbd7d2; }
-.rating { margin-top: 6px; color: #f3bf21; font-size: 11px; white-space: nowrap; }
-.rating span { color: #62564e; font-size: 7px; }
+.warm-cover { background-color: #f7dfbd; background-image: url('/assets/books/open-book.svg'); }
+.stack-cover { background-color: #ead5b7; background-image: url('/assets/books/book-stack.svg'); }
+.gold-cover { background-color: #dcc99b; background-image: url('/assets/books/open-book.svg'); }
+.blue-cover { background-color: #cbd7d2; background-image: url('/assets/books/open-book-blue.svg'); }
+.rating { margin-top: 4px; color: #f3bf21; font-size: 7px; white-space: nowrap; }
+.rating span { color: #62564e; font-size: 5px; }
 
 .book-actions {
   display: flex;
-  gap: 6px;
-  button { min-width: 0; flex: 1; border: 0; border-radius: 13px; padding: 8px 2px; background: #8ca071; color: #f5f0e9; font-size: 6px; white-space: nowrap; }
+  gap: 4px;
+  button { min-width: 0; flex: 1; border: 0; border-radius: 9px; padding: 5px 2px; background: #8ca071; color: #f5f0e9; font-size: 5px; white-space: nowrap; }
   button + button { background: #d2967a; }
 }
 
 .purchase-section { margin-top: 8px; }
+.empty-books { width: 100%; margin: 12px 0; color: #76645a; font-size: 8px; text-align: center; }
+
 
 .menu-backdrop {
   position: fixed;
@@ -226,7 +245,7 @@ ion-content {
   .menu-close { margin-left: auto; align-self: flex-start; padding: 1px; }
 }
 
-.search-box {
+.side-menu .search-box {
   height: 30px;
   display: flex;
   align-items: center;

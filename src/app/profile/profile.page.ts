@@ -1,12 +1,12 @@
 ﻿import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { IonContent } from '@ionic/angular';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, IonContent, RouterLink],
+  imports: [CommonModule, IonContent, RouterLink, RouterLinkActive],
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss'],
 })
