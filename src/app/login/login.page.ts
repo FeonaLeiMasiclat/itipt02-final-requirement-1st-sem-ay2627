@@ -54,12 +54,6 @@ export class LoginPage {
       return;
     }
 
-<<<<<<< HEAD:src/app/home/home.page.ts
-    const isAdmin = this.username === 'admin' && this.password === 'admin';
-    const isUser = this.username === 'user' && this.password === 'user';
-
-    if (!isAdmin && !isUser) {
-=======
     if (username === 'admin' && password === 'admin') {
       localStorage.setItem('lmsDisplayName', 'admin');
       localStorage.setItem('lmsUserRole', 'admin');
@@ -69,19 +63,21 @@ export class LoginPage {
 
     const savedEmail = localStorage.getItem('lmsEmail');
     const savedPassword = localStorage.getItem('lmsPassword');
-    if (username.toLowerCase() !== savedEmail?.toLowerCase() || password !== savedPassword) {
->>>>>>> 5b63650b3aca012379d8beb80a0cff6ad3dff0bf:src/app/login/login.page.ts
+    const isHardcodedUser = username === 'user' && password === 'user';
+    const isRegisteredUser =
+      username.toLowerCase() === savedEmail?.toLowerCase() && password === savedPassword;
+
+    if (!isHardcodedUser && !isRegisteredUser) {
       alert('Invalid username or password.');
       return;
     }
 
-<<<<<<< HEAD:src/app/home/home.page.ts
-    localStorage.setItem('lmsDisplayName', this.username);
-    this.router.navigate(['/dashboard']);
-=======
+    if (isHardcodedUser) {
+      localStorage.setItem('lmsDisplayName', 'user');
+    }
+
     localStorage.setItem('lmsUserRole', 'reader');
     this.router.navigate(['/reader_homepage']);
->>>>>>> 5b63650b3aca012379d8beb80a0cff6ad3dff0bf:src/app/login/login.page.ts
   }
 
   forgotPassword(event: Event) {
