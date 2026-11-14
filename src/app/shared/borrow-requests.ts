@@ -3,6 +3,7 @@ export type BorrowRequestStatus = 'Pending' | 'Approved' | 'Declined';
 export interface BorrowRequest {
   id: string;
   bookTitle: string;
+  author: string;
   requestedBy: string;
   requestedAt: string;
   status: BorrowRequestStatus;
@@ -16,6 +17,7 @@ function isBorrowRequest(value: unknown): value is BorrowRequest {
   return (
     typeof request['id'] === 'string' &&
     typeof request['bookTitle'] === 'string' &&
+    (typeof request['author'] === 'string' || request['author'] === undefined) &&
     typeof request['requestedBy'] === 'string' &&
     typeof request['requestedAt'] === 'string' &&
     (request['status'] === 'Pending' || request['status'] === 'Approved' || request['status'] === 'Declined')
@@ -30,7 +32,7 @@ export function loadBorrowRequests(): BorrowRequest[] {
   if (!Array.isArray(parsedRequests) || !parsedRequests.every(isBorrowRequest)) {
     throw new Error('Saved borrow request data has an invalid format.');
   }
-  return parsedRequests;
+  return parsedRequests.map((request) => ({ ...request, author: request.author || 'Not specified' }));
 }
 
 export function saveBorrowRequests(requests: BorrowRequest[]): void {

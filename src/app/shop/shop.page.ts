@@ -4,6 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { IonContent } from '@ionic/angular';
 
+import { loadBorrowRequests, saveBorrowRequests } from '../shared/borrow-requests';
+import type { BorrowRequest } from '../shared/borrow-requests';
+
 interface ShopCartItem {
   title: string;
   author: string;
@@ -59,6 +62,15 @@ export class ShopPage {
   cartOpen = false;
   checkoutOpen = false;
   receiptOpen = false;
+  acquisitionModalOpen = false;
+  selectedBookTitle = '';
+  selectedAuthor = '';
+  readonly acquisitionBooks = [
+    { title: 'The Midnight Library', author: 'Matt Haig' },
+    { title: 'His Unwritten Promise', author: 'Caleb Reed' },
+    { title: 'Dear Future Ex', author: 'Matt Kingly' },
+    { title: 'The Rain in España', author: 'Gwy Saludes' },
+  ];
   checkoutOrderId = '';
   completedOrder: CounterOrder | null = null;
   cartItems = [
@@ -193,5 +205,31 @@ export class ShopPage {
 
   closeWishlist(): void {
     this.wishlistOpen = false;
+  }
+
+  requestAcquisition(): void {
+    this.selectedBookTitle = '';
+    this.selectedAuthor = '';
+    this.acquisitionModalOpen = true;
+  }
+
+  cancelAcquisition(): void {
+    this.acquisitionModalOpen = false;
+  }
+
+  submitAcquisition(): void {
+    if (!this.selectedBookTitle || !this.selectedAuthor) return;
+
+    const requests: BorrowRequest[] = loadBorrowRequests();
+    requests.push({
+      id: `${Date.now()}`,
+      bookTitle: this.selectedBookTitle,
+      author: this.selectedAuthor,
+      requestedBy: localStorage.getItem('lmsDisplayName') || 'Reader',
+      requestedAt: new Date().toISOString(),
+      status: 'Pending',
+    });
+    saveBorrowRequests(requests);
+    this.acquisitionModalOpen = false;
   }
 }

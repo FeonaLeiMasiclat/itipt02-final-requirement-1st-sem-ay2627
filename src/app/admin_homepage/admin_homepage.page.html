@@ -161,6 +161,7 @@
         <article class="request-item">
           <div>
             <strong>{{ request.bookTitle }}</strong>
+            <p>by {{ request.author }}</p>
             <p>Requested by {{ request.requestedBy }} · {{ request.requestedAt | date: 'medium' }}</p>
             <span class="status-pill" [class.archived]="request.status !== 'Pending'">{{ request.status }}</span>
           </div>

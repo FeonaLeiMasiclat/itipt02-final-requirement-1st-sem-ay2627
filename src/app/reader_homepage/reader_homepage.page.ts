@@ -1,7 +1,8 @@
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import type { OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AlertController, IonContent } from '@ionic/angular';
+import { IonContent } from '@ionic/angular';
 
 import { loadBorrowRequests, saveBorrowRequests } from '../shared/borrow-requests';
 import type { BorrowRequest } from '../shared/borrow-requests';
@@ -11,16 +12,23 @@ import type { BorrowRequest } from '../shared/borrow-requests';
   templateUrl: './reader_homepage.page.html',
   styleUrls: ['./reader_homepage.page.scss'],
   standalone: true,
-  imports: [IonContent, RouterLink],
+  imports: [FormsModule, IonContent, RouterLink],
 })
 export class ReaderHomepagePage implements OnInit {
   private readonly router: Router = inject(Router);
-  private readonly alertController = inject(AlertController);
-  private readonly changeDetectorRef = inject(ChangeDetectorRef);
   menuOpen = false;
   displayName = 'Reader';
   homeRoute = '/reader_homepage';
   acquisitionMessage = '';
+  acquisitionModalOpen = false;
+  selectedBookTitle = '';
+  selectedAuthor = '';
+  readonly acquisitionBooks = [
+    { title: 'The Midnight Library', author: 'Matt Haig' },
+    { title: 'His Unwritten Promise', author: 'Caleb Reed' },
+    { title: 'Dear Future Ex', author: 'Matt Kingly' },
+    { title: 'The Rain in España', author: 'Gwy Saludes' },
+  ];
   logoutModalOpen = false;
 
   ngOnInit(): void {
@@ -59,50 +67,34 @@ export class ReaderHomepagePage implements OnInit {
     void this.router.navigate(['/login']);
   }
 
-  async requestAcquisition(): Promise<void> {
+  requestAcquisition(): void {
     this.acquisitionMessage = '';
-    const alert = await this.alertController.create({
-      header: 'Request Acquisition',
-      message: 'Enter the title of the book you would like to request.',
-      inputs: [
-        {
-          name: 'bookTitle',
-          type: 'text',
-          placeholder: 'Book title',
-          attributes: { maxlength: 100 },
-        },
-      ],
-      buttons: [
-        { text: 'Cancel', role: 'cancel' },
-        {
-          text: 'Send Request',
-          handler: (data: unknown): boolean => {
-            const bookTitle =
-              typeof data === 'object' && data !== null && 'bookTitle' in data && typeof data.bookTitle === 'string'
-                ? data.bookTitle.trim()
-                : '';
-            if (!bookTitle) {
-              this.acquisitionMessage = 'Please enter a book title before sending.';
-              this.changeDetectorRef.detectChanges();
-              return false;
-            }
+    this.selectedBookTitle = '';
+    this.selectedAuthor = '';
+    this.acquisitionModalOpen = true;
+  }
 
-            const requests: BorrowRequest[] = loadBorrowRequests();
-            requests.push({
-              id: `${Date.now()}`,
-              bookTitle,
-              requestedBy: localStorage.getItem('lmsDisplayName') || 'Reader',
-              requestedAt: new Date().toISOString(),
-              status: 'Pending',
-            });
-            saveBorrowRequests(requests);
-            this.acquisitionMessage = 'Your book request was sent to the admin.';
-            this.changeDetectorRef.detectChanges();
-            return true;
-          },
-        },
-      ],
+  cancelAcquisition(): void {
+    this.acquisitionModalOpen = false;
+  }
+
+  submitAcquisition(): void {
+    if (!this.selectedBookTitle || !this.selectedAuthor) {
+      this.acquisitionMessage = 'Please select both a book title and an author.';
+      return;
+    }
+
+    const requests: BorrowRequest[] = loadBorrowRequests();
+    requests.push({
+      id: `${Date.now()}`,
+      bookTitle: this.selectedBookTitle,
+      author: this.selectedAuthor,
+      requestedBy: localStorage.getItem('lmsDisplayName') || 'Reader',
+      requestedAt: new Date().toISOString(),
+      status: 'Pending',
     });
-    await alert.present();
+    saveBorrowRequests(requests);
+    this.acquisitionModalOpen = false;
+    this.acquisitionMessage = 'Your book request was sent to the admin.';
   }
 }

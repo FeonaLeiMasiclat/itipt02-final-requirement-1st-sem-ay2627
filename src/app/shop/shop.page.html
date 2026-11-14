@@ -37,7 +37,7 @@
       <h1>♜ Library Book Shop</h1>
       <p>Purchase and Add New to Your Personal collection</p>
       <blockquote>“A book is a dream you hold in<br />your hands” <cite>— Neil Gaiman</cite></blockquote>
-      <button type="button">⊕ &nbsp; Request Acquisition</button>
+      <button type="button" (click)="requestAcquisition()">⊕ &nbsp; Request Acquisition</button>
     </section>
 
     <label class="search-box">
@@ -295,5 +295,18 @@
         </footer>
       </section>
     </aside>
+
+    @if (acquisitionModalOpen) {
+    <div class="acquisition-modal-backdrop">
+      <form class="acquisition-modal" (ngSubmit)="submitAcquisition()" aria-labelledby="acquisition-dialog-title">
+        <div class="acquisition-icon" aria-hidden="true">+</div>
+        <h2 id="acquisition-dialog-title">Request Acquisition</h2>
+        <p>Select the book and author you would like the library to acquire.</p>
+        <label>Book Title<input name="bookTitle" type="search" list="shop-acquisition-book-titles" [(ngModel)]="selectedBookTitle" placeholder="Search or select a book title" required autocomplete="off" /><datalist id="shop-acquisition-book-titles">@for (book of acquisitionBooks; track book.title) {<option [value]="book.title"></option>}</datalist></label>
+        <label>Author<input name="author" type="search" list="shop-acquisition-authors" [(ngModel)]="selectedAuthor" placeholder="Search or select an author" required autocomplete="off" /><datalist id="shop-acquisition-authors">@for (book of acquisitionBooks; track book.author) {<option [value]="book.author"></option>}</datalist></label>
+        <div class="acquisition-actions"><button type="button" class="cancel-acquisition" (click)="cancelAcquisition()">Cancel</button><button type="submit" class="submit-acquisition">Send Request</button></div>
+      </form>
+    </div>
+    }
   </main>
 </ion-content>
