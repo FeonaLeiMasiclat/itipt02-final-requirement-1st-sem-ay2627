@@ -6,8 +6,7 @@
         <a routerLink="/home"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 9.2 10 3l7.5 6.2M5 8.5V17h10V8.5M8 17v-5h4v5" /></svg> Home</a>
         <a routerLink="/shop"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7h12l1 10H3L4 7ZM7 7V5a3 3 0 0 1 6 0v2" /></svg> Shop</a>
         <a class="active" routerLink="/profile"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="6" r="3.5"/><path d="M3 18a7 7 0 0 1 14 0" /></svg> Profile</a>
-        <button type="button" class="icon-button cart-button" aria-label="Open shopping cart" (click)="toggleCart()"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 3h2l2 10h9l2-7H5M8 17a1 1 0 1 0 0 .1M14 17a1 1 0 1 0 0 .1" /></svg></button>
-        <a routerLink="/login"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11 3h6v14h-6M3 10h11M9 6l4 4-4 4" /></svg> Log Out</a>
+        <button type="button" class="logout-trigger" (click)="openLogoutModal()"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11 3h6v14h-6M3 10h11M9 6l4 4-4 4" /></svg> Log Out</button>
       </header>
 
       <section class="account-card">
@@ -50,11 +49,26 @@
       <nav class="genre-list"><h3>BOOK GENRES</h3><a href="#genres" (click)="closeMenu()">✨ &nbsp; All Genres</a><a href="#romance" (click)="closeMenu()">❤️ &nbsp; Romance</a><a href="#horror" (click)="closeMenu()">👻 &nbsp; Horror</a><a href="#sci-fi" (click)="closeMenu()">🛸 &nbsp; Sci-fi</a><a href="#comedy" (click)="closeMenu()">🎭 &nbsp; Comedy</a><a href="#mythology" (click)="closeMenu()">🐉 &nbsp; Mythology</a></nav>
       <section class="library-menu-bottom"><h3>SUPPORT &amp; INFO</h3><a href="#about" (click)="closeMenu()">ⓘ &nbsp; About Us</a><a href="#help" (click)="closeMenu()">❔ &nbsp; Need Help?</a><div class="library-shortcuts"><a routerLink="/profile" (click)="closeMenu()">Profile</a><a [routerLink]="['/shop']" [queryParams]="{ wishlist: true }" (click)="closeMenu()">Wishlist</a></div><footer><div>♧</div><strong>Library Management System</strong><span>Headquarters Library</span><a routerLink="/login" (click)="closeMenu()">Log out</a></footer></section>
     </aside>
+    <!-- Legacy profile cart removed from the profile navigation. -->
+    <!--
     <button *ngIf="cartOpen" class="cart-backdrop" type="button" aria-label="Close cart" (click)="closeCart()"></button>
     <aside class="cart-panel" [class.open]="cartOpen" aria-label="Selected book cart">
       <header class="cart-header"><h2><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 3h2l2 10h9l2-7H5M8 17a1 1 0 1 0 0 .1M14 17a1 1 0 1 0 0 .1" /></svg> Selected Book Cart</h2><button type="button" aria-label="Close cart" (click)="closeCart()">×</button></header>
       <div class="cart-items"><article class="cart-item" *ngFor="let item of cartItems"><input type="checkbox" [(ngModel)]="item.selected" [attr.aria-label]="'Select ' + item.title"/><span class="cart-cover"><i></i></span><div class="cart-item-info"><strong>{{ item.title }}</strong><b>₱ 520</b></div><button class="remove-cart-item" type="button" [attr.aria-label]="'Remove ' + item.title" (click)="removeCartItem(item.title)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 6h12M8 6V4h4v2m3 0-.7 11H5.7L5 6m3 3v5m4-5v5" /></svg></button></article></div>
       <footer class="cart-summary"><div><span>Book Price</span><span>₱ 520</span></div><div><span>Processing Fee</span><span>₱ 15</span></div><hr/><strong><span>Total Amount</span><span>₱ 535</span></strong><button type="button" (click)="checkout()">Proceed to Checkout <span>➜</span></button></footer>
     </aside>
+    -->
+
+    @if (logoutModalOpen) {
+    <div class="logout-modal-backdrop">
+      <section class="logout-modal" role="dialog" aria-modal="true" aria-labelledby="logout-dialog-title" aria-describedby="logout-dialog-description">
+        <div class="logout-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 4h6v16h-6M3 12h12m-5-5 5 5-5 5" /></svg></div>
+        <h2 id="logout-dialog-title">Log Out account?</h2>
+        <p id="logout-dialog-description">Are you sure you want to log out? Your Saved Cart and Counter Orders will remain safely stored.</p>
+        <div class="logout-account"><div class="logout-avatar" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0z" /></svg></div><div class="logout-account-details"><strong>{{ displayName }}</strong><span>Card ID: #LMS-2026-8812</span></div></div>
+        <div class="logout-actions"><button type="button" class="cancel-logout" (click)="cancelLogout()">Cancel</button><button type="button" class="confirm-logout" (click)="confirmLogout()">Log Out</button></div>
+      </section>
+    </div>
+    }
   </main>
 </ion-content>
