@@ -1,21 +1,28 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import type { OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { IonContent } from '@ionic/angular';
+import { AlertController, IonContent } from '@ionic/angular';
+
+import { loadBorrowRequests, saveBorrowRequests } from '../shared/borrow-requests';
+import type { BorrowRequest } from '../shared/borrow-requests';
 
 @Component({
   selector: 'app-reader-homepage',
   templateUrl: './reader_homepage.page.html',
   styleUrls: ['./reader_homepage.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonContent, RouterLink],
+  imports: [IonContent, RouterLink],
 })
-export class ReaderHomepagePage {
+export class ReaderHomepagePage implements OnInit {
+  private readonly router: Router = inject(Router);
+  private readonly alertController = inject(AlertController);
+  private readonly changeDetectorRef = inject(ChangeDetectorRef);
   menuOpen = false;
   displayName = 'Reader';
   homeRoute = '/reader_homepage';
+  acquisitionMessage = '';
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.displayName = localStorage.getItem('lmsDisplayName') || 'Reader';
     if (localStorage.getItem('lmsUserRole') === 'admin') {
       this.homeRoute = '/admin_homepage';
@@ -23,17 +30,62 @@ export class ReaderHomepagePage {
     }
   }
 
-  constructor(private router: Router) {}
-
-  goToShop() {
+  goToShop(): void {
     this.router.navigate(['/shop']);
   }
 
-  toggleMenu() {
+  toggleMenu(): void {
     this.menuOpen = !this.menuOpen;
   }
 
-  closeMenu() {
+  closeMenu(): void {
     this.menuOpen = false;
+  }
+
+  async requestAcquisition(): Promise<void> {
+    this.acquisitionMessage = '';
+    const alert = await this.alertController.create({
+      header: 'Request Acquisition',
+      message: 'Enter the title of the book you would like to request.',
+      inputs: [
+        {
+          name: 'bookTitle',
+          type: 'text',
+          placeholder: 'Book title',
+          attributes: { maxlength: 100 },
+        },
+      ],
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Send Request',
+          handler: (data: unknown): boolean => {
+            const bookTitle =
+              typeof data === 'object' && data !== null && 'bookTitle' in data && typeof data.bookTitle === 'string'
+                ? data.bookTitle.trim()
+                : '';
+            if (!bookTitle) {
+              this.acquisitionMessage = 'Please enter a book title before sending.';
+              this.changeDetectorRef.detectChanges();
+              return false;
+            }
+
+            const requests: BorrowRequest[] = loadBorrowRequests();
+            requests.push({
+              id: `${Date.now()}`,
+              bookTitle,
+              requestedBy: localStorage.getItem('lmsDisplayName') || 'Reader',
+              requestedAt: new Date().toISOString(),
+              status: 'Pending',
+            });
+            saveBorrowRequests(requests);
+            this.acquisitionMessage = 'Your book request was sent to the admin.';
+            this.changeDetectorRef.detectChanges();
+            return true;
+          },
+        },
+      ],
+    });
+    await alert.present();
   }
 }

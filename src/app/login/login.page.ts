@@ -1,48 +1,52 @@
-
-import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import type { OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonIcon } from '@ionic/angular';
-
+import { IonContent, IonIcon } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import {person, lockClosed, eye, eyeOff} from 'ionicons/icons';
+import { eye, eyeOff, lockClosed, person } from 'ionicons/icons';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: true,
-  imports: [
-    CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent, IonIcon, RouterLink
-  ],
+  imports: [CommonModule, FormsModule, IonContent, IonIcon, RouterLink],
 })
-export class LoginPage {
-
+export class LoginPage implements OnInit {
+  private readonly router = inject(Router);
   username: string = '';
   password: string = '';
   rememberMe: boolean = false;
   showPassword: boolean = false;
 
-  constructor(private router: Router) {
+  constructor() {
     addIcons({
       person,
       lockClosed,
       eye,
-      eyeOff
+      eyeOff,
     });
   }
 
+<<<<<<< HEAD
+  ngOnInit(): void {
+    const savedEmail = localStorage.getItem('lmsEmail');
+    if (savedEmail) {
+      this.username = savedEmail;
+    }
+=======
   ngOnInit() {
     localStorage.removeItem('lmsUserRole');
+>>>>>>> b43ae4f13f552a794e94e407598540deacde5964
   }
 
-  togglePassword() {
+  togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
 
-  login() {
+  login(): void {
     const username = this.username.trim();
     const password = this.password;
     const normalizedUsername = username.toLowerCase();
@@ -56,15 +60,21 @@ export class LoginPage {
     if (normalizedUsername === 'admin' && demoPassword === 'admin') {
       localStorage.setItem('lmsDisplayName', 'admin');
       localStorage.setItem('lmsUserRole', 'admin');
+      localStorage.setItem('lmsAdminLastLoginAt', new Date().toISOString());
       this.router.navigate(['/admin_homepage']);
       return;
     }
 
     const savedEmail = localStorage.getItem('lmsEmail');
     const savedPassword = localStorage.getItem('lmsPassword');
+<<<<<<< HEAD
+    const isHardcodedUser = username === 'user' && password === 'user';
+    const isRegisteredUser = username.toLowerCase() === savedEmail?.toLowerCase() && password === savedPassword;
+=======
     const isHardcodedUser = normalizedUsername === 'user' && demoPassword === 'user';
     const isRegisteredUser =
       normalizedUsername === savedEmail?.trim().toLowerCase() && password === savedPassword;
+>>>>>>> b43ae4f13f552a794e94e407598540deacde5964
 
     if (!isHardcodedUser && !isRegisteredUser) {
       alert('Invalid username or password.');
@@ -79,9 +89,8 @@ export class LoginPage {
     this.router.navigate(['/reader_homepage']);
   }
 
-  forgotPassword(event: Event) {
+  forgotPassword(event: Event): void {
     event.preventDefault();
     this.router.navigate(['/forgot-password']);
   }
-
 }

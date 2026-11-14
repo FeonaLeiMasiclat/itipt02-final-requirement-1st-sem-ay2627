@@ -1,10 +1,6 @@
 <ion-content [fullscreen]="true">
   <main class="dashboard-page">
-    <button
-      type="button"
-      class="hamburger-button"
-      aria-label="Open navigation menu"
-      (click)="toggleMenu()">
+    <button type="button" class="hamburger-button" aria-label="Open navigation menu" (click)="toggleMenu()">
       <span></span><span></span><span></span>
     </button>
 
@@ -13,10 +9,26 @@
         <button type="button" class="mobile-menu hamburger" aria-label="Open navigation menu" (click)="toggleMenu()">
           <span></span><span></span><span></span>
         </button>
-        <a class="active" routerLink="/home"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 9.2 10 3l7.5 6.2M5 8.5V17h10V8.5M8 17v-5h4v5" /></svg> Home</a>
-        <a routerLink="/shop"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7h12l1 10H3L4 7ZM7 7V5a3 3 0 0 1 6 0v2" /></svg> Shop</a>
-        <a routerLink="/profile"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="6" r="3.5"/><path d="M3 18a7 7 0 0 1 14 0" /></svg> Profile</a>
-        <a routerLink="/login"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11 3h6v14h-6M3 10h11M9 6l4 4-4 4" /></svg> Log Out</a>
+        <a class="active" routerLink="/home"
+          ><svg viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M2.5 9.2 10 3l7.5 6.2M5 8.5V17h10V8.5M8 17v-5h4v5" />
+          </svg>
+          Home</a
+        >
+        <a routerLink="/shop"
+          ><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7h12l1 10H3L4 7ZM7 7V5a3 3 0 0 1 6 0v2" /></svg>
+          Shop</a
+        >
+        <a routerLink="/profile"
+          ><svg viewBox="0 0 20 20" aria-hidden="true">
+            <circle cx="10" cy="6" r="3.5" />
+            <path d="M3 18a7 7 0 0 1 14 0" />
+          </svg>
+          Profile</a
+        >
+        <a routerLink="/login"
+          ><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11 3h6v14h-6M3 10h11M9 6l4 4-4 4" /></svg> Log Out</a
+        >
       </header>
 
       <section class="welcome-card">
@@ -26,7 +38,10 @@
           “A book is a dream you hold in<br />your hands”
           <cite>— Neil Gaiman</cite>
         </blockquote>
-        <button type="button">⊕ &nbsp; Request Acquisition</button>
+        <button type="button" (click)="requestAcquisition()">⊕ &nbsp; Request Acquisition</button>
+        @if (acquisitionMessage) {
+        <p class="acquisition-message" role="status">{{ acquisitionMessage }}</p>
+        }
       </section>
 
       <div class="filters" aria-label="Book filters">
@@ -64,19 +79,21 @@
       <section class="book-section purchase-section">
         <h2>🛒 &nbsp; Purchase</h2>
         <div class="book-grid">
-          <article class="book-card"><div class="book-cover gold-cover">📖</div><h3>How great Books Go</h3></article>
-          <article class="book-card"><div class="book-cover blue-cover">📖</div><h3>The Midnight Library</h3></article>
+          <article class="book-card">
+            <div class="book-cover gold-cover">📖</div>
+            <h3>How great Books Go</h3>
+          </article>
+          <article class="book-card">
+            <div class="book-cover blue-cover">📖</div>
+            <h3>The Midnight Library</h3>
+          </article>
         </div>
       </section>
     </section>
 
-    <button
-      *ngIf="menuOpen"
-      type="button"
-      class="menu-backdrop"
-      aria-label="Close navigation menu"
-      (click)="closeMenu()">
-    </button>
+    @if (menuOpen) {
+    <button type="button" class="menu-backdrop" aria-label="Close navigation menu" (click)="closeMenu()"></button>
+    }
 
     <aside class="side-menu" [class.open]="menuOpen" aria-label="Library navigation">
       <div class="menu-header">

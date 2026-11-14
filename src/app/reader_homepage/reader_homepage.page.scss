@@ -110,6 +110,11 @@ ion-content {
   cite { display: block; margin-top: 4px; text-align: right; font-family: Arial, sans-serif; font-size: 8px; font-style: normal; }
   button { width: 100%; border: 0; border-radius: 16px; padding: 7px; background: #9e9b76; color: #5c624e; font-size: 8px; }
 }
+.welcome-card > .acquisition-message {
+  margin: 8px 0 0;
+  color: #344d31;
+  font-size: 10px;
+}
 
 .filters {
   display: flex;
