@@ -1,0 +1,60 @@
+<ion-content [fullscreen]="true">
+  <main class="profile-page">
+    <section class="profile-content">
+      <header class="top-navigation">
+        <button type="button" class="hamburger" aria-label="Open navigation" (click)="toggleMenu()"><span></span><span></span><span></span></button>
+        <a routerLink="/home"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 9.2 10 3l7.5 6.2M5 8.5V17h10V8.5M8 17v-5h4v5" /></svg> Home</a>
+        <a routerLink="/shop"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 7h12l1 10H3L4 7ZM7 7V5a3 3 0 0 1 6 0v2" /></svg> Shop</a>
+        <a class="active" routerLink="/profile"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="6" r="3.5"/><path d="M3 18a7 7 0 0 1 14 0" /></svg> Profile</a>
+        <button type="button" class="icon-button cart-button" aria-label="Open shopping cart" (click)="toggleCart()"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 3h2l2 10h9l2-7H5M8 17a1 1 0 1 0 0 .1M14 17a1 1 0 1 0 0 .1" /></svg></button>
+        <a routerLink="/home"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11 3h6v14h-6M3 10h11M9 6l4 4-4 4" /></svg> Log Out</a>
+      </header>
+
+      <section class="account-card">
+        <div class="identity">
+          <div class="avatar" aria-hidden="true"><span></span><i></i></div>
+          <div><h1>{{ displayName }}</h1><p>{{ email }}</p><strong>CARD ID: #LMS-2026-8812</strong></div>
+        </div>
+        <div class="stats-grid">
+          <a class="stat" routerLink="/shop"><strong>16</strong><span>Add to Cart</span></a>
+          <a class="stat filled" routerLink="/shop"><strong>2</strong><span>Counter Order</span></a>
+          <a class="stat muted" routerLink="/dashboard"><strong>6</strong><span>Borrowed Books</span></a>
+          <a class="stat" routerLink="/dashboard"><strong>3</strong><span>Fines Due</span></a>
+          <a class="stat archive" routerLink="/dashboard"><strong>10</strong><span>Archive</span></a>
+        </div>
+      </section>
+
+      <section class="orders-section">
+        <div class="section-heading"><h2><span class="clock">◷</span> Pending Counter Payment Order</h2><span class="ready-chip">1 Ready</span></div>
+        <div class="order-meta"><div><strong>Order #LMS-2026-0089</strong><span>Pickup Location: <b>Main Library Counter</b></span></div><span class="price-chip">₱ 535</span></div>
+        <article class="order-book"><span class="book-icon">📚</span><div class="book-details"><strong>Safe Skies, Archer</strong><span>by Scott G. Elwell, ...</span><small>♧ &nbsp; Pay at counter to claim order</small></div><span class="order-status">Awaiting Counter<br>Clerk</span></article>
+        <button type="button" class="receipt-button">▣ &nbsp; Show Counter Payment Pick-Up Receipt</button>
+      </section>
+
+      <section class="owned-section">
+        <div class="section-heading"><h2>▣ &nbsp; Your Owned &amp; Active Books</h2><span class="borrowed-count">2 Borrowed</span></div>
+        <article class="owned-book">
+          <div class="owned-main"><span class="book-icon">📚</span><div><strong>The Rain in España</strong><span>by Gwy Saludes</span></div></div>
+          <div class="progress-label"><span>Reading Progress</span><b>62%</b></div><div class="progress-track"><span></span></div>
+          <div class="due-line"><span>Due: Nov 17, 2026</span><b>4 Days Left</b></div>
+          <div class="book-buttons"><button type="button">Start Reading</button><button type="button">Renew Book</button></div>
+        </article>
+      </section>
+      <div class="extra-links"><a routerLink="/dashboard">Dashboard</a><a [routerLink]="['/shop']" [queryParams]="{ wishlist: true }">Wishlist ♡</a><a routerLink="/home">Log Out</a></div>
+    </section>
+
+    <button *ngIf="menuOpen" class="library-menu-backdrop" type="button" aria-label="Close navigation" (click)="closeMenu()"></button>
+    <aside class="library-menu" [class.open]="menuOpen" aria-label="Library navigation">
+      <header class="library-menu-header"><div class="library-mark">📚</div><div><h2>LMS</h2><p>READ . BORROW . LEARN</p></div><button type="button" class="library-menu-close" aria-label="Close navigation" (click)="closeMenu()"><span></span><span></span><span></span></button></header>
+      <label class="library-search"><span>⌕</span><input type="search" placeholder="Search books..." /></label>
+      <nav class="genre-list"><h3>BOOK GENRES</h3><a href="#genres" (click)="closeMenu()">✨ &nbsp; All Genres</a><a href="#romance" (click)="closeMenu()">❤️ &nbsp; Romance</a><a href="#horror" (click)="closeMenu()">👻 &nbsp; Horror</a><a href="#sci-fi" (click)="closeMenu()">🛸 &nbsp; Sci-fi</a><a href="#comedy" (click)="closeMenu()">🎭 &nbsp; Comedy</a><a href="#mythology" (click)="closeMenu()">🐉 &nbsp; Mythology</a></nav>
+      <section class="library-menu-bottom"><h3>SUPPORT &amp; INFO</h3><a href="#about" (click)="closeMenu()">ⓘ &nbsp; About Us</a><a href="#help" (click)="closeMenu()">❔ &nbsp; Need Help?</a><div class="library-shortcuts"><a routerLink="/profile" (click)="closeMenu()">Profile</a><a [routerLink]="['/shop']" [queryParams]="{ wishlist: true }" (click)="closeMenu()">Wishlist</a></div><footer><div>♧</div><strong>Library Management System</strong><span>Headquarters Library</span><a routerLink="/home" (click)="closeMenu()">Log out</a></footer></section>
+    </aside>
+    <button *ngIf="cartOpen" class="cart-backdrop" type="button" aria-label="Close cart" (click)="closeCart()"></button>
+    <aside class="cart-panel" [class.open]="cartOpen" aria-label="Selected book cart">
+      <header class="cart-header"><h2><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 3h2l2 10h9l2-7H5M8 17a1 1 0 1 0 0 .1M14 17a1 1 0 1 0 0 .1" /></svg> Selected Book Cart</h2><button type="button" aria-label="Close cart" (click)="closeCart()">×</button></header>
+      <div class="cart-items"><article class="cart-item" *ngFor="let item of cartItems"><input type="checkbox" [(ngModel)]="item.selected" [attr.aria-label]="'Select ' + item.title"/><span class="cart-cover"><i></i></span><div class="cart-item-info"><strong>{{ item.title }}</strong><b>₱ 520</b></div><button class="remove-cart-item" type="button" [attr.aria-label]="'Remove ' + item.title" (click)="removeCartItem(item.title)"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 6h12M8 6V4h4v2m3 0-.7 11H5.7L5 6m3 3v5m4-5v5" /></svg></button></article></div>
+      <footer class="cart-summary"><div><span>Book Price</span><span>₱ 520</span></div><div><span>Processing Fee</span><span>₱ 15</span></div><hr/><strong><span>Total Amount</span><span>₱ 535</span></strong><button type="button" (click)="checkout()">Proceed to Checkout <span>➜</span></button></footer>
+    </aside>
+  </main>
+</ion-content>
