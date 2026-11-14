@@ -6,6 +6,8 @@ import { IonContent } from '@ionic/angular';
 
 import { loadBorrowRequests, saveBorrowRequests } from '../shared/borrow-requests';
 import type { BorrowRequest } from '../shared/borrow-requests';
+import { loadCounterOrders, saveCounterOrders } from '../shared/counter-orders';
+import type { CounterOrder, CounterOrderItem } from '../shared/counter-orders';
 
 interface ShopCartItem {
   title: string;
@@ -13,23 +15,6 @@ interface ShopCartItem {
   price: number;
   selected: boolean;
   quantity: number;
-}
-
-interface CounterOrderItem {
-  title: string;
-  author: string;
-  price: number;
-  quantity: number;
-}
-
-interface CounterOrder {
-  id: string;
-  items: CounterOrderItem[];
-  bookPrice: number;
-  total: number;
-  pickupLocation: string;
-  paymentMethod: string;
-  createdAt: string;
 }
 
 type ShopFilter = 'All Available' | 'Recently Added' | 'By Series' | 'Reading Progress' | 'On Sale';
@@ -45,22 +30,6 @@ interface ShopBook {
 interface WishlistItem {
   title: string;
   price: number;
-}
-
-const COUNTER_ORDERS_STORAGE_KEY = 'lmsCounterOrders';
-
-function isCounterOrder(value: unknown): value is CounterOrder {
-  if (typeof value !== 'object' || value === null) return false;
-  const order = value as Record<string, unknown>;
-  return (
-    typeof order['id'] === 'string' &&
-    Array.isArray(order['items']) &&
-    typeof order['bookPrice'] === 'number' &&
-    typeof order['total'] === 'number' &&
-    typeof order['pickupLocation'] === 'string' &&
-    typeof order['paymentMethod'] === 'string' &&
-    typeof order['createdAt'] === 'string'
-  );
 }
 
 @Component({
@@ -141,6 +110,14 @@ export class ShopPage {
     return this.cartItems.filter((item) => item.selected);
   }
 
+  get wishlistCount(): number {
+    return this.wishlistItems.length;
+  }
+
+  get cartCount(): number {
+    return this.cartItems.reduce((count, item) => count + item.quantity, 0);
+  }
+
   get bookPrice(): number {
     return this.selectedCartItems.reduce((total, item) => total + item.price * item.quantity, 0);
   }
@@ -198,9 +175,9 @@ export class ShopPage {
       paymentMethod: 'Counter Cash',
       createdAt: new Date().toISOString(),
     };
-    const orders = this.readCounterOrders();
+    const orders = loadCounterOrders();
     orders.push(order);
-    localStorage.setItem(COUNTER_ORDERS_STORAGE_KEY, JSON.stringify(orders));
+    saveCounterOrders(orders);
 
     this.completedOrder = order;
     this.cartItems = this.cartItems.filter((item) => !item.selected);
@@ -214,19 +191,8 @@ export class ShopPage {
   }
 
   private createOrderId(): string {
-    const nextNumber = this.readCounterOrders().length + 1;
+    const nextNumber = loadCounterOrders().length + 1;
     return `LMS-${new Date().getFullYear()}-${String(nextNumber).padStart(4, '0')}`;
-  }
-
-  private readCounterOrders(): CounterOrder[] {
-    const storedOrders = localStorage.getItem(COUNTER_ORDERS_STORAGE_KEY);
-    if (storedOrders === null) return [];
-
-    const parsedOrders: unknown = JSON.parse(storedOrders);
-    if (!Array.isArray(parsedOrders) || !parsedOrders.every(isCounterOrder)) {
-      throw new Error('Saved counter order data has an invalid format.');
-    }
-    return parsedOrders;
   }
 
   toggleWishlist(): void {

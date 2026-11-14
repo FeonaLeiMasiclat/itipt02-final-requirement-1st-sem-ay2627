@@ -24,12 +24,13 @@
       <button type="button" class="icon-button wishlist-button" aria-label="Open wishlist" (click)="toggleWishlist()">
         <svg viewBox="0 0 20 20" aria-hidden="true">
           <path d="M10 17s-7-4.4-7-9.1A3.9 3.9 0 0 1 10 5a3.9 3.9 0 0 1 7 2.9C17 12.6 10 17 10 17Z" /></svg
-        ><sup>3</sup>
+        ><sup>{{ wishlistCount }}</sup>
       </button>
       <button type="button" class="icon-button cart-button" aria-label="Open shopping cart" (click)="toggleCart()">
         <svg viewBox="0 0 20 20" aria-hidden="true">
           <path d="M2 3h2l2 10h9l2-7H5M8 17a1 1 0 1 0 0 .1M14 17a1 1 0 1 0 0 .1" />
         </svg>
+        <sup>{{ cartCount }}</sup>
       </button>
     </header>
 

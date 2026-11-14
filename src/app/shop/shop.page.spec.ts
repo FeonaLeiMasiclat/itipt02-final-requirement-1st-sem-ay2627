@@ -60,15 +60,29 @@ describe('ShopPage checkout', () => {
     const page = TestBed.createComponent(ShopPage).componentInstance;
     const book = page.availableBooks[0];
 
+    expect(page.wishlistCount).toBe(3);
     page.toggleWishlistItem(book);
 
     expect(page.isInWishlist(book.title)).toBe(true);
+    expect(page.wishlistCount).toBe(4);
     expect(page.wishlistOpen).toBe(false);
 
     page.toggleWishlistItem(book);
 
     expect(page.isInWishlist(book.title)).toBe(false);
+    expect(page.wishlistCount).toBe(3);
     expect(page.recentlyRemovedWishlistItem).toEqual({ title: book.title, price: book.price });
+  });
+
+  it('updates the cart badge count as item quantities change', () => {
+    const page = TestBed.createComponent(ShopPage).componentInstance;
+
+    expect(page.cartCount).toBe(3);
+    page.addToCart('His Unwritten Promise', 'Caleb Reed', 520);
+    expect(page.cartCount).toBe(4);
+
+    page.removeCartItem('Safe Skies, Archer');
+    expect(page.cartCount).toBe(3);
   });
 
   it('saves the confirmed order, removes purchased books, and shows its receipt', () => {
