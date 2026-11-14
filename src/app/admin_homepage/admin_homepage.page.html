@@ -1,5 +1,215 @@
 <ion-content [fullscreen]="true">
-  <main class="admin-homepage" aria-label="Admin homepage">
-    <a routerLink="/home">Home</a>
+  <main class="admin-page">
+    <div class="dashboard-shell">
+      <header class="session-bar">
+        <a class="brand-home" routerLink="/home" aria-label="Admin home">
+          <span class="avatar" aria-hidden="true">A</span>
+          <span class="session-copy">
+            <strong>Admin Session</strong>
+            <small>ID: ADM-2026-27</small>
+          </span>
+        </a>
+        <button class="logout-button" type="button" (click)="logout()">
+          <span aria-hidden="true">↪</span> Log Out
+        </button>
+      </header>
+
+      <section class="welcome-card" aria-labelledby="welcome-title">
+        <div>
+          <h1 id="welcome-title">Welcome Back, Admin!</h1>
+          <p>ADMIN CONTROL PANEL</p>
+        </div>
+        <div class="welcome-rule"></div>
+        <nav class="shortcut-grid" aria-label="Admin tools">
+          <button type="button" (click)="openAddBook()"><span aria-hidden="true">＋</span> Add Books</button>
+          <button type="button" (click)="openPanel('borrowRequests')">
+            <span aria-hidden="true">◷</span> Borrow Requests @if (latestRequestCount) {
+            <span class="shortcut-count">{{ latestRequestCount }}</span>
+            }
+          </button>
+          <button type="button" (click)="downloadReport()"><span aria-hidden="true">▤</span> Report Generator</button>
+          <button type="button" (click)="openPanel('userLogs')"><span aria-hidden="true">▧</span> User Logs</button>
+        </nav>
+      </section>
+
+      <section class="overview-grid" aria-label="Library overview">
+        <article class="overview-card">
+          <span class="overview-icon" aria-hidden="true">▣</span>
+          <div>
+            <strong>{{ activeCopies }}</strong>
+            <span>Active copies</span>
+          </div>
+          <small>Across {{ books.length }} catalog {{ books.length === 1 ? 'title' : 'titles' }}</small>
+        </article>
+        <article class="overview-card request-overview">
+          <span class="overview-icon" aria-hidden="true">◷</span>
+          <div>
+            <strong>{{ latestRequestCount }}</strong>
+            <span>Pending requests</span>
+          </div>
+          <small>Borrow requests awaiting review</small>
+        </article>
+      </section>
+
+      <section class="book-management" aria-labelledby="management-title">
+        <div class="section-heading">
+          <div class="section-title">
+            <span aria-hidden="true">▤</span>
+            <h2 id="management-title">MAIN BOOK MANAGEMENT</h2>
+          </div>
+          <label class="filter-control">
+            <span>Filter Status:</span>
+            <select [(ngModel)]="statusFilter" name="statusFilter">
+              <option value="Active">Active</option>
+              <option value="Archived">Archived</option>
+              <option value="All">All</option>
+            </select>
+          </label>
+        </div>
+
+        @if (statusMessage) {
+        <p class="status-message" role="status">{{ statusMessage }}</p>
+        } @if (filteredBooks.length) {
+        <div class="book-list">
+          @for (book of filteredBooks; track book.id) {
+          <article class="book-row">
+            <div class="book-summary">
+              <div class="book-art" aria-hidden="true">📖</div>
+              <div class="book-copy">
+                <span class="status-pill" [class.archived]="book.status === 'Archived'">{{ book.status }}</span>
+                <h3>{{ book.title }}</h3>
+                <p>By {{ book.author }}</p>
+                <strong class="copy-count">{{ book.copies }} {{ book.copies === 1 ? 'copy' : 'copies' }}</strong>
+                <small>Last updated: {{ book.updatedAt | date: 'mediumDate' }}</small>
+              </div>
+            </div>
+            <div class="quick-actions">
+              <h3>Quick Action</h3>
+              <div class="action-grid">
+                <button type="button" class="edit-action" (click)="editBook(book)">
+                  <span aria-hidden="true">✎</span> Edit
+                </button>
+                <button type="button" class="renew-action" (click)="renewBook(book)">
+                  <span aria-hidden="true">⟳</span> Renew
+                </button>
+                <button type="button" class="delete-action" (click)="deleteBook(book)">
+                  <span aria-hidden="true">▤</span> Delete
+                </button>
+                <button type="button" class="archive-action" (click)="archiveBook(book)">
+                  <span aria-hidden="true">▰</span> Archive
+                </button>
+                <button type="button" class="details-action" (click)="showDetails(book)">
+                  <span aria-hidden="true">ⓘ</span> Details
+                </button>
+              </div>
+            </div>
+          </article>
+          }
+        </div>
+        } @else {
+        <div class="empty-state">
+          <span aria-hidden="true">📚</span>
+          <h3>No {{ statusFilter === 'All' ? '' : statusFilter.toLowerCase() }} books found</h3>
+          <p>Add a book or choose another status filter.</p>
+          <button type="button" (click)="openAddBook()">Add a book</button>
+        </div>
+        }
+      </section>
+    </div>
   </main>
+
+  @if (panel) {
+  <div class="modal-backdrop">
+    <button class="modal-dismiss" type="button" aria-label="Close dialog" (click)="closePanel()"></button>
+    <section class="modal-card" role="dialog" aria-modal="true" [attr.aria-labelledby]="'dialog-title'">
+      <header class="modal-header">
+        <div>
+          <p>ADMIN CONTROL PANEL</p>
+          <h2 id="dialog-title">
+            {{ panel === 'addBook' ? editingBookId === null ? 'Add a Book' : 'Edit Book' : panel === 'borrowRequests' ?
+            'Borrow Requests' : panel === 'userLogs' ? 'User Logs' : 'Book Details' }}
+          </h2>
+        </div>
+        <button type="button" class="close-button" aria-label="Close dialog" (click)="closePanel()">×</button>
+      </header>
+
+      @if (panel === 'addBook') {
+      <form class="book-form" (ngSubmit)="saveBook()">
+        <label>
+          Book title
+          <input [(ngModel)]="draft.title" name="title" maxlength="100" required />
+        </label>
+        <label>
+          Author
+          <input [(ngModel)]="draft.author" name="author" maxlength="80" required />
+        </label>
+        <label>
+          Copies
+          <input [(ngModel)]="draft.copies" name="copies" type="number" min="1" step="1" required />
+        </label>
+        @if (formError) {
+        <p class="form-error" role="alert">{{ formError }}</p>
+        }
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" (click)="closePanel()">Cancel</button>
+          <button type="submit" class="primary-button">Save Book</button>
+        </div>
+      </form>
+      } @if (panel === 'borrowRequests') {
+      <div class="request-list">
+        @for (request of borrowRequests; track request.id) {
+        <article class="request-item">
+          <div>
+            <strong>{{ request.bookTitle }}</strong>
+            <p>Requested by {{ request.requestedBy }} · {{ request.requestedAt | date: 'medium' }}</p>
+            <span class="status-pill" [class.archived]="request.status !== 'Pending'">{{ request.status }}</span>
+          </div>
+          @if (request.status === 'Pending') {
+          <div class="request-actions">
+            <button type="button" class="approve-action" (click)="updateRequest(request, 'Approved')">Approve</button>
+            <button type="button" class="decline-action" (click)="updateRequest(request, 'Declined')">Decline</button>
+          </div>
+          }
+        </article>
+        } @if (borrowRequests.length === 0) {
+        <div class="empty-state compact">
+          <span aria-hidden="true">◷</span>
+          <h3>No borrow requests yet</h3>
+          <p>Reader acquisition requests will appear here.</p>
+        </div>
+        }
+      </div>
+      } @if (panel === 'userLogs') {
+      <div class="log-list">
+        @if (lastAdminLogin) {
+        <article class="log-item">
+          <span class="log-dot" aria-hidden="true"></span>
+          <div>
+            <strong>Admin signed in</strong>
+            <p>{{ lastAdminLogin | date: 'medium' }}</p>
+          </div>
+        </article>
+        } @else {
+        <div class="empty-state compact">
+          <span aria-hidden="true">▧</span>
+          <h3>No user activity recorded</h3>
+          <p>Successful admin sign-ins will appear here.</p>
+        </div>
+        }
+      </div>
+      } @if (panel === 'details' && selectedBook; as book) {
+      <div class="detail-list">
+        <div><span>Title</span><strong>{{ book.title }}</strong></div>
+        <div><span>Author</span><strong>{{ book.author }}</strong></div>
+        <div><span>Copies</span><strong>{{ book.copies }}</strong></div>
+        <div><span>Status</span><strong>{{ book.status }}</strong></div>
+        <div><span>Last updated</span><strong>{{ book.updatedAt | date: 'medium' }}</strong></div>
+        <div class="modal-actions">
+          <button type="button" class="primary-button" (click)="closePanel()">Done</button>
+        </div>
+      </div>
+      }
+    </section>
+  </div>
+  }
 </ion-content>
