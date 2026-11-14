@@ -22,6 +22,6 @@ export class ForgotPasswordPage {
     }
 
     alert('A password reset link has been sent to your email.');
-    this.router.navigate(['/home']);
+    this.router.navigate(['/login']);
   }
 }
