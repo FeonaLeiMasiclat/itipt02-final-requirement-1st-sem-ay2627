@@ -10,15 +10,15 @@ import { addIcons } from 'ionicons';
 import {person, lockClosed, eye, eyeOff} from 'ionicons/icons';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: 'home.page.html',
-  styleUrls: ['home.page.scss'],
+  selector: 'app-login',
+  templateUrl: './login.page.html',
+  styleUrls: ['./login.page.scss'],
   standalone: true,
   imports: [
     CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent, IonIcon, RouterLink
   ],
 })
-export class HomePage {
+export class LoginPage {
 
   username: string = '';
   password: string = '';
@@ -46,18 +46,30 @@ export class HomePage {
   }
 
   login() {
-    if (!this.username || !this.password) {
+    const username = this.username.trim();
+    const password = this.password;
+
+    if (!username || !password) {
       alert('Please enter your username and password.');
       return;
     }
 
-    if (this.username !== 'admin' || this.password !== 'admin') {
+    if (username === 'admin' && password === 'admin') {
+      localStorage.setItem('lmsDisplayName', 'admin');
+      localStorage.setItem('lmsUserRole', 'admin');
+      this.router.navigate(['/admin_homepage']);
+      return;
+    }
+
+    const savedEmail = localStorage.getItem('lmsEmail');
+    const savedPassword = localStorage.getItem('lmsPassword');
+    if (username.toLowerCase() !== savedEmail?.toLowerCase() || password !== savedPassword) {
       alert('Invalid username or password.');
       return;
     }
 
-    localStorage.setItem('lmsDisplayName', 'admin');
-    this.router.navigate(['/dashboard']);
+    localStorage.setItem('lmsUserRole', 'reader');
+    this.router.navigate(['/reader_homepage']);
   }
 
   forgotPassword(event: Event) {
