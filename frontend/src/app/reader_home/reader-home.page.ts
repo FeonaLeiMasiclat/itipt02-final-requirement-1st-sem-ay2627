@@ -175,7 +175,28 @@ export class ReaderHomePage {
     const book = this.books().find(item => item.id === id);
 
     if (book) {
-      alert('You selected: ' + book.title);
+      const requests = this.loadRequests();
+      if (requests.some((request: any) => request.bookTitle === book.title && request.reader === this.username && request.status === 'Pending')) {
+        alert('You already have a pending request for this book.');
+        return;
+      }
+      requests.unshift({
+        id: Date.now(),
+        bookTitle: book.title,
+        reader: this.username,
+        status: 'Pending',
+        requestedAt: new Date().toLocaleString()
+      });
+      localStorage.setItem('borrowRequests', JSON.stringify(requests));
+      alert('Borrow request submitted for ' + book.title + '.');
+    }
+  }
+
+  private loadRequests(): any[] {
+    try {
+      return JSON.parse(localStorage.getItem('borrowRequests') || '[]');
+    } catch {
+      return [];
     }
   }
 
@@ -192,6 +213,16 @@ export class ReaderHomePage {
       return;
     }
 
+    const requests = this.loadRequests();
+    requests.unshift({
+      id: Date.now(),
+      bookTitle: this.requestedTitle.trim(),
+      reader: this.username,
+      status: 'Pending',
+      requestedAt: new Date().toLocaleString(),
+      author: this.requestedAuthor.trim()
+    });
+    localStorage.setItem('borrowRequests', JSON.stringify(requests));
     alert('Your book request has been submitted!');
 
     this.requestedTitle = '';

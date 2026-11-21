@@ -164,18 +164,18 @@ ion-router-outlet {
   max-height: 34px;
   flex: 0 0 70px;
   margin: 0;
-  --background: #d7d1c5;
-  --background-hover: #9eae89;
-  --background-activated: #9eae89;
-  --background-focused: #9eae89;
+  --background: #ead8bd;
+  --background-hover: #d6c2a3;
+  --background-activated: #d6c2a3;
+  --background-focused: #d6c2a3;
   --border-radius: 20px;
   --box-shadow: none;
-  --color: #26352c;
+  --color: #392c20;
   --padding-start: 6px;
   --padding-end: 6px;
   font-family: Arial, sans-serif;
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: bold;
   letter-spacing: 0;
   text-transform: none;
   border-radius: 999px;
@@ -236,12 +236,12 @@ ion-router-outlet {
 }
 
 .shared-logout-button:hover {
-  --background: #9eae89;
+  --background: #d6c2a3;
 }
 
 .shared-logout-button:hover::part(native),
 .shared-logout-button:active::part(native) {
-  background: #9eae89;
+  background: #d6c2a3;
 }
 
 .shared-logout-button ion-icon {

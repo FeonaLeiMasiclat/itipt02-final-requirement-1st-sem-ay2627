@@ -251,3 +251,19 @@ ion-modal.fine-payment-slip-modal::part(content) {
     display: none;
   }
 }
+ion-modal.admin-unified-modal {
+  --width: min(92.7vw, 760px);
+  --height: min(82vh, 720px);
+  --max-height: calc(100% - 32px);
+  --background: #eee0c2;
+  --border-radius: 28px;
+  --box-shadow: 0 12px 32px rgb(42 39 31 / 18%);
+  --backdrop-opacity: 0.3;
+}
+
+ion-modal.admin-unified-modal::part(content) {
+  overflow: hidden;
+  border: 1px solid #d5c6aa;
+  background: #eee0c2;
+}
+
