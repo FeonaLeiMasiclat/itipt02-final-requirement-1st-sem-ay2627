@@ -250,6 +250,8 @@ export class BookShopPage {
   });
 
   constructor() {
+    this.syncAdminBooks();
+
     this.pageHeaderActions.shopCartRequested
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.openCart());
@@ -286,6 +288,36 @@ export class BookShopPage {
       addOutline,
       removeOutline
     });
+  }
+
+  ionViewWillEnter(): void {
+    this.syncAdminBooks();
+  }
+
+  private syncAdminBooks(): void {
+    const catalog = this.loadData<Array<{
+      id: number;
+      title: string;
+      author: string;
+      price?: number;
+      genre?: string;
+      status?: string;
+    }>>('adminBooks', []);
+
+    const readerBooks = catalog
+      .filter(book => book.status === 'Active')
+      .map(book => ({
+        id: 1_000_000 + Number(book.id),
+        title: book.title,
+        author: book.author,
+        price: Number(book.price ?? 350),
+        rating: 0,
+        reviews: 0,
+        genre: book.genre || 'Romance'
+      }));
+
+    const defaultBooks = this.books().filter(book => book.id < 1_000_000);
+    this.books.set([...defaultBooks, ...readerBooks]);
   }
 
   // Load data from localStorage
