@@ -1,0 +1,256 @@
+
+<ion-content>
+
+  <div class="profile-page">
+
+    <!-- Profile Information -->
+    <ion-card class="profile-card">
+
+      <div class="user-information">
+
+        <div class="avatar-container">
+
+          <ion-icon name="person-circle"></ion-icon>
+
+          <span class="online-indicator"></span>
+
+        </div>
+
+        <div class="user-details">
+
+          <h2>{{ userName() }}</h2>
+
+          <p>{{ userEmail() }}</p>
+
+          <small>CARD ID: {{ cardId() }}</small>
+
+        </div>
+
+      </div>
+
+      <!-- Account Statistics -->
+      <div class="statistics-grid">
+
+        <ion-card class="stat-card"
+          button="true"
+          (click)="showSection('cart')">
+
+          <ion-card-content>
+            <h2>{{ addToCartCount() }}</h2>
+            <p>Add to Cart</p>
+          </ion-card-content>
+
+        </ion-card>
+
+        <ion-card class="stat-card"
+          button="true"
+          (click)="showSection('counter')">
+
+          <ion-card-content>
+            <h2>{{ counterOrderCount() }}</h2>
+            <p>Counter Order</p>
+          </ion-card-content>
+
+        </ion-card>
+
+        <ion-card class="stat-card darker"
+          button="true"
+          (click)="showSection('borrowed')">
+
+          <ion-card-content>
+            <h2>{{ borrowedCount() }}</h2>
+            <p>Borrowed Books</p>
+          </ion-card-content>
+
+        </ion-card>
+
+        <ion-card class="stat-card"
+          button="true"
+          (click)="showSection('fines')">
+
+          <ion-card-content>
+            <h2>{{ finesDue() }}</h2>
+            <p>Fines Due</p>
+          </ion-card-content>
+
+        </ion-card>
+
+        <ion-card class="stat-card archive-card"
+          button="true"
+          (click)="showSection('archive')">
+
+          <ion-card-content>
+            <h2>{{ archiveCount() }}</h2>
+            <p>Archive</p>
+          </ion-card-content>
+
+        </ion-card>
+
+      </div>
+
+    </ion-card>
+
+    <!-- Selected Statistics Section -->
+    @if (selectedSection()) {
+
+      <ion-card class="details-card">
+
+        <ion-card-header>
+
+          <ion-card-title>
+            {{ sectionTitle() }}
+          </ion-card-title>
+
+          <ion-button
+            fill="clear"
+            size="small"
+            (click)="selectedSection.set('')">
+
+            Close
+
+          </ion-button>
+
+        </ion-card-header>
+
+        <ion-card-content>
+
+          @switch (selectedSection()) {
+
+            @case ('cart') {
+              <p>You have {{ addToCartCount() }} items in your cart.</p>
+              <ion-button expand="block" (click)="goShop()">
+                Visit Book Shop
+              </ion-button>
+            }
+
+            @case ('counter') {
+              <p>{{ counterOrderCount() }} counter orders recorded.</p>
+            }
+
+            @case ('borrowed') {
+              @for (book of ownedBooks(); track book.id) {
+                <p>{{ book.title }} - {{ book.status }}</p>
+              }
+            }
+
+            @case ('fines') {
+              <p>Total fines due: ₱{{ finesDueAmount() }}</p>
+            }
+
+            @case ('archive') {
+              <p>You have {{ archiveCount() }} archived books.</p>
+            }
+
+          }
+
+        </ion-card-content>
+
+      </ion-card>
+
+    }
+
+    <!-- Pending Counter Payment -->
+    <div class="section-heading">
+
+      <h3>
+        <ion-icon name="time-outline"></ion-icon>
+        Pending Counter Payment Order
+      </h3>
+
+      <ion-badge color="warning">
+        {{ pendingCounterOrders() }} Ready
+      </ion-badge>
+
+    </div>
+
+    <div class="pending-container">
+
+      @if (pendingOrders().length > 0) {
+
+        @for (order of pendingOrders(); track order.id) {
+
+          <ion-card class="pending-card">
+
+            <ion-card-content>
+
+              <h3>{{ order.bookTitle }}</h3>
+
+              <p>Order ID: {{ order.id }}</p>
+
+              <ion-badge color="warning">
+                {{ order.status }}
+              </ion-badge>
+
+            </ion-card-content>
+
+          </ion-card>
+
+        }
+
+      } @else {
+
+        <p class="empty-message">
+          No pending counter payment orders.
+        </p>
+
+      }
+
+    </div>
+
+    <!-- Owned and Active Books -->
+    <div class="owned-container">
+
+      <div class="owned-header">
+
+        <h3>
+          <ion-icon name="book-outline"></ion-icon>
+          Your Owned & Active Books
+        </h3>
+
+        <span>{{ borrowedCount() }} Borrowed</span>
+
+      </div>
+
+      @for (book of ownedBooks(); track book.id) {
+
+        <ion-card class="owned-book-card">
+
+          <ion-card-content>
+
+            <div class="owned-book-information">
+
+              <ion-icon name="book-outline"></ion-icon>
+
+              <div>
+                <h4>{{ book.title }}</h4>
+                <p>by {{ book.author }}</p>
+              </div>
+
+            </div>
+
+            <ion-button
+              expand="block"
+              class="reading-button"
+              (click)="startReading(book)">
+
+              Start Reading
+
+            </ion-button>
+
+          </ion-card-content>
+
+        </ion-card>
+
+      } @empty {
+
+        <p class="empty-message">
+          You don't have any borrowed books yet.
+        </p>
+
+      }
+
+    </div>
+
+  </div>
+
+</ion-content>

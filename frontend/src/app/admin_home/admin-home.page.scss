@@ -1,0 +1,448 @@
+
+ion-content {
+  --background: #f3e9d9;
+}
+
+.admin-page {
+  min-height: 100%;
+  max-width: 1100px;
+  margin: auto;
+  padding: 10px 15px 35px;
+  background: #f3e9d9;
+}
+
+/* Admin Header */
+.admin-header {
+  position: relative;
+  box-shadow: none;
+  background: transparent;
+}
+
+.admin-header ion-toolbar {
+  --background: transparent;
+  --color: #201a14;
+  min-height: 55px;
+}
+
+.admin-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 5px;
+}
+
+.profile-circle {
+  width: 43px;
+  height: 43px;
+  border: 1px solid #90704f;
+  border-radius: 50%;
+  background: #fffaf0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: Georgia, serif;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.admin-profile strong {
+  font-size: 13px;
+}
+
+.admin-profile p {
+  margin: 3px 0 0;
+  font-size: 10px;
+  color: #806c57;
+}
+
+.logout-button {
+  --background: #ead8bd;
+  --color: #392c20;
+  --border-radius: 20px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+/* Welcome Card */
+.welcome-card {
+  background: #fffdf9;
+  border: 1px solid #a99b89;
+  border-radius: 19px;
+
+  padding: 20px;
+  margin-top: 10px;
+}
+
+.welcome-card h1 {
+  font-family: Georgia, serif;
+  font-size: 30px;
+  color: #21170f;
+  margin: 0;
+}
+
+.welcome-card > p {
+  color: #806c57;
+  font-size: 10px;
+  margin: 5px 0;
+}
+
+.welcome-divider {
+  height: 1px;
+  background: #cdbda9;
+  margin: 14px 0;
+}
+
+/* Admin Actions */
+.admin-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-actions ion-button {
+  --background: #f8f3ea;
+  --color: #201a14;
+  --border-color: #ad9e8c;
+  --border-style: solid;
+  --border-width: 1px;
+  --border-radius: 13px;
+
+  height: 45px;
+  font-size: 11px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.admin-actions ion-icon {
+  margin-right: 5px;
+}
+
+/* Statistics */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+  margin: 13px 0 20px;
+}
+
+.stat-card {
+  margin: 0;
+  border: 1px solid #b3a593;
+  border-radius: 18px;
+  background: #fffdf9;
+  box-shadow: none;
+}
+
+.stat-card ion-card-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 17px;
+}
+
+.stat-icon {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 13px;
+  background: #eadbc5;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  color: #34281d;
+  font-size: 21px;
+}
+
+.stat-card h2 {
+  display: inline;
+  font-family: Georgia, serif;
+  font-size: 22px;
+  margin: 0 8px 0 0;
+  color: #21170f;
+}
+
+.stat-card p {
+  display: inline;
+  font-size: 10px;
+  color: #806c57;
+}
+
+.stat-card small {
+  display: block;
+  margin-top: 7px;
+  font-size: 10px;
+  color: #806c57;
+}
+
+/* Management Header */
+.management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin: 15px 0 10px;
+}
+
+.management-header h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  font-size: 13px;
+  font-weight: normal;
+  color: #33291f;
+}
+
+.management-header h3 ion-icon {
+  font-size: 19px;
+}
+
+.filter-item {
+  --background: #fffdf9;
+  --border-radius: 9px;
+  --border-color: #c5b5a0;
+  --border-style: solid;
+  --border-width: 1px;
+
+  min-height: 38px;
+  max-width: 185px;
+  font-size: 10px;
+}
+
+.filter-item ion-label {
+  font-size: 10px;
+}
+
+/* Management List */
+.management-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.management-card {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #b3a18a;
+  border-radius: 19px;
+  background: #e9d8c0;
+  box-shadow: none;
+
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Book Information */
+.book-information {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+.admin-book-cover {
+  width: 95px;
+  height: 110px;
+  min-width: 95px;
+
+  border: 1px solid #c2b29d;
+  border-radius: 17px;
+  background: #f9f3e8;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #3975ad;
+  font-size: 43px;
+}
+
+.book-details {
+  min-width: 0;
+}
+
+.book-details ion-badge {
+  font-size: 9px;
+  font-weight: normal;
+}
+
+.book-details h2 {
+  font-family: Georgia, serif;
+  font-size: 15px;
+  color: #24190f;
+  margin: 5px 0;
+  overflow-wrap: anywhere;
+}
+
+.book-details p {
+  font-size: 11px;
+  color: #66513d;
+  margin: 4px 0;
+}
+
+.book-details strong {
+  display: block;
+  font-size: 12px;
+  margin-top: 7px;
+  color: #292019;
+}
+
+.book-details small {
+  display: block;
+  font-size: 10px;
+  color: #806c57;
+  margin-top: 4px;
+}
+
+/* Quick Actions */
+.quick-actions {
+  background: #fffaf2;
+  border: 1px solid #c3b29e;
+  border-radius: 15px;
+  padding: 10px;
+}
+
+.quick-actions > p {
+  text-align: center;
+  color: #805d3e;
+  font-size: 10px;
+  margin: 0 0 8px;
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.action-grid ion-button {
+  height: 33px;
+  margin: 0;
+
+  --border-radius: 9px;
+  --color: #21170f;
+
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.edit-button {
+  --background: #c7d2b2;
+}
+
+.renew-button {
+  --background: #eac9b9;
+}
+
+.delete-button {
+  --background: #d99689;
+}
+
+.archive-button {
+  --background: #ebd28b;
+}
+
+.details-button {
+  --background: #dcc9ae;
+  grid-column: span 2;
+}
+
+/* Empty List */
+.empty-list {
+  text-align: center;
+  padding: 35px;
+  color: #806c57;
+}
+
+.empty-list ion-icon {
+  font-size: 40px;
+}
+
+/* Modal */
+ion-modal ion-toolbar {
+  --background: #f3e9d9;
+  --color: #292019;
+}
+
+ion-modal ion-content {
+  --background: #fffaf2;
+}
+
+ion-modal ion-input {
+  margin: 15px 0;
+  --highlight-color-focused: #90704f;
+}
+
+.save-button {
+  --background: #90704f;
+  --border-radius: 10px;
+  margin-top: 25px;
+}
+
+.request-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* Tablet */
+@media (max-width: 700px) {
+
+  .admin-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .management-card {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-actions {
+    width: 100%;
+  }
+
+}
+
+/* Small Mobile */
+@media (max-width: 400px) {
+
+  .admin-page {
+    padding: 8px;
+  }
+
+  .welcome-card {
+    padding: 15px;
+  }
+
+  .welcome-card h1 {
+    font-size: 24px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .management-header {
+    flex-wrap: wrap;
+  }
+
+  .management-header h3 {
+    font-size: 11px;
+  }
+
+  .admin-book-cover {
+    width: 75px;
+    min-width: 75px;
+    height: 95px;
+  }
+
+  .book-details h2 {
+    font-size: 13px;
+  }
+
+}

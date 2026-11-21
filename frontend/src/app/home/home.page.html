@@ -1,0 +1,295 @@
+<div class="ion-page app-shell-main" [class.logout-confirm-open]="logoutConfirmOpen()">
+<ion-header class="app-header">
+  <ion-toolbar class="app-toolbar">
+
+    <!-- Main Navigation -->
+    <ion-buttons slot="start" class="shared-navigation">
+
+      @if (!isActive('/book-shop') && !isActive('/profile')) {
+        <ion-button
+          fill="clear"
+          class="menu-toggle"
+          (click)="toggleMenu()"
+          [attr.aria-label]="menuOpen() ? 'Close navigation menu' : 'Open navigation menu'"
+          [attr.aria-expanded]="menuOpen()">
+          <ion-icon name="menu-outline"></ion-icon>
+        </ion-button>
+      }
+
+      <!-- Home Button -->
+      <ion-button
+        fill="solid"
+        class="shared-nav-button"
+        [class.active]="isActive('/reader-home')"
+        (click)="navigateTo('/reader-home')">
+
+        <ion-icon name="home-outline"></ion-icon>
+        <span>Home</span>
+      </ion-button>
+
+      <!-- Shop Button -->
+      <ion-button
+        fill="solid"
+        class="shared-nav-button"
+        [class.active]="isActive('/book-shop')"
+        (click)="navigateTo('/book-shop')">
+
+        <ion-icon name="bag-outline"></ion-icon>
+        <span>Shop</span>
+      </ion-button>
+
+      <!-- Profile Button -->
+      <ion-button
+        fill="solid"
+        class="shared-nav-button"
+        [class.active]="isActive('/profile')"
+        (click)="navigateTo('/profile')">
+
+        <ion-icon name="person-outline"></ion-icon>
+        <span>Profile</span>
+      </ion-button>
+
+    </ion-buttons>
+
+    <!-- Logout Button -->
+    @if (isActive('/profile')) {
+      <ion-buttons slot="end">
+        <ion-button
+          fill="solid"
+          class="shared-logout-button"
+          (click)="openLogoutConfirmation()">
+
+          <ion-icon name="log-out-outline"></ion-icon>
+          <span>Log Out</span>
+        </ion-button>
+      </ion-buttons>
+    }
+
+    @if (isActive('/reader-home')) {
+      <ion-buttons slot="end" class="page-actions">
+        <ion-button
+          fill="clear"
+          class="page-action-button"
+          aria-label="Open wishlist"
+          (click)="openReaderWishlist()">
+          <ion-icon name="heart-outline"></ion-icon>
+          @if (pageHeaderActions.shopWishlistCount() > 0) {
+            <ion-badge>{{ pageHeaderActions.shopWishlistCount() }}</ion-badge>
+          }
+        </ion-button>
+      </ion-buttons>
+    }
+
+    @if (isActive('/book-shop')) {
+      <ion-buttons slot="end" class="page-actions">
+        <ion-button
+          fill="clear"
+          class="page-action-button"
+          aria-label="Open shopping cart"
+          (click)="openShopCart()">
+          <ion-icon name="cart-outline"></ion-icon>
+          @if (pageHeaderActions.shopCartCount() > 0) {
+            <ion-badge>{{ pageHeaderActions.shopCartCount() }}</ion-badge>
+          }
+        </ion-button>
+      </ion-buttons>
+    }
+
+  </ion-toolbar>
+</ion-header>
+
+@if (wishlistOpen()) {
+  <div class="wishlist-backdrop" (click)="closeWishlist()"></div>
+  <aside class="wishlist-menu" aria-label="Wishlist items">
+    <div class="wishlist-drawer-header">
+      <h2><ion-icon name="heart"></ion-icon> Wishlist Items</h2>
+      <ion-button fill="clear" aria-label="Close wishlist" (click)="closeWishlist()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </div>
+
+    @if (pageHeaderActions.wishlist().length > 0) {
+      <ion-list lines="none" class="wishlist-list">
+        @for (item of pageHeaderActions.wishlist(); track item.id) {
+          <ion-item lines="none" class="wishlist-item">
+            <ion-label>
+              <h3>{{ item.title }}</h3>
+              <p>₱ {{ item.price.toFixed(2) }}</p>
+            </ion-label>
+            <ion-button slot="end" fill="clear" aria-label="Remove {{ item.title }} from wishlist" (click)="removeWishlist(item.id)">
+              <ion-icon name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+        }
+      </ion-list>
+    } @else {
+      <div class="wishlist-empty">
+        <ion-icon name="heart-outline"></ion-icon>
+        <h3>Your wishlist is empty</h3>
+        <p>Save books with the heart button to find them here.</p>
+      </div>
+    }
+  </aside>
+}
+
+<ion-modal
+  [isOpen]="logoutConfirmOpen()"
+  cssClass="logout-confirm-modal"
+  [backdropDismiss]="false"
+  (didDismiss)="closeLogoutConfirmation()">
+  <ng-template>
+    <section class="logout-confirm-card" aria-labelledby="logout-confirm-title">
+      <div class="logout-confirm-icon">
+        <ion-icon name="log-out-outline"></ion-icon>
+      </div>
+      <h2 id="logout-confirm-title">Are you sure you want to log out?</h2>
+      <p class="logout-confirm-message">
+         Your books will remain safely stored.
+      </p>
+
+      <div class="logout-account-card">
+        <div class="logout-account-avatar">
+          <ion-icon name="person-outline"></ion-icon>
+        </div>
+        <div class="logout-account-copy">
+          <strong>{{ logoutAccountName }}</strong>
+        </div>
+      </div>
+
+      <div class="logout-confirm-actions">
+        <ion-button fill="clear" class="logout-cancel-button" (click)="closeLogoutConfirmation()">
+          Cancel
+        </ion-button>
+        <ion-button class="logout-confirm-button" (click)="confirmLogout()">
+          Log Out
+        </ion-button>
+      </div>
+    </section>
+  </ng-template>
+</ion-modal>
+
+<!-- Hamburger Menu -->
+@if (menuOpen()) {
+
+  <!-- Menu Backdrop -->
+  <div
+    class="menu-backdrop"
+    role="button"
+    tabindex="0"
+    aria-label="Close navigation menu"
+    (click)="closeMenu()"
+    (keydown.enter)="closeMenu()">
+  </div>
+
+  <!-- Side Menu -->
+  <aside class="library-menu">
+
+    <!-- Menu Header -->
+    <div class="menu-brand">
+
+      <div class="brand-mark">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+      <div class="brand-copy">
+        <strong>LMS</strong>
+        <small>READ · BORROW · LEARN</small>
+      </div>
+
+      <ion-button
+        fill="clear"
+        class="menu-close"
+        aria-label="Close menu"
+        (click)="closeMenu()">
+
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+
+    </div>
+
+    <!-- Search Books -->
+    <ion-searchbar
+      class="menu-search"
+      placeholder="Search books..."
+      aria-label="Search books"
+      [value]="menuSearch()"
+      (ionInput)="updateMenuSearch($event)"
+      (keydown.enter)="searchFromMenu()">
+    </ion-searchbar>
+
+    <!-- Book Genres -->
+    <section class="menu-section">
+
+      <h2>BOOK GENRES</h2>
+
+      <ion-list lines="none" class="genre-list">
+
+        @for (genre of genres; track genre.value) {
+          <ion-item
+            button
+            detail="false"
+            class="menu-link"
+            (click)="selectGenre(genre.value)">
+
+            <span class="genre-emoji" slot="start">
+              {{ genre.icon }}
+            </span>
+
+            <ion-label>{{ genre.label }}</ion-label>
+
+          </ion-item>
+        }
+
+      </ion-list>
+
+    </section>
+
+    <!-- Support and Information -->
+    <section class="menu-support">
+
+      <h2>SUPPORT &amp; INFO</h2>
+
+      <ion-list lines="none" class="support-list">
+
+        <ion-item
+          button
+          detail="false"
+          class="menu-link"
+          (click)="showAbout()">
+
+          <ion-icon name="information-circle-outline" slot="start"></ion-icon>
+          <ion-label>About Us</ion-label>
+
+        </ion-item>
+
+        <ion-item
+          button
+          detail="false"
+          class="menu-link"
+          (click)="showHelp()">
+
+          <ion-icon name="help-circle-outline" slot="start"></ion-icon>
+          <ion-label>Need Help?</ion-label>
+
+        </ion-item>
+
+      </ion-list>
+
+    </section>
+
+    <!-- Menu Footer -->
+    <footer class="menu-footer">
+
+      <ion-icon name="library-outline"></ion-icon>
+      <strong>Library Management System</strong>
+      <span>Headquarters Library</span>
+
+    </footer>
+
+  </aside>
+}
+
+<ion-router-outlet></ion-router-outlet>
+</div>

@@ -1,0 +1,246 @@
+
+<ion-content>
+
+  <div class="reader-page">
+
+    <section class="reader-welcome" aria-label="Welcome">
+      <h1>Welcome, {{ username }}!</h1>
+      <p>Read and discover books that you love.</p>
+    </section>
+
+    <!-- Search -->
+    <div class="search-container">
+      <ion-searchbar
+        placeholder="Search books..."
+        [(ngModel)]="searchText"
+        (ionInput)="searchBooks()"
+        debounce="200">
+      </ion-searchbar>
+    </div>
+
+    <!-- Trending Books -->
+    @if (category() === 'all' || category() === 'favorites') {
+
+      <h3 class="section-title">Trending Books Now</h3>
+
+      <section class="book-section">
+
+        <h3 class="section-heading">
+          <ion-icon name="heart"></ion-icon>
+          Favorites
+        </h3>
+
+        <div class="book-grid">
+
+          @for (book of displayedFavorites(); track book.id) {
+
+            <ion-card class="book-card">
+
+              <div class="book-cover" [class]="book.coverClass">
+                <ion-icon name="book-outline"></ion-icon>
+              </div>
+
+              <ion-card-header>
+                <ion-card-title>{{ book.title }}</ion-card-title>
+                <ion-card-subtitle>
+                  By {{ book.author }}
+                </ion-card-subtitle>
+              </ion-card-header>
+
+              <ion-card-content>
+
+                <div class="rating">★★★★★</div>
+
+                <p>{{ book.description }}</p>
+
+                <div class="card-buttons">
+
+                  <ion-button
+                    size="small"
+                    (click)="borrowBook(book.id)">
+                    Start Reading
+                  </ion-button>
+
+                  <ion-button
+                    size="small"
+                    color="tertiary"
+                    (click)="addToCart(book.id)">
+                    Add to Cart
+                  </ion-button>
+
+                </div>
+
+              </ion-card-content>
+
+            </ion-card>
+
+          }
+
+        </div>
+
+      </section>
+
+    }
+
+    <!-- Purchase Books -->
+    @if (category() === 'all' || category() === 'purchase') {
+
+      <section class="book-section">
+
+        <h3 class="section-heading">
+          <ion-icon name="cart-outline"></ion-icon>
+          Purchase
+        </h3>
+
+        <div class="book-grid">
+
+          @for (book of displayedPurchase(); track book.id) {
+
+            <ion-card class="book-card">
+
+              <div class="book-cover" [class]="book.coverClass">
+                <ion-icon name="book-outline"></ion-icon>
+              </div>
+
+              <ion-card-header>
+                <ion-card-title>{{ book.title }}</ion-card-title>
+                <ion-card-subtitle>
+                  By {{ book.author }}
+                </ion-card-subtitle>
+              </ion-card-header>
+
+              <ion-card-content>
+
+                <div class="rating">★★★★★</div>
+
+                <p>{{ book.description }}</p>
+
+                <div class="card-buttons">
+
+                  <ion-button
+                    size="small"
+                    (click)="borrowBook(book.id)">
+                    Read
+                  </ion-button>
+
+                  <ion-button
+                    size="small"
+                    color="tertiary"
+                    (click)="addToCart(book.id)">
+                    Add to Cart
+                  </ion-button>
+
+                </div>
+
+              </ion-card-content>
+
+            </ion-card>
+
+          }
+
+        </div>
+
+      </section>
+
+    }
+
+    @if (filteredBooks().length === 0) {
+      <div class="empty-message">
+        <ion-icon name="book-outline"></ion-icon>
+        <p>No books found.</p>
+      </div>
+    }
+
+    <!-- Cart Modal -->
+    <ion-modal
+      [isOpen]="cartOpen()"
+      (didDismiss)="cartOpen.set(false)">
+
+      <ng-template>
+
+        <ion-header>
+          <ion-toolbar>
+            <ion-title>My Cart</ion-title>
+            <ion-buttons slot="end">
+              <ion-button (click)="cartOpen.set(false)">
+                Close
+              </ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+
+        <ion-content class="ion-padding">
+
+          @for (book of cartBooks(); track book.id) {
+            <ion-item>
+              <ion-label>
+                <h2>{{ book.title }}</h2>
+                <p>By {{ book.author }}</p>
+              </ion-label>
+
+              <ion-button
+                color="danger"
+                fill="clear"
+                (click)="removeFromCart(book.id)">
+                <ion-icon name="trash"></ion-icon>
+              </ion-button>
+            </ion-item>
+          }
+
+          @if (cartBooks().length === 0) {
+            <p>Your cart is empty.</p>
+          }
+
+        </ion-content>
+
+      </ng-template>
+
+    </ion-modal>
+
+    <!-- Request Modal -->
+    <ion-modal
+      [isOpen]="requestOpen()"
+      (didDismiss)="requestOpen.set(false)">
+
+      <ng-template>
+
+        <ion-header>
+          <ion-toolbar>
+            <ion-title>Request a Book</ion-title>
+            <ion-buttons slot="end">
+              <ion-button (click)="requestOpen.set(false)">
+                Close
+              </ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+
+        <ion-content class="ion-padding">
+
+          <ion-input
+            label="Book Title"
+            labelPlacement="floating"
+            [(ngModel)]="requestedTitle">
+          </ion-input>
+
+          <ion-input
+            label="Author"
+            labelPlacement="floating"
+            [(ngModel)]="requestedAuthor">
+          </ion-input>
+
+          <ion-button
+            expand="block"
+            (click)="submitRequest()">
+            Submit Request
+          </ion-button>
+
+        </ion-content>
+
+      </ng-template>
+
+    </ion-modal>
+
+  </div>
+
+</ion-content>

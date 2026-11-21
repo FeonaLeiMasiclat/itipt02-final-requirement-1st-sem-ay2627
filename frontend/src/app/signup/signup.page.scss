@@ -1,0 +1,178 @@
+
+ion-content {
+  --background: #f5ead6;
+}
+
+.signup-page {
+  min-height: 100%;
+  width: 100%;
+  padding: 24px 16px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  background: radial-gradient(
+    circle,
+    #fffaf0 0%,
+    #f5ead6 75%,
+    #efe0c7 100%
+  );
+}
+
+/* Heading */
+.signup-heading {
+  text-align: center;
+  margin: 0 0 22px;
+}
+
+.signup-heading h1 {
+  margin: 0;
+  color: #171717;
+
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 44px;
+  font-weight: bold;
+}
+
+.signup-heading p {
+  margin: 5px 0 0;
+  color: #66513d;
+  font-size: 14px;
+}
+
+/* Signup Card */
+.signup-card {
+  width: 100%;
+  max-width: 410px;
+
+  margin: 0;
+  padding: 20px 25px 23px;
+
+  border-radius: 34px;
+  background: #f5ead6;
+
+  box-shadow: 0 22px 40px rgba(55, 43, 29, 0.35);
+}
+
+ion-card-content {
+  padding: 4px 0;
+}
+
+/* Input Fields */
+.input-container {
+  display: flex;
+  align-items: center;
+
+  height: 56px;
+  margin-bottom: 18px;
+  padding: 0 10px;
+
+  border-radius: 16px;
+  background: #d6d6d6;
+}
+
+.input-icon {
+  color: #080808;
+  font-size: 24px;
+  min-width: 28px;
+  margin-right: 15px;
+}
+
+.input-container ion-input {
+  --color: #292929;
+  --placeholder-color: #514638;
+  --highlight-color-focused: #90704f;
+
+  font-family: Arial, sans-serif;
+  font-size: 15px;
+}
+
+/* Password Button */
+.password-button {
+  --color: #111111;
+  --padding-start: 5px;
+  --padding-end: 5px;
+
+  margin: 0;
+}
+
+/* Register Button */
+.register-button {
+  margin-top: 24px;
+  height: 49px;
+
+  --background: #90704f;
+  --background-hover: #795a3c;
+  --border-radius: 10px;
+  --box-shadow: none;
+  --color: white;
+
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+/* Login Text */
+.login-text {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+
+  margin-top: 18px;
+
+  color: #292929;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 14px;
+}
+
+.login-text a {
+  color: #292929;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 14px;
+  font-weight: normal;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Messages */
+.error-message {
+  text-align: center;
+  color: #c62828;
+  font-size: 13px;
+}
+
+.success-message {
+  text-align: center;
+  color: #2e7d32;
+  font-size: 13px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+
+  .signup-page {
+    padding: 30px 15px;
+  }
+
+  .signup-heading {
+    margin-bottom: 20px;
+  }
+
+  .signup-heading h1 {
+    font-size: 40px;
+  }
+
+  .signup-card {
+    padding: 18px 20px 21px;
+    border-radius: 30px;
+  }
+
+  .input-container {
+    height: 54px;
+    margin-bottom: 16px;
+  }
+
+}

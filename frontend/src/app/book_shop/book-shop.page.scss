@@ -1,0 +1,1524 @@
+
+:host {
+  display: block;
+}
+
+.shop-page {
+  min-height: 100%;
+  background: #f7f8fc;
+  color: #25283b;
+  padding-bottom: 30px;
+}
+
+.shop-welcome {
+  padding: 23px 16px 19px;
+  margin: 2px 0 14px;
+  border: 1px solid rgb(73 94 65 / 12%);
+  border-radius: 20px;
+  background: linear-gradient(135deg, #e7dfc8 0%, #dce2ca 100%);
+  text-align: center;
+}
+
+.shop-welcome h1 {
+  margin: 0;
+  color: #304536;
+  font: 600 23px/1.25 Georgia, serif;
+  letter-spacing: -0.3px;
+}
+
+.shop-welcome p {
+  margin: 7px 0 0;
+  color: #68715e;
+  font: 13px/1.5 Arial, sans-serif;
+}
+
+/* Banner */
+.shop-banner {
+  margin: 25px auto;
+  width: 90%;
+  min-height: 260px;
+  border-radius: 22px;
+  padding: 35px;
+  background: linear-gradient(120deg, #40347f, #7565bd);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+  position: relative;
+}
+
+.banner-content {
+  position: relative;
+  z-index: 2;
+  max-width: 550px;
+}
+
+.banner-subtitle,
+.section-subtitle {
+  font-size: 11px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+
+.banner-subtitle {
+  color: #d8d0ff;
+}
+
+.banner-content h1 {
+  font-size: clamp(27px, 5vw, 42px);
+  line-height: 1.15;
+  margin: 0 0 12px;
+  font-weight: 800;
+}
+
+.banner-description {
+  color: #e6e1ff;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.banner-button {
+  --background: #ffffff;
+  --color: #51448f;
+  --border-radius: 10px;
+  margin-top: 12px;
+  font-weight: 700;
+  text-transform: none;
+}
+
+.banner-decoration {
+  font-size: 150px;
+  color: rgba(255, 255, 255, 0.13);
+  padding-right: 25px;
+}
+
+/* Request section */
+.request-section {
+  width: 90%;
+  margin: 25px auto;
+  padding: 20px 24px;
+  border: 1px solid #e9e7f5;
+  background: #ffffff;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.request-section h2 {
+  font-size: 16px;
+  margin: 0 0 6px;
+}
+
+.request-section p {
+  color: #85899a;
+  font-size: 12px;
+  margin: 0;
+}
+
+.request-button {
+  --background: #5546a8;
+  --border-radius: 9px;
+  text-transform: none;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+/* Books */
+.books-section {
+  width: 90%;
+  margin: 40px auto;
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-subtitle {
+  color: #8175bb;
+}
+
+.section-heading h2 {
+  font-size: 25px;
+  margin: 0;
+  font-weight: 800;
+}
+
+.book-search {
+  --background: #ffffff;
+  --border-radius: 12px;
+  --box-shadow: none;
+  --placeholder-color: #999caf;
+  padding: 12px 0;
+}
+
+.book-grid {
+  padding: 0;
+}
+
+.book-card {
+  height: 100%;
+  margin: 7px;
+  border-radius: 15px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 4px 18px rgba(35, 35, 75, 0.07);
+}
+
+.book-cover {
+  height: 155px;
+  background: linear-gradient(145deg, #e9e5fa, #d5d0ef);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.book-cover > ion-icon {
+  font-size: 65px;
+  color: #6557a5;
+}
+
+.favorite-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  --color: #5546a8;
+  --background: #ffffff;
+  --border-radius: 50%;
+  width: 35px;
+  height: 35px;
+}
+
+.favorite-button ion-icon {
+  font-size: 19px;
+}
+
+.book-card ion-card-content {
+  padding: 14px;
+}
+
+.book-card h3 {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 5px;
+  min-height: 34px;
+}
+
+.book-author {
+  font-size: 11px;
+  color: #888da0;
+  margin: 0 0 10px;
+}
+
+.book-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #e5a52c;
+}
+
+.book-rating ion-icon {
+  font-size: 13px;
+}
+
+.review-count {
+  color: #9a9dad;
+}
+
+.book-price {
+  color: #51448f;
+  font-size: 16px;
+  font-weight: 800;
+  margin: 12px 0;
+}
+
+.book-actions {
+  display: grid;
+  gap: 7px;
+}
+
+.book-actions ion-button {
+  margin: 0;
+  font-size: 10px;
+  height: 34px;
+  text-transform: none;
+  --border-radius: 8px;
+}
+
+.add-cart-button {
+  --background: #5546a8;
+}
+
+.buy-button {
+  --color: #5546a8;
+  --border-color: #5546a8;
+}
+
+/* Drawers */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 18, 35, 0.48);
+  z-index: 99;
+}
+
+.side-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 90%;
+  max-width: 420px;
+  height: 100%;
+  height: 100dvh;
+  padding: 24px 18px;
+  background: #ffffff;
+  z-index: 100;
+  overflow-y: auto;
+  box-shadow: -5px 0 25px rgba(0, 0, 0, 0.12);
+}
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.drawer-header h2 {
+  font-size: 23px;
+  margin: 0;
+}
+
+.close-button {
+  --color: #555b70;
+}
+
+.drawer-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 0;
+  border-bottom: 1px solid #eeeeF5;
+}
+
+.drawer-book-icon {
+  min-width: 45px;
+  height: 48px;
+  background: #eeeafa;
+  color: #5546a8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.drawer-book-icon ion-icon {
+  font-size: 24px;
+}
+
+.drawer-item-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.drawer-item-details h3 {
+  font-size: 13px;
+  margin: 0 0 5px;
+}
+
+.drawer-item-details p {
+  font-size: 12px;
+  color: #5546a8;
+  margin: 0;
+  font-weight: 700;
+}
+
+.cart-item {
+  gap: 8px;
+}
+
+.cart-item ion-checkbox {
+  --size: 18px;
+  --checkbox-background-checked: #5546a8;
+  --border-color-checked: #5546a8;
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.quantity-control ion-button {
+  margin: 0;
+  height: 25px;
+  min-height: 25px;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  --color: #5546a8;
+}
+
+.quantity-control span {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.cart-summary {
+  margin-top: 25px;
+  padding-top: 15px;
+  border-top: 1px solid #eeeeF5;
+}
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #777b8c;
+}
+
+.summary-line strong {
+  color: #292b40;
+}
+
+.total-line {
+  font-size: 16px;
+  color: #25283b;
+}
+
+.total-line strong {
+  color: #5546a8;
+}
+
+.checkout-button,
+.confirm-button,
+.finish-button {
+  --background: #5546a8;
+  --border-radius: 10px;
+  text-transform: none;
+  font-weight: 700;
+  margin-top: 18px;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 45px 15px;
+  color: #9295a5;
+}
+
+.empty-state ion-icon {
+  font-size: 48px;
+  color: #aaa1d5;
+}
+
+.empty-state h3 {
+  color: #37394e;
+  font-size: 16px;
+}
+
+.empty-state p {
+  font-size: 12px;
+}
+
+/* Checkout and receipt modal content */
+.checkout-container,
+.receipt-container {
+  width: 100%;
+  max-height: 90dvh;
+  overflow-y: auto;
+  padding: 25px;
+  background: #ffffff;
+  color: #292b40;
+  border-radius: 18px;
+}
+
+.modal-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-heading h2,
+.receipt-container h2 {
+  margin: 0;
+  font-size: 25px;
+  font-weight: 800;
+}
+
+.checkout-subheading,
+.payment-section h3 {
+  font-size: 15px;
+  margin: 25px 0 12px;
+}
+
+.checkout-item,
+.receipt-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #eeeeF5;
+  font-size: 12px;
+}
+
+.checkout-item h4 {
+  font-size: 13px;
+  margin: 0 0 5px;
+}
+
+.checkout-item p {
+  color: #888da0;
+  margin: 0;
+}
+
+.checkout-item strong,
+.receipt-item strong {
+  white-space: nowrap;
+}
+
+.checkout-total {
+  display: flex;
+  justify-content: space-between;
+  padding: 18px 0;
+  margin-top: 5px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.checkout-total strong {
+  color: #5546a8;
+}
+
+.payment-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f5f3fc;
+  border: 1px solid #e5e0f6;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.payment-option > ion-icon:first-child {
+  font-size: 27px;
+  color: #5546a8;
+}
+
+.payment-option div {
+  flex: 1;
+}
+
+.payment-option strong {
+  font-size: 13px;
+}
+
+.payment-option p {
+  color: #888da0;
+  font-size: 11px;
+  margin: 4px 0 0;
+}
+
+.payment-check {
+  color: #5546a8;
+  font-size: 21px;
+}
+
+.cancel-button {
+  --color: #777b8c;
+  text-transform: none;
+  margin-top: 5px;
+}
+
+/* Receipt */
+.receipt-container {
+  text-align: center;
+}
+
+.receipt-success-icon {
+  margin: 5px auto 15px;
+}
+
+.receipt-success-icon ion-icon {
+  font-size: 65px;
+  color: #36a879;
+}
+
+.receipt-message {
+  color: #85899a;
+  font-size: 13px;
+  margin-bottom: 22px;
+}
+
+.receipt-details {
+  text-align: left;
+  padding: 15px;
+  background: #f8f7fc;
+  border-radius: 12px;
+}
+
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 10px 0;
+  font-size: 12px;
+}
+
+.receipt-row span {
+  color: #85899a;
+}
+
+.receipt-row strong {
+  text-align: right;
+}
+
+.receipt-divider {
+  height: 1px;
+  background: #e6e3ef;
+  margin: 15px 0;
+}
+
+.receipt-details h3 {
+  font-size: 14px;
+  margin: 0 0 8px;
+}
+
+.receipt-item {
+  font-size: 11px;
+}
+
+.receipt-total {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.receipt-total strong {
+  color: #5546a8;
+}
+
+.counter-note {
+  background: #eeebfa;
+  color: #5546a8;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 1.5;
+  margin-top: 15px;
+}
+
+.finish-button {
+  margin-top: 20px;
+}
+
+/* Responsive layout */
+@media (max-width: 600px) {
+  .nav-icon {
+    --padding-start: 6px;
+    --padding-end: 6px;
+  }
+
+  .shop-banner {
+    width: 92%;
+    min-height: 230px;
+    padding: 25px 20px;
+    margin: 18px auto;
+  }
+
+  .banner-decoration {
+    position: absolute;
+    right: -20px;
+    bottom: -15px;
+    font-size: 110px;
+  }
+
+  .banner-content h1 {
+    font-size: 29px;
+  }
+
+  .banner-description {
+    max-width: 240px;
+    font-size: 12px;
+  }
+
+  .request-button {
+    width: 100%;
+    margin: 5px 0 0;
+  }
+
+  .books-section {
+    width: 94%;
+    margin-top: 30px;
+  }
+
+  .section-heading h2 {
+    font-size: 22px;
+  }
+
+  .book-cover {
+    height: 125px;
+  }
+
+  .book-cover > ion-icon {
+    font-size: 52px;
+  }
+
+  .book-card {
+    margin: 4px;
+  }
+
+  .book-card ion-card-content {
+    padding: 10px;
+  }
+
+  .book-card h3 {
+    font-size: 12px;
+  }
+
+  .book-author,
+  .review-count {
+    font-size: 10px;
+  }
+
+  .book-price {
+    font-size: 14px;
+  }
+
+  .book-actions ion-button {
+    font-size: 9px;
+  }
+
+  .checkout-container,
+  .receipt-container {
+    padding: 20px 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  .book-cover {
+    height: 110px;
+  }
+}
+
+/* Warm library palette and shop-specific quick actions */
+ion-content {
+  --background: #f5ead6;
+}
+
+ion-button {
+  --border-radius: 999px;
+}
+
+ion-button::part(native) {
+  border-radius: 999px;
+}
+
+.shop-page {
+  width: 100%;
+  max-width: 430px;
+  position: relative;
+  margin: 0 auto;
+  padding: 12px 14px 30px;
+  background: #f5ead6;
+  color: #29241e;
+}
+
+.shop-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  min-height: 38px;
+  margin-bottom: 5px;
+}
+
+.nav-icon {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  margin: 0;
+  --background: #d7d1c5;
+  --border-radius: 50%;
+  --box-shadow: none;
+  --color: #26352c;
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+.nav-icon ion-icon {
+  font-size: 13px;
+}
+
+.cart-nav ion-badge,
+.favorite-nav ion-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: #fff;
+  background: #e45f52;
+  min-width: 14px;
+  min-height: 14px;
+  padding: 2px;
+}
+
+.shop-banner {
+  width: 100%;
+  min-height: 0;
+  margin: 8px 0 17px;
+  padding: 17px 19px 12px;
+  border-radius: 24px;
+  background: #a6b48d;
+  color: #252b20;
+}
+
+.banner-content {
+  max-width: none;
+  width: 100%;
+}
+
+.banner-content h1 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 4px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.banner-content h1 ion-icon {
+  font-size: 14px;
+}
+
+.banner-description {
+  margin: 0;
+  color: #454a3d;
+  font-size: 9px;
+}
+
+.shop-quote {
+  margin: 12px 3px 9px;
+  padding: 10px 14px;
+  border-radius: 17px;
+  background: #819c6b;
+  color: #263a25;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 11px;
+}
+
+.shop-quote span {
+  display: block;
+  text-align: right;
+  font-size: 9px;
+}
+
+.banner-button {
+  width: 100%;
+  height: 30px;
+  margin: 5px 0 0;
+  --background: #a7a27d;
+  --color: #fffaf0;
+  --border-radius: 20px;
+  font-size: 9px;
+  font-weight: 400;
+}
+
+.banner-decoration {
+  display: none;
+}
+
+.books-section {
+  width: 100%;
+  margin: 0;
+}
+
+.section-heading {
+  margin: 0 0 6px;
+}
+
+.section-subtitle {
+  margin: 0 0 8px;
+  color: #263b35;
+  font-size: 12px;
+  letter-spacing: 0;
+  font-weight: 700;
+}
+
+.section-heading h2 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #303b34;
+}
+
+.item-count {
+  color: #766c5d;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.book-search {
+  --background: #ead9bc;
+  --border-radius: 24px;
+  --color: #3d3327;
+  --placeholder-color: #786b5d;
+  padding: 0 0 9px;
+  font-size: 12px;
+}
+
+.book-grid {
+  margin: 0 -4px;
+}
+
+.book-card {
+  margin: 3px;
+  border-radius: 21px;
+  background: #e9d6b8;
+  box-shadow: none;
+}
+
+.book-cover {
+  height: 130px;
+  margin: 8px 8px 0;
+  border-radius: 17px;
+  background: #f6e2c3;
+}
+
+.book-cover > ion-icon {
+  color: #dfaa54;
+  font-size: 70px;
+}
+
+.favorite-button {
+  top: 4px;
+  right: 4px;
+  width: 27px;
+  height: 27px;
+  --color: #34503e;
+  --background: #d7dfce;
+}
+
+.book-card ion-card-content {
+  padding: 9px 10px 11px;
+}
+
+.book-card h3 {
+  min-height: 0;
+  margin-bottom: 3px;
+  color: #30251b;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.book-author {
+  margin-bottom: 7px;
+  color: #554839;
+  font-size: 9px;
+}
+
+.book-rating {
+  color: #c78b27;
+  font-size: 9px;
+}
+
+.book-price {
+  margin: 8px 0;
+  color: #435b36;
+  font-size: 14px;
+}
+
+.book-actions {
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+
+.book-actions ion-button {
+  height: 28px;
+  font-size: 9px;
+  --border-radius: 16px;
+}
+
+.add-cart-button {
+  --background: #8fa57a;
+}
+
+.buy-button {
+  --background: #e9897d;
+  --color: #fff;
+  --border-color: #e9897d;
+}
+
+@media (max-width: 360px) {
+  .shop-actions {
+    min-height: 34px;
+  }
+}
+
+/* Warm, rounded cart drawer to match the wishlist panel */
+.drawer-backdrop {
+  background: rgb(28 31 27 / 12%);
+}
+
+.side-drawer {
+  top: 12px;
+  right: 12px;
+  bottom: 12px;
+  width: min(420px, calc(100vw - 24px));
+  height: auto;
+  box-sizing: border-box;
+  padding: 18px 16px;
+  border: 1px solid rgb(98 85 62 / 18%);
+  border-radius: 22px;
+  color: #26352c;
+  background: #ead9bd;
+  box-shadow: 0 12px 32px rgb(42 39 31 / 22%);
+}
+
+.side-drawer .drawer-header {
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #978b76;
+}
+
+.side-drawer .drawer-header .section-subtitle {
+  margin: 0 0 4px;
+  color: #68715e;
+  font-size: 10px;
+  letter-spacing: 0.8px;
+}
+
+.side-drawer .drawer-header h2 {
+  color: #385344;
+  font: 600 18px Arial, sans-serif;
+}
+
+.side-drawer .close-button {
+  --color: #716b5e;
+}
+
+.side-drawer .drawer-item {
+  margin-bottom: 8px;
+  padding: 10px;
+  border: 1px solid rgb(98 85 62 / 12%);
+  border-radius: 14px;
+  background: #f7ead6;
+}
+
+.side-drawer .drawer-book-icon {
+  border-radius: 12px;
+  color: #557b51;
+  background: #d5dfc4;
+}
+
+.side-drawer .drawer-item-details h3 {
+  color: #30251b;
+}
+
+.side-drawer .drawer-item-details p,
+.side-drawer .quantity-control ion-button {
+  color: #557b51;
+}
+
+.side-drawer .cart-item ion-checkbox {
+  --checkbox-background-checked: #8fa57a;
+  --border-color-checked: #8fa57a;
+}
+
+.side-drawer .cart-summary {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid rgb(98 85 62 / 12%);
+  border-radius: 16px;
+  background: #f7ead6;
+}
+
+.side-drawer .summary-line {
+  color: #746c5d;
+}
+
+.side-drawer .summary-line strong,
+.side-drawer .total-line,
+.side-drawer .total-line strong {
+  color: #385344;
+}
+
+.side-drawer .empty-state {
+  padding: 54px 16px;
+  color: #746c5d;
+}
+
+.side-drawer .empty-state ion-icon {
+  color: #71866e;
+}
+
+.side-drawer .empty-state h3 {
+  color: #385344;
+}
+
+.side-drawer .empty-state p {
+  color: #746c5d;
+}
+
+.shop-page.modal-open > * {
+  filter: blur(6px);
+  transition: filter 140ms ease;
+}
+
+.side-drawer {
+  display: flex;
+  flex-direction: column;
+}
+
+.side-drawer .drawer-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #26352c;
+}
+
+.side-drawer .drawer-title > ion-icon {
+  font-size: 20px;
+}
+
+.side-drawer .cart-items {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
+.side-drawer .cart-item {
+  min-height: 54px;
+  gap: 7px;
+  padding: 8px;
+}
+
+.side-drawer .cart-item ion-checkbox {
+  flex: 0 0 auto;
+  --size: 15px;
+  --checkbox-background-checked: #557b51;
+  --border-color-checked: #557b51;
+}
+
+.side-drawer .drawer-book-icon {
+  min-width: 32px;
+  width: 32px;
+  height: 34px;
+  flex: 0 0 32px;
+  border-radius: 5px;
+}
+
+.side-drawer .drawer-book-icon ion-icon {
+  font-size: 20px;
+}
+
+.side-drawer .drawer-item-details h3 {
+  margin: 0 0 2px;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.side-drawer .drawer-item-details small {
+  display: block;
+  overflow: hidden;
+  color: #746c5d;
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.side-drawer .drawer-item-details p {
+  margin-top: 2px;
+  font-size: 9px;
+}
+
+.side-drawer .quantity-control {
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.side-drawer .quantity-control ion-button {
+  width: 22px;
+  height: 22px;
+  min-height: 22px;
+  --padding-start: 0;
+  --padding-end: 0;
+  --background: #d5dfc4;
+  --border-radius: 50%;
+  font-size: 11px;
+}
+
+.side-drawer .quantity-control span {
+  color: #354333;
+  font-size: 9px;
+}
+
+.side-drawer .remove-cart-button {
+  width: 26px;
+  min-width: 26px;
+  height: 28px;
+  margin: 0;
+  --color: #8c8578;
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+.side-drawer .cart-summary {
+  flex: 0 0 auto;
+  margin-top: 12px;
+  padding: 10px;
+}
+
+.side-drawer .summary-line {
+  margin-bottom: 7px;
+  font-size: 10px;
+}
+
+.side-drawer .total-line {
+  margin-bottom: 0;
+  padding-top: 7px;
+  border-top: 1px solid #c8b99f;
+  font-size: 11px;
+}
+
+.side-drawer .checkout-button {
+  min-height: 34px;
+  margin-top: 10px;
+  --background: #9eae89;
+  --background-hover: #8fa57a;
+  --background-activated: #8fa57a;
+  --border-radius: 9px;
+  --color: #fff;
+  font-size: 10px;
+}
+
+.checkout-container,
+.receipt-container {
+  box-sizing: border-box;
+  width: 100%;
+  max-height: 90dvh;
+  overflow-y: auto;
+  padding: 17px;
+  border: 1px solid #ad9e83;
+  border-radius: 18px;
+  color: #29241e;
+  background: #ead9bd;
+  box-shadow: 0 12px 30px rgb(42 39 31 / 18%);
+}
+
+.modal-heading {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #b7a88e;
+}
+
+.checkout-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #26352c;
+}
+
+.checkout-title ion-icon {
+  font-size: 18px;
+}
+
+.checkout-title h2 {
+  margin: 0;
+  color: #3b3a32;
+  font: 500 15px Arial, sans-serif;
+}
+
+.checkout-items {
+  display: grid;
+  max-height: 36dvh;
+  gap: 7px;
+  overflow-y: auto;
+}
+
+.checkout-container .checkout-item {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  padding: 9px;
+  border: 0;
+  border-radius: 13px;
+  background: #e4d8c2;
+  font-size: 10px;
+}
+
+.checkout-book-icon {
+  display: flex;
+  width: 38px;
+  height: 42px;
+  flex: 0 0 38px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  color: #557b51;
+  background: #f7ead6;
+}
+
+.checkout-book-icon ion-icon {
+  font-size: 25px;
+}
+
+.checkout-book-details {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.checkout-book-details h4 {
+  overflow: hidden;
+  margin: 0 0 2px;
+  color: #30251b;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.checkout-book-details p {
+  margin: 0 0 3px;
+  color: #746c5d;
+  font-size: 8px;
+}
+
+.checkout-book-details strong {
+  color: #3c4435;
+  font-size: 9px;
+}
+
+.checkout-quantity {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 4px;
+  border-radius: 12px;
+  background: #d5dfc4;
+}
+
+.checkout-quantity ion-button {
+  width: 20px;
+  height: 22px;
+  min-height: 22px;
+  margin: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+  --color: #557b51;
+  font-size: 12px;
+}
+
+.checkout-quantity span {
+  min-width: 10px;
+  color: #354333;
+  font-size: 9px;
+  text-align: center;
+}
+
+.payment-section {
+  margin-top: 12px;
+}
+
+.payment-section h3 {
+  margin: 0 0 6px;
+  color: #746c5d;
+  font-size: 8px;
+  font-weight: 500;
+}
+
+.payment-option {
+  gap: 9px;
+  padding: 9px;
+  border: 1px solid rgb(98 85 62 / 10%);
+  border-radius: 12px;
+  background: #f7ead6;
+}
+
+.payment-option > ion-icon:first-child {
+  color: #4b5441;
+  font-size: 20px;
+}
+
+.payment-option strong {
+  color: #403b30;
+  font-size: 10px;
+}
+
+.payment-option p {
+  margin: 3px 0 0;
+  color: #746c5d;
+  font-size: 8px;
+}
+
+.payment-check {
+  color: #5e8d4c;
+  font-size: 17px;
+}
+
+.pickup-note {
+  margin-top: 7px;
+  padding: 8px;
+  border: 1px dashed #b7a88e;
+  border-radius: 10px;
+  color: #665d50;
+  font-size: 8px;
+  line-height: 1.4;
+}
+
+.checkout-summary {
+  margin-top: 8px;
+  padding: 9px;
+  border: 1px solid #978b76;
+  border-radius: 14px;
+  background: #f7ead6;
+}
+
+.checkout-summary-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 0 6px;
+  color: #62594d;
+  font-size: 10px;
+}
+
+.checkout-summary-total {
+  padding: 6px 0;
+  border-top: 1px solid #c8b99f;
+  font-weight: 700;
+}
+
+.checkout-summary-total strong {
+  color: #3b4434;
+}
+
+.confirm-button,
+.finish-button {
+  min-height: 34px;
+  margin: 7px 0 0;
+  --background: #9eae89;
+  --background-hover: #8fa57a;
+  --background-activated: #8fa57a;
+  --border-radius: 8px;
+  --color: #fff;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.receipt-container {
+  text-align: center;
+}
+
+.receipt-success-icon {
+  display: flex;
+  width: 46px;
+  height: 46px;
+  align-items: center;
+  justify-content: center;
+  margin: 2px auto 8px;
+  border-radius: 50%;
+  color: #fff;
+  background: #347c2f;
+}
+
+.receipt-success-icon ion-icon {
+  color: inherit;
+  font-size: 34px;
+}
+
+.receipt-container h2 {
+  margin: 0;
+  color: #3a3931;
+  font: 700 15px Arial, sans-serif;
+}
+
+.receipt-message {
+  margin: 4px 0 12px;
+  color: #746c5d;
+  font-size: 8px;
+}
+
+.pickup-order-id {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border: 1px dashed #b7a88e;
+  border-radius: 11px;
+  background: #f7ead6;
+}
+
+.pickup-order-id span {
+  color: #746c5d;
+  font-size: 7px;
+}
+
+.pickup-order-id strong {
+  color: #30342d;
+  font-size: 12px;
+  letter-spacing: 0.4px;
+}
+
+.receipt-details {
+  margin-top: 8px;
+  padding: 9px 10px;
+  border: 1px solid #ad9e83;
+  border-radius: 12px;
+  background: #f7ead6;
+  text-align: left;
+}
+
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 6px 0;
+  color: #51483c;
+  font-size: 8px;
+}
+
+.receipt-row strong {
+  max-width: 68%;
+  color: #3a3931;
+  font-size: 8px;
+  text-align: right;
+}
+
+.receipt-items-summary {
+  display: flex;
+  max-width: 68%;
+  flex-direction: column;
+  gap: 2px;
+  overflow-wrap: anywhere;
+  color: #3a3931;
+  font-size: 8px;
+  text-align: right;
+}
+
+.receipt-row.receipt-total {
+  margin-bottom: 0;
+  padding-top: 7px;
+  border-top: 1px solid #c8b99f;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.receipt-row.receipt-total strong {
+  color: #385344;
+}
+
+.receipt-container .finish-button {
+  width: 100%;
+  margin-top: 10px;
+}
+

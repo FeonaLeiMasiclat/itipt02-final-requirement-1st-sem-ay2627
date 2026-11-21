@@ -1,0 +1,113 @@
+
+<ion-content [fullscreen]="true">
+
+  <div class="login-page">
+
+    <!-- Decorative Icons -->
+    <ion-icon name="heart-outline" class="decoration heart"></ion-icon>
+    <ion-icon name="book-outline" class="decoration book"></ion-icon>
+    <ion-icon name="bookmark-outline" class="decoration bookmark"></ion-icon>
+    <ion-icon name="albums-outline" class="decoration albums"></ion-icon>
+    <ion-icon name="heart-circle" class="decoration heart-circle"></ion-icon>
+
+    <!-- Login Card -->
+    <ion-card class="login-card">
+
+      <ion-card-header>
+        <ion-card-title>Login</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+
+        <form (ngSubmit)="login()">
+
+          <!-- Username Input -->
+          <div class="input-container">
+
+            <ion-icon name="person" class="input-icon"></ion-icon>
+
+            <ion-input
+              label="Username"
+              labelPlacement="floating"
+              type="text"
+              name="username"
+              [(ngModel)]="username"
+              required
+              autocomplete="username">
+            </ion-input>
+
+          </div>
+
+          <!-- Password Input -->
+          <div class="input-container">
+
+            <ion-icon name="lock-closed" class="input-icon"></ion-icon>
+
+            <ion-input
+              label="Password"
+              labelPlacement="floating"
+              [type]="showPassword() ? 'text' : 'password'"
+              name="password"
+              [(ngModel)]="password"
+              required
+              autocomplete="current-password">
+            </ion-input>
+
+            <ion-button
+              fill="clear"
+              type="button"
+              class="password-button"
+              (click)="togglePassword()">
+
+              <ion-icon
+                [name]="showPassword() ? 'eye' : 'eye-off'">
+              </ion-icon>
+
+            </ion-button>
+
+          </div>
+
+          <!-- Sign Up Link -->
+          <div class="signup-text">
+            <span>Don't have an account?</span>
+            <a routerLink="/signup">Sign Up</a>
+          </div>
+
+          <!-- Forgot Password Link -->
+          <div class="forgot-password">
+            <a routerLink="/forgot-password">
+              Forgot Password?
+            </a>
+          </div>
+
+          <!-- Error Message -->
+          @if (errorMessage()) {
+            <p class="error-message">
+              {{ errorMessage() }}
+            </p>
+          }
+
+          <!-- Login Button -->
+          <ion-button
+            expand="block"
+            type="submit"
+            class="login-button"
+            [disabled]="isLoading()">
+
+            @if (isLoading()) {
+              Logging in...
+            } @else {
+              Log in
+            }
+
+          </ion-button>
+
+        </form>
+
+      </ion-card-content>
+
+    </ion-card>
+
+  </div>
+
+</ion-content>

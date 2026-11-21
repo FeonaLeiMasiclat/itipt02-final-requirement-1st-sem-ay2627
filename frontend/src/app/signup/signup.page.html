@@ -1,0 +1,148 @@
+
+<ion-content [fullscreen]="true">
+
+  <div class="signup-page">
+
+    <!-- Sign Up Card -->
+    <ion-card class="signup-card">
+
+      <div class="signup-heading">
+        <h1>Sign Up</h1>
+        <p>Please provide your credentials</p>
+      </div>
+
+      <ion-card-content>
+
+        <form (ngSubmit)="register()">
+
+          <!-- Full Name -->
+          <div class="input-container">
+            <ion-icon name="person" class="input-icon"></ion-icon>
+
+            <ion-input
+              type="text"
+              name="fullName"
+              placeholder="Full Name"
+              [(ngModel)]="fullName"
+              required
+              autocomplete="name">
+            </ion-input>
+          </div>
+
+          <!-- Date of Birth -->
+          <div class="input-container">
+            <ion-icon name="calendar" class="input-icon"></ion-icon>
+
+            <ion-input
+              type="date"
+              name="dateOfBirth"
+              placeholder="Date of Birth"
+              [(ngModel)]="dateOfBirth"
+              required>
+            </ion-input>
+          </div>
+
+          <!-- Address -->
+          <div class="input-container">
+            <ion-icon name="home" class="input-icon"></ion-icon>
+
+            <ion-input
+              type="text"
+              name="address"
+              placeholder="Address"
+              [(ngModel)]="address"
+              required
+              autocomplete="street-address">
+            </ion-input>
+          </div>
+
+          <!-- Email Address -->
+          <div class="input-container">
+            <ion-icon name="mail-outline" class="input-icon"></ion-icon>
+
+            <ion-input
+              type="email"
+              name="email"
+              placeholder="Email Address"
+              [(ngModel)]="email"
+              required
+              autocomplete="email">
+            </ion-input>
+          </div>
+
+          <!-- Password -->
+          <div class="input-container">
+            <ion-icon name="lock-closed" class="input-icon"></ion-icon>
+
+            <ion-input
+              [type]="showPassword() ? 'text' : 'password'"
+              name="password"
+              placeholder="Password"
+              [(ngModel)]="password"
+              required
+              minlength="6"
+              autocomplete="new-password">
+            </ion-input>
+
+            <ion-button
+              fill="clear"
+              type="button"
+              class="password-button"
+              (click)="togglePassword()">
+
+              <ion-icon
+                [name]="showPassword() ? 'eye' : 'eye-off'">
+              </ion-icon>
+
+            </ion-button>
+          </div>
+
+          <!-- Error Message -->
+          @if (errorMessage()) {
+            <p class="error-message">
+              {{ errorMessage() }}
+            </p>
+          }
+
+          <!-- Success Message -->
+          @if (successMessage()) {
+            <p class="success-message">
+              {{ successMessage() }}
+            </p>
+          }
+
+          <!-- Register Button -->
+          <ion-button
+            expand="block"
+            type="submit"
+            class="register-button"
+            [disabled]="isLoading()">
+
+            <ion-icon
+              name="play"
+              slot="start">
+            </ion-icon>
+
+            @if (isLoading()) {
+              REGISTERING...
+            } @else {
+              REGISTER
+            }
+
+          </ion-button>
+
+          <!-- Login Link -->
+          <div class="login-text">
+            <span>Already Registered?</span>
+            <a routerLink="/login">Log in here.</a>
+          </div>
+
+        </form>
+
+      </ion-card-content>
+
+    </ion-card>
+
+  </div>
+
+</ion-content>
