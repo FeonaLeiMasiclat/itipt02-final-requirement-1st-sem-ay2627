@@ -36,7 +36,13 @@ import {
   heartOutline,
   cartOutline,
   heart,
-  trashOutline
+  trashOutline,
+  sparklesOutline,
+  skullOutline,
+  planetOutline,
+  happyOutline,
+  flameOutline,
+  businessOutline
 } from 'ionicons/icons';
 
 import { PageHeaderActions } from '../services/page-header-actions';
@@ -83,12 +89,12 @@ export class HomePage {
 
   // Book Genres
   readonly genres = [
-    { label: 'All Genres', value: '', icon: '✨' },
-    { label: 'Romance', value: 'Romance', icon: '💗' },
-    { label: 'Horror', value: 'Horror', icon: '👻' },
-    { label: 'Sci-fi', value: 'Sci-fi', icon: '🛸' },
-    { label: 'Comedy', value: 'Comedy', icon: '🎭' },
-    { label: 'Mythology', value: 'Mythology', icon: '🐉' }
+    { label: 'All Genres', value: '', icon: 'sparkles-outline' },
+    { label: 'Romance', value: 'Romance', icon: 'heart-outline' },
+    { label: 'Horror', value: 'Horror', icon: 'skull-outline' },
+    { label: 'Sci-fi', value: 'Sci-fi', icon: 'planet-outline' },
+    { label: 'Comedy', value: 'Comedy', icon: 'happy-outline' },
+    { label: 'Mythology', value: 'Mythology', icon: 'flame-outline' }
   ];
 
   constructor() {
@@ -112,7 +118,13 @@ export class HomePage {
       heartOutline,
       cartOutline,
       heart,
-      trashOutline
+      trashOutline,
+      sparklesOutline,
+      skullOutline,
+      planetOutline,
+      happyOutline,
+      flameOutline,
+      businessOutline
     });
   }
 
@@ -179,6 +191,11 @@ export class HomePage {
 
     this.menuSearch.set('');
     this.closeMenu();
+  }
+
+  isGenreSelected(genre: string): boolean {
+    const selectedGenre = this.router.parseUrl(this.router.url).queryParams['genre'];
+    return genre ? selectedGenre === genre : !selectedGenre;
   }
 
   // About Us

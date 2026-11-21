@@ -34,7 +34,9 @@ import {
   star,
   cashOutline,
   checkmarkCircle,
-  checkmark
+  checkmark,
+  addOutline,
+  removeOutline
 } from 'ionicons/icons';
 
 interface Book {
@@ -252,6 +254,10 @@ export class BookShopPage {
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.openCart());
 
+    this.pageHeaderActions.shopCheckoutRequested
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.proceedToCheckout());
+
     this.route.queryParamMap.subscribe(params => {
       const search = params.get('search') ?? '';
       this.searchText = search;
@@ -276,7 +282,9 @@ export class BookShopPage {
       star,
       cashOutline,
       checkmarkCircle,
-      checkmark
+      checkmark,
+      addOutline,
+      removeOutline
     });
   }
 
