@@ -139,6 +139,40 @@ ion-router-outlet {
   flex-wrap: nowrap;
 }
 
+.page-actions {
+  align-items: center;
+}
+
+.page-action-button {
+  position: relative;
+  overflow: visible;
+  --color: #365341;
+  --padding-start: 8px;
+  --padding-end: 8px;
+}
+
+.page-action-button ion-icon {
+  font-size: 21px;
+}
+
+.page-action-button ion-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  display: grid;
+  min-width: 17px;
+  height: 17px;
+  place-items: center;
+  padding: 0 4px;
+  border: 1px solid #f5ead6;
+  border-radius: 10px;
+  --background: #8fa57a;
+  --color: #fffaf1;
+  background: #8fa57a;
+  color: #fffaf1;
+  font: 700 10px/1 Arial, sans-serif;
+}
+
 /* Hamburger Button */
 .menu-toggle {
   width: 38px;
@@ -337,20 +371,6 @@ ion-router-outlet {
   font-size: 32px;
 }
 
-/* Ionic Searchbar */
-.menu-search {
-  padding: 0;
-  flex: 0 0 auto;
-  --background: #ebe2d1;
-  --border-radius: 28px;
-  --box-shadow: none;
-  --color: #40382e;
-  --placeholder-color: #847b6c;
-  --icon-color: #847b6c;
-  --clear-button-color: #847b6c;
-  min-height: 44px;
-}
-
 /* Menu Sections */
 .menu-section {
   flex: 0 0 auto;
@@ -531,10 +551,6 @@ ion-router-outlet {
     letter-spacing: 1px;
   }
 
-  .menu-search {
-    min-height: 40px;
-  }
-
   .menu-section {
     margin-top: 16px;
   }
@@ -578,10 +594,6 @@ ion-router-outlet {
 
   .menu-close ion-icon {
     font-size: 27px;
-  }
-
-  .menu-search {
-    min-height: 34px;
   }
 
   .menu-section {

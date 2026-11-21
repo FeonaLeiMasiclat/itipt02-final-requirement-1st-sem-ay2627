@@ -4,7 +4,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { PageHeaderActions, type WishlistItem } from '../services/page-header-actions';
+import { PageHeaderActions } from '../services/page-header-actions';
+import { AuthService } from '../services/auth_service';
+import { AppDialogService } from '../services/app-dialog.service';
+import { BookCatalogService } from '../services/book-catalog.service';
 
 import {
   IonContent,
@@ -22,8 +25,6 @@ import {
 
 import { addIcons } from 'ionicons';
 import {
-  heart,
-  heartOutline,
   cartOutline,
   libraryOutline,
   addCircleOutline,
@@ -47,6 +48,8 @@ interface Book {
   rating: number;
   reviews: number;
   genre: string;
+  availableCopies: number;
+  synopsis?: string;
 }
 
 interface CartItem {
@@ -60,6 +63,7 @@ interface CartItem {
 
 interface OrderReceipt {
   orderId: string;
+  purchasedBy: string;
   items: CartItem[];
   total: number;
   paymentMethod: string;
@@ -91,106 +95,59 @@ interface OrderReceipt {
 export class BookShopPage {
   private route = inject(ActivatedRoute);
   private pageHeaderActions = inject(PageHeaderActions);
+  private authService = inject(AuthService);
+  private appDialog = inject(AppDialogService);
+  readonly username = this.authService.getUserData()?.user?.username
+    || this.authService.getUserData()?.username
+    || 'Reader';
   selectedGenre = signal('');
+  detailsOpen = signal(false);
+  selectedBook = signal<Book | null>(null);
 
   // Search
   searchText = '';
   searchQuery = signal('');
 
-  // Book list
-  books = signal<Book[]>([
-    {
-      id: 1,
-      title: 'The Great Gatsby',
-      author: 'F. Scott Fitzgerald',
-      price: 350,
-      rating: 4.8,
-      reviews: 120,
-      genre: 'Romance'
-    },
-    {
-      id: 2,
-      title: 'To Kill a Mockingbird',
-      author: 'Harper Lee',
-      price: 420,
-      rating: 4.9,
-      reviews: 150,
-      genre: 'Romance'
-    },
-    {
-      id: 3,
-      title: 'Pride and Prejudice',
-      author: 'Jane Austen',
-      price: 300,
-      rating: 4.7,
-      reviews: 95,
-      genre: 'Romance'
-    },
-    {
-      id: 4,
-      title: 'The Hobbit',
-      author: 'J.R.R. Tolkien',
-      price: 450,
-      rating: 4.9,
-      reviews: 180,
-      genre: 'Mythology'
-    },
-    {
-      id: 5,
-      title: 'The Alchemist',
-      author: 'Paulo Coelho',
-      price: 380,
-      rating: 4.6,
-      reviews: 110,
-      genre: 'Mythology'
-    },
-    {
-      id: 6,
-      title: 'Little Women',
-      author: 'Louisa May Alcott',
-      price: 320,
-      rating: 4.8,
-      reviews: 88,
-      genre: 'Romance'
-    },
-    {
-      id: 7,
-      title: '1984',
-      author: 'George Orwell',
-      price: 390,
-      rating: 4.7,
-      reviews: 130,
-      genre: 'Sci-fi'
-    },
-    {
-      id: 8,
-      title: 'The Catcher in the Rye',
-      author: 'J.D. Salinger',
-      price: 360,
-      rating: 4.5,
-      reviews: 76,
-      genre: 'Comedy'
-    }
-  ]);
+  private catalog = inject(BookCatalogService);
+  readonly books = computed<Book[]>(() => this.catalog.books()
+    .filter(book => book.status === 'Active')
+    .map(book => ({
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      price: book.price,
+      rating: book.rating,
+      reviews: book.reviews,
+      genre: book.genre,
+      availableCopies: book.copies,
+      synopsis: book.synopsis
+    })));
+  booksForSelectedGenre = computed(() => {
+    const genre = this.selectedGenre();
+    return this.books().filter(book => !genre || book.genre === genre);
+  });
+
+  reservedGridHeight = computed(() => {
+    const rows = Math.ceil(this.books().length / 2);
+    return rows * 310 + Math.max(0, rows - 1) * 12;
+  });
 
   // Filtered books
   filteredBooks = computed(() => {
     const search = this.searchQuery().toLowerCase().trim();
-    const genre = this.selectedGenre();
 
-    return this.books().filter(book =>
-      (!search || book.title.toLowerCase().includes(search) ||
-        book.author.toLowerCase().includes(search)) &&
-      (!genre || book.genre === genre)
+    return this.booksForSelectedGenre().filter(book =>
+      !search || book.title.toLowerCase().includes(search) ||
+        book.author.toLowerCase().includes(search)
     );
   });
 
-  // Wishlist and cart
-  readonly wishlist = this.pageHeaderActions.wishlist;
+  // Cart
 
   cart = signal<CartItem[]>(
     this.loadData<CartItem[]>('cart', [])
   );
+  directCheckoutItem = signal<CartItem | null>(null);
 
   // Cart drawer visibility
   showCart = signal(false);
@@ -232,6 +189,8 @@ export class BookShopPage {
 
   // Items to be checked out
   checkoutItems = computed(() => {
+    const directItem = this.directCheckoutItem();
+    if (directItem) return [directItem];
     return this.cart().filter(item => item.selected);
   });
 
@@ -250,7 +209,6 @@ export class BookShopPage {
   });
 
   constructor() {
-    this.syncAdminBooks();
 
     this.pageHeaderActions.shopCartRequested
       .pipe(takeUntilDestroyed())
@@ -272,8 +230,6 @@ export class BookShopPage {
     });
 
     addIcons({
-      heart,
-      heartOutline,
       cartOutline,
       libraryOutline,
       addCircleOutline,
@@ -288,36 +244,6 @@ export class BookShopPage {
       addOutline,
       removeOutline
     });
-  }
-
-  ionViewWillEnter(): void {
-    this.syncAdminBooks();
-  }
-
-  private syncAdminBooks(): void {
-    const catalog = this.loadData<Array<{
-      id: number;
-      title: string;
-      author: string;
-      price?: number;
-      genre?: string;
-      status?: string;
-    }>>('adminBooks', []);
-
-    const readerBooks = catalog
-      .filter(book => book.status === 'Active')
-      .map(book => ({
-        id: 1_000_000 + Number(book.id),
-        title: book.title,
-        author: book.author,
-        price: Number(book.price ?? 350),
-        rating: 0,
-        reviews: 0,
-        genre: book.genre || 'Romance'
-      }));
-
-    const defaultBooks = this.books().filter(book => book.id < 1_000_000);
-    this.books.set([...defaultBooks, ...readerBooks]);
   }
 
   // Load data from localStorage
@@ -336,11 +262,6 @@ export class BookShopPage {
     }
   }
 
-  // Save wishlist
-  saveWishlist(): void {
-    this.pageHeaderActions.saveWishlist();
-  }
-
   // Save cart
   saveCart(): void {
     localStorage.setItem('cart', JSON.stringify(this.cart()));
@@ -356,32 +277,6 @@ export class BookShopPage {
     document.getElementById('books-section')?.scrollIntoView({
       behavior: 'smooth'
     });
-  }
-
-  // Check if a book is already in wishlist
-  isWishlisted(bookId: number): boolean {
-    return this.wishlist().some(item => item.id === bookId);
-  }
-
-  // Add or remove a book from wishlist
-  toggleWishlist(book: Book): void {
-    if (this.isWishlisted(book.id)) {
-      this.removeWishlist(book.id);
-    } else {
-      const newItem: WishlistItem = {
-        id: book.id,
-        title: book.title,
-        price: book.price
-      };
-
-      this.wishlist.update(items => [...items, newItem]);
-      this.saveWishlist();
-    }
-  }
-
-  // Remove book from wishlist
-  removeWishlist(bookId: number): void {
-    this.pageHeaderActions.removeWishlist(bookId);
   }
 
   // Add book to cart
@@ -412,10 +307,88 @@ export class BookShopPage {
     this.saveCart();
   }
 
+  addToCartWithConfirmation(book: Book): void {
+    this.addToCart(book);
+    this.showAddedToCartMessage(book);
+  }
+
+  private showAddedToCartMessage(book: Book): void {
+    this.appDialog.show(
+      'Added to Shopping Cart',
+      `"${book.title}" has been added to your shopping cart.`,
+      'success'
+    );
+  }
+
+  openBookDetails(book: Book): void {
+    this.selectedBook.set(book);
+    this.detailsOpen.set(true);
+  }
+
+  closeBookDetails(): void {
+    this.detailsOpen.set(false);
+  }
+
+  starsFor(rating: number): string {
+    const filledStars = Math.max(0, Math.min(5, Math.round(rating)));
+    return String.fromCharCode(9733).repeat(filledStars)
+      + String.fromCharCode(9734).repeat(5 - filledStars);
+  }
+
+  borrowBook(book: Book): void {
+    const requests = this.loadData<any[]>('borrowRequests', []);
+    if (requests.some(request => request.bookTitle === book.title
+      && request.reader === this.username && request.status === 'Pending')) {
+      this.closeBookDetails();
+      this.appDialog.show(
+        'Request Already Pending',
+        'You already have a pending request for this book.',
+        'warning'
+      );
+      return;
+    }
+
+    requests.unshift({
+      id: Date.now(),
+      bookTitle: book.title,
+      author: book.author,
+      genre: book.genre,
+      availableCopies: book.availableCopies,
+      price: book.price,
+      rating: book.rating,
+      reviews: book.reviews,
+      synopsis: book.synopsis,
+      reader: this.username,
+      status: 'Pending',
+      requestedAt: new Date().toLocaleString()
+    });
+    localStorage.setItem('borrowRequests', JSON.stringify(requests));
+    this.closeBookDetails();
+    this.appDialog.show(
+      'Request Submitted',
+      `Your request to borrow "${book.title}" has been submitted.`,
+      'success'
+    );
+  }
+
+  addSelectedBookToCart(book: Book): void {
+    this.addToCart(book);
+    this.closeBookDetails();
+    this.showAddedToCartMessage(book);
+  }
+
   // Buy now
   buyNow(book: Book): void {
-    this.addToCart(book);
-    this.showCart.set(true);
+    this.directCheckoutItem.set({
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      price: book.price,
+      quantity: 1,
+      selected: true
+    });
+    this.showCart.set(false);
+    this.showCheckout.set(true);
   }
 
   // Open cart
@@ -447,6 +420,14 @@ export class BookShopPage {
 
   // Increase quantity
   increaseQuantity(bookId: number): void {
+    const directItem = this.directCheckoutItem();
+    if (directItem?.id === bookId) {
+      this.directCheckoutItem.update(item => item
+        ? { ...item, quantity: item.quantity + 1 }
+        : null);
+      return;
+    }
+
     this.cart.update(items =>
       items.map(item =>
         item.id === bookId
@@ -460,6 +441,14 @@ export class BookShopPage {
 
   // Decrease quantity
   decreaseQuantity(bookId: number): void {
+    const directItem = this.directCheckoutItem();
+    if (directItem?.id === bookId) {
+      this.directCheckoutItem.update(item => item
+        ? { ...item, quantity: Math.max(1, item.quantity - 1) }
+        : null);
+      return;
+    }
+
     this.cart.update(items =>
       items.map(item =>
         item.id === bookId
@@ -474,7 +463,7 @@ export class BookShopPage {
     this.saveCart();
   }
 
-  // Close wishlist and cart drawers
+  // Close cart drawer
   closeDrawers(): void {
     this.showCart.set(false);
   }
@@ -482,11 +471,16 @@ export class BookShopPage {
   // Open checkout modal
   proceedToCheckout(): void {
     if (this.selectedItems() === 0) {
-      alert('Please select at least one book before checkout.');
+      this.appDialog.show(
+        'Select a Book',
+        'Please select at least one book before checkout.',
+        'warning'
+      );
       return;
     }
 
     this.showCart.set(false);
+    this.directCheckoutItem.set(null);
     this.showCheckout.set(true);
   }
 
@@ -495,7 +489,7 @@ export class BookShopPage {
     const itemsToPurchase = this.checkoutItems();
 
     if (itemsToPurchase.length === 0) {
-      alert('Your checkout list is empty.');
+      this.appDialog.show('Cart is Empty', 'Your checkout list is empty.', 'warning');
       return;
     }
 
@@ -518,6 +512,7 @@ export class BookShopPage {
 
     const receipt: OrderReceipt = {
       orderId: orderId,
+      purchasedBy: this.username,
       items: itemsToPurchase.map(item => ({ ...item })),
       total: this.checkoutTotal(),
       paymentMethod: this.paymentMethod(),
@@ -539,16 +534,16 @@ export class BookShopPage {
   // Finish order
   finishOrder(): void {
     const receipt = this.orderReceipt();
+    const isDirectPurchase = this.directCheckoutItem() !== null;
 
     if (receipt) {
-      const purchasedIds = receipt.items.map(item => item.id);
-
-      // Remove purchased books from cart
-      this.cart.update(items =>
-        items.filter(item => !purchasedIds.includes(item.id))
-      );
-
-      this.saveCart();
+      if (!isDirectPurchase) {
+        const purchasedIds = receipt.items.map(item => item.id);
+        this.cart.update(items =>
+          items.filter(item => !purchasedIds.includes(item.id))
+        );
+        this.saveCart();
+      }
 
       // Save order to order history
       const orderHistory = this.loadData<OrderReceipt[]>(
@@ -566,20 +561,26 @@ export class BookShopPage {
 
     this.showReceipt.set(false);
     this.orderReceipt.set(null);
+    this.directCheckoutItem.set(null);
   }
 
   // Close checkout modal
   closeCheckout(): void {
     this.showCheckout.set(false);
+    this.directCheckoutItem.set(null);
   }
 
   // Close receipt modal
   closeReceipt(): void {
     this.showReceipt.set(false);
+    this.directCheckoutItem.set(null);
   }
 
   // Request book acquisition
   requestAcquisition(): void {
-    alert('Book acquisition request feature will be connected soon.');
+    this.appDialog.show(
+      'Coming Soon',
+      'Book acquisition requests will be available in a future update.'
+    );
   }
 }

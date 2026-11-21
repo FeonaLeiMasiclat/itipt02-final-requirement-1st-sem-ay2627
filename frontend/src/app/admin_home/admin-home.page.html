@@ -1,7 +1,7 @@
 
 <ion-content [fullscreen]="true">
 
-  <div class="admin-page" [class.logout-confirm-open]="logoutConfirmOpen()">
+  <div class="admin-page">
 
     <!-- Admin Header -->
     <ion-header class="admin-header">
@@ -41,10 +41,13 @@
       <div class="welcome-divider"></div>
 
       <!-- Admin Actions -->
+      <h2 class="admin-control-title">Admin Control Panel</h2>
       <div class="admin-actions">
 
         <ion-button
           fill="outline"
+          [class.action-selected]="activeAdminAction() === 'add'"
+          [attr.aria-pressed]="activeAdminAction() === 'add'"
           (click)="openAddBook()">
 
           <ion-icon name="add" slot="start"></ion-icon>
@@ -54,6 +57,8 @@
 
         <ion-button
           fill="outline"
+          [class.action-selected]="activeAdminAction() === 'requests'"
+          [attr.aria-pressed]="activeAdminAction() === 'requests'"
           (click)="openRequests()">
 
           <ion-icon name="time-outline" slot="start"></ion-icon>
@@ -63,6 +68,8 @@
 
         <ion-button
           fill="outline"
+          [class.action-selected]="activeAdminAction() === 'report'"
+          [attr.aria-pressed]="activeAdminAction() === 'report'"
           (click)="generateReport()">
 
           <ion-icon name="document-text-outline" slot="start"></ion-icon>
@@ -72,6 +79,8 @@
 
         <ion-button
           fill="outline"
+          [class.action-selected]="activeAdminAction() === 'logs'"
+          [attr.aria-pressed]="activeAdminAction() === 'logs'"
           (click)="openLogs()">
 
           <ion-icon name="list-outline" slot="start"></ion-icon>
@@ -81,6 +90,8 @@
 
         <ion-button
           fill="outline"
+          [class.action-selected]="activeAdminAction() === 'archived'"
+          [attr.aria-pressed]="activeAdminAction() === 'archived'"
           (click)="showArchivedBooks()">
 
           <ion-icon name="archive-outline" slot="start"></ion-icon>
@@ -90,6 +101,8 @@
 
         <ion-button
           fill="outline"
+          [class.action-selected]="activeAdminAction() === 'purchased'"
+          [attr.aria-pressed]="activeAdminAction() === 'purchased'"
           (click)="openPurchasedBooks()">
 
           <ion-icon name="bag-outline" slot="start"></ion-icon>
@@ -112,7 +125,12 @@
           (click)="openGenreFilter()">
           <ion-icon name="list-outline"></ion-icon>
         </ion-button>
-        BOOK MANAGEMENT
+        <ion-button
+          fill="clear"
+          class="manage-books-button"
+          (click)="showActiveBooks()">
+          Manage Books
+        </ion-button>
         @if (filterGenre()) { <span class="selected-genre-label">· {{ filterGenre() }}</span> }
       </h3>
 
@@ -157,75 +175,46 @@
         <ion-card class="management-card">
 
           <div class="book-information">
-
             <div class="admin-book-cover">
               <ion-icon name="book-outline"></ion-icon>
+              <ion-badge class="book-status-badge" [color]="book.status === 'Active' ? 'success' : 'medium'">
+                {{ book.status }}
+              </ion-badge>
             </div>
 
             <div class="book-details">
-
-              <ion-badge
-                [color]="book.status === 'Active' ? 'success' : 'medium'">
-
-                {{ book.status }}
-
-              </ion-badge>
-
               <h2>{{ book.title }}</h2>
 
-              <p>By {{ book.author }}</p>
-              <small class="book-genre">{{ book.genre }}</small>
-
-              <strong>{{ book.copies }} copies</strong>
-              <small>Price: ₱{{ book.price.toFixed(2) }}</small>
-
-              <small>
-                Last updated: {{ book.lastUpdated }}
-              </small>
-
-            </div>
-
-          </div>
-
-          <!-- Quick Actions -->
-          <div class="quick-actions">
-
-            <p>Actions</p>
-
-            <div class="action-grid">
-
-              <ion-button
-                class="edit-button"
-                (click)="editBook(book)">
-
-                <ion-icon name="create-outline"></ion-icon>
-                Edit
-
-              </ion-button>
-
-              <ion-button
-                class="archive-button"
-                (click)="archiveBook(book.id)">
-
-                <ion-icon name="archive-outline"></ion-icon>
-                Archive
-
-              </ion-button>
-
-              <ion-button
-                class="details-button"
-                (click)="viewDetails(book)">
-
-                <ion-icon name="information-circle-outline"></ion-icon>
-                Details
-
-              </ion-button>
+              <div class="quick-actions">
+                <div class="action-grid" [class.archived-actions]="book.status === 'Archived'">
+                  @if (book.status === 'Archived') {
+                    <ion-button class="restore-button" (click)="restoreBook(book.id)">
+                      <ion-icon name="refresh-outline"></ion-icon>
+                      <span>Restore Book</span>
+                    </ion-button>
+                    <ion-button class="permanent-delete-button" (click)="deleteBook(book.id)">
+                      <ion-icon name="trash-outline"></ion-icon>
+                      <span>Delete Permanently</span>
+                    </ion-button>
+                  } @else {
+                    <ion-button class="edit-button" (click)="editBook(book)">
+                      <ion-icon name="create-outline"></ion-icon>
+                      Edit
+                    </ion-button>
+                    <ion-button class="archive-button" (click)="archiveBook(book.id)">
+                      <ion-icon name="archive-outline"></ion-icon>
+                      Archive
+                    </ion-button>
+                  }
+                  <ion-button class="details-button" (click)="viewDetails(book)">
+                    <ion-icon name="information-circle-outline"></ion-icon>
+                    Details
+                  </ion-button>
+                </div>
+              </div>
 
             </div>
-
-          </div>
-
-        </ion-card>
+          </div>        </ion-card>
 
       }
 
@@ -279,6 +268,15 @@
             <label for="book-price">Price (₱)</label>
             <ion-input id="book-price" type="number" min="0" step="0.01" name="price" [(ngModel)]="formPrice" required></ion-input>
 
+            <label for="book-rating">Review rating (0–5)</label>
+            <ion-input id="book-rating" type="number" min="0" max="5" step="0.1" name="rating" [(ngModel)]="formRating" required></ion-input>
+
+            <label for="book-reviews">Number of reviews</label>
+            <ion-input id="book-reviews" type="number" min="0" step="1" name="reviews" [(ngModel)]="formReviews" required></ion-input>
+
+            <label for="book-synopsis">Synopsis</label>
+            <ion-textarea id="book-synopsis" name="synopsis" [(ngModel)]="formSynopsis" rows="4" autoGrow="true" placeholder="Write a short description of the book" required></ion-textarea>
+
             <div class="form-actions">
               <ion-button type="button" class="cancel-button" fill="outline" (click)="closeModal()">Cancel</ion-button>
               <ion-button type="submit" class="save-button">{{ isEditing() ? 'Update Book' : 'Save Book' }}</ion-button>
@@ -311,6 +309,8 @@
               <article class="admin-list-item book-detail-item"><strong>Copies</strong><span>{{ selectedBook()?.copies }}</span></article>
               <article class="admin-list-item book-detail-item"><strong>Genre</strong><span>{{ selectedBook()?.genre }}</span></article>
               <article class="admin-list-item book-detail-item"><strong>Price</strong><span>₱{{ selectedBook()?.price?.toFixed(2) }}</span></article>
+              <article class="admin-list-item book-detail-item"><strong>Rating</strong><span>{{ selectedBook()?.rating }} / 5 ({{ selectedBook()?.reviews }} reviews)</span></article>
+              <article class="admin-list-item book-detail-item book-detail-synopsis"><strong>Synopsis</strong><span>{{ selectedBook()?.synopsis || 'No synopsis provided.' }}</span></article>
               <article class="admin-list-item book-detail-item"><strong>Status</strong><span>{{ selectedBook()?.status }}</span></article>
               <article class="admin-list-item book-detail-item"><strong>Last Updated</strong><span>{{ selectedBook()?.lastUpdated }}</span></article>
             }
@@ -322,7 +322,7 @@
     <ion-modal
       cssClass="admin-unified-modal"
       [isOpen]="requestsOpen()"
-      (didDismiss)="requestsOpen.set(false)">
+      (didDismiss)="closeRequests()">
 
       <ng-template>
         <section class="admin-list-panel" role="dialog" aria-modal="true" aria-labelledby="requests-title">
@@ -344,12 +344,19 @@
                     <p>Reader: {{ request.reader }}</p>
                     @if (request.requestedAt) { <small>Requested: {{ request.requestedAt }}</small> }
                   </div>
-                  <ion-badge [color]="request.status === 'Pending' ? 'warning' : request.status === 'Approved' ? 'success' : 'danger'">{{ request.status }}</ion-badge>
+                  <ion-badge
+                    class="request-status-badge"
+                    [class.status-approved]="request.status === 'Approved'"
+                    [class.status-declined]="request.status === 'Declined' || request.status === 'Rejected'"
+                    [class.status-returned]="request.status === 'Returned'"
+                    [class.status-pending]="request.status === 'Pending'">
+                    {{ request.status === 'Rejected' ? 'Declined' : request.status }}
+                  </ion-badge>
                 </div>
                 @if (request.status === 'Pending') {
                   <div class="request-buttons">
                     <ion-button class="approve-request-button" (click)="updateRequest(request.id, 'Approved')">Approve</ion-button>
-                    <ion-button class="reject-request-button" (click)="updateRequest(request.id, 'Rejected')">Reject</ion-button>
+                    <ion-button class="reject-request-button" (click)="updateRequest(request.id, 'Declined')">Decline</ion-button>
                   </div>
                 }
               </article>
@@ -371,7 +378,7 @@
     <ion-modal
       cssClass="admin-unified-modal"
       [isOpen]="logsOpen()"
-      (didDismiss)="logsOpen.set(false)">
+      (didDismiss)="closeLogs()">
 
       <ng-template>
 
@@ -382,8 +389,8 @@
               <h2 id="logs-title">Admin Logs</h2>
             </div>
             <ion-button fill="clear" class="admin-list-close" aria-label="Close user logs" (click)="logsOpen.set(false)">
-              <ion-iconGitHub: Sign In. name="close-outline"></ion-icon>
-            </ion-button>
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button> 
           </header>
           <div class="admin-list-content log-list-content">
             @for (log of logs(); track $index) {
@@ -408,7 +415,7 @@
     <ion-modal
       cssClass="admin-unified-modal"
       [isOpen]="purchasedBooksOpen()"
-      (didDismiss)="purchasedBooksOpen.set(false)">
+      (didDismiss)="closePurchasedBooks()">
       <ng-template>
         <section class="admin-list-panel" role="dialog" aria-modal="true" aria-labelledby="purchased-books-title">
           <header class="admin-list-header">
@@ -443,68 +450,6 @@
       </ng-template>
     </ion-modal>
 
-    <ion-modal
-      cssClass="admin-unified-modal"
-      [isOpen]="dialogOpen()"
-      (didDismiss)="closeDialog()">
-      <ng-template>
-        <section class="admin-list-panel" role="dialog" aria-modal="true" aria-labelledby="admin-message-title">
-          <header class="admin-list-header">
-            <div class="admin-list-title">
-              <ion-icon name="document-text-outline"></ion-icon>
-              <h2 id="admin-message-title">{{ dialogTitle() }}</h2>
-            </div>
-            <ion-button fill="clear" class="admin-list-close" aria-label="Close message" (click)="closeDialog()">
-              <ion-icon name="close-outline"></ion-icon>
-            </ion-button>
-          </header>
-          <div class="admin-list-content dialog-content">
-            <p class="dialog-message" [class.report-message]="dialogMode() === 'report'">{{ dialogMessage() }}</p>
-          </div>
-          <div class="dialog-actions">
-            @if (dialogMode() === 'confirm') {
-              <ion-button class="cancel-button" fill="outline" (click)="closeDialog()">Cancel</ion-button>
-              <ion-button class="dialog-delete-button" (click)="confirmDialogAction()">Delete</ion-button>
-            } @else {
-              <ion-button class="save-button" (click)="confirmDialogAction()">Done</ion-button>
-            }
-          </div>
-        </section>
-      </ng-template>
-    </ion-modal>
-    <ion-modal
-      [isOpen]="logoutConfirmOpen()"
-      cssClass="admin-unified-modal"
-      [backdropDismiss]="false"
-      (didDismiss)="closeLogoutConfirmation()">
-      <ng-template>
-        <section class="admin-list-panel logout-panel" role="dialog" aria-modal="true" aria-labelledby="admin-logout-confirm-title">
-          <header class="admin-list-header">
-            <div class="admin-list-title">
-              <ion-icon name="log-out-outline"></ion-icon>
-              <h2 id="admin-logout-confirm-title">Confirm Log Out</h2>
-            </div>
-            <ion-button fill="clear" class="admin-list-close" aria-label="Cancel logout" (click)="closeLogoutConfirmation()">
-              <ion-icon name="close-outline"></ion-icon>
-            </ion-button>
-          </header>
-          <div class="admin-list-content logout-panel-content">
-            <p class="dialog-message">Are you sure you want to log out of the admin control panel?</p>
-            <div class="logout-account-card">
-              <div class="logout-account-avatar">A</div>
-              <div class="logout-account-copy">
-                <strong>Admin Session</strong>
-                <small>ID: SUM2024-040610</small>
-              </div>
-            </div>
-          </div>
-          <div class="dialog-actions">
-            <ion-button class="logout-cancel-button" fill="outline" (click)="closeLogoutConfirmation()">Cancel</ion-button>
-            <ion-button class="logout-confirm-button" (click)="confirmLogout()">Log Out</ion-button>
-          </div>
-        </section>
-      </ng-template>
-    </ion-modal>
 
   </div>
 

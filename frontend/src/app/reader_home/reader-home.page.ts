@@ -1,7 +1,13 @@
 
 import { Component, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../services/auth_service';
+import { PageHeaderActions } from '../services/page-header-actions';
+import type { WishlistItem } from '../services/page-header-actions';
+import { AppDialogService } from '../services/app-dialog.service';
+import { BookCatalogService } from '../services/book-catalog.service';
 
 import {
   IonContent,
@@ -10,8 +16,6 @@ import {
   IonButtons,
   IonButton,
   IonIcon,
-  IonItem,
-  IonLabel,
   IonCard,
   IonCardHeader,
   IonCardTitle,
@@ -25,9 +29,7 @@ import {
 
 import { addIcons } from 'ionicons';
 import {
-  cart,
-  addCircleOutline, bookOutline, trash,
-  cartOutline
+  bookOutline, heart, heartOutline
 } from 'ionicons/icons';
 
 interface Book {
@@ -36,8 +38,11 @@ interface Book {
   author: string;
   description: string;
   coverClass: string;
-  favorite: boolean;
-  category: string;
+  genre: string;
+  price: number;
+  rating: number;
+  reviews: number;
+  availableCopies: number;
 }
 
 @Component({
@@ -49,7 +54,6 @@ interface Book {
     FormsModule,
     IonContent, IonToolbar, IonTitle,
     IonButtons, IonButton, IonIcon,
-    IonItem, IonLabel,
     IonCard, IonCardHeader, IonCardTitle,
     IonCardSubtitle, IonCardContent,
     IonSearchbar,
@@ -60,114 +64,138 @@ interface Book {
 export class ReaderHomePage {
 
   private authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
+  private appDialog = inject(AppDialogService);
+  readonly pageHeaderActions = inject(PageHeaderActions);
   readonly username = this.authService.getUserData()?.user?.username
     || this.authService.getUserData()?.username
     || 'Reader';
 
-  // Sample Book Data
-  books = signal<Book[]>([
-    {
-      id: 1,
-      title: 'His Unwritten Promise',
-      author: 'Cy Caleb Reid',
-      description: 'A profoundly moving and elegant reimagining of a much-loved classic.',
-      coverClass: 'cover-orange',
-      favorite: true,
-      category: 'favorite'
-    },
-    {
-      id: 2,
-      title: 'Dear Future Ex',
-      author: 'Sky Mel Kordy',
-      description: 'Between the lines and their share a library of infinite second chances.',
-      coverClass: 'cover-green',
-      favorite: true,
-      category: 'favorite'
-    },
-    {
-      id: 3,
-      title: 'How Great Books Go',
-      author: 'Gabriella Smith',
-      description: 'A new title available for your library.',
-      coverClass: 'cover-orange',
-      favorite: false,
-      category: 'purchase'
-    },
-    {
-      id: 4,
-      title: 'The Midnight Library',
-      author: 'Matt Haig',
-      description: 'A story about the choices that shape a life.',
-      coverClass: 'cover-blue',
-      favorite: false,
-      category: 'purchase'
-    }
-  ]);
-
+  private catalog = inject(BookCatalogService);
+  readonly books = computed<Book[]>(() => this.catalog.books()
+    .filter(book => book.status === 'Active')
+    .map(book => ({
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      description: book.synopsis,
+      coverClass: book.genre === 'Horror' || book.genre === 'Sci-fi' ? 'cover-blue' : book.genre === 'Romance' ? 'cover-orange' : 'cover-green',
+      genre: book.genre,
+      price: book.price,
+      rating: book.rating,
+      reviews: book.reviews,
+      availableCopies: book.copies
+    })));
   // Component Properties
-  searchText = '';
+  searchText = signal('');
   requestedTitle = '';
   requestedAuthor = '';
 
   // Signals
-  category = signal('all');
-  cartOpen = signal(false);
   requestOpen = signal(false);
-  cartIds = signal<number[]>([]);
+  selectedGenre = signal('');
+  detailsOpen = signal(false);
+  selectedBook = signal<Book | null>(null);
+
+  booksForSelectedGenre = computed(() => {
+    const genre = this.selectedGenre();
+    return this.books().filter(book => !genre || book.genre === genre);
+  });
+
+  reservedGridHeight = computed(() => {
+    const rows = Math.ceil(this.books().length / 2);
+    return rows * 320 + Math.max(0, rows - 1) * 12;
+  });
 
   // Computed Values
   filteredBooks = computed(() => {
-    const search = this.searchText.toLowerCase();
+    const search = this.searchText().toLowerCase().trim();
 
-    return this.books().filter(book =>
-      book.title.toLowerCase().includes(search) ||
-      book.author.toLowerCase().includes(search)
+    return this.booksForSelectedGenre().filter(book =>
+      !search || book.title.toLowerCase().includes(search) ||
+        book.author.toLowerCase().includes(search)
     );
   });
 
-  displayedFavorites = computed(() =>
-    this.filteredBooks().filter(book =>
-      book.favorite
-    )
-  );
-
-  displayedPurchase = computed(() =>
-    this.filteredBooks().filter(book =>
-      book.category === 'purchase'
-    )
-  );
-
-  cartBooks = computed(() =>
-    this.books().filter(book =>
-      this.cartIds().includes(book.id)
-    )
-  );
-
   constructor() {
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed())
+      .subscribe(params => this.selectedGenre.set(params.get('genre') ?? ''));
+
     addIcons({
-      cart,
-      addCircleOutline, bookOutline, trash,
-      cartOutline
+      bookOutline, heart, heartOutline
     });
   }
 
-  searchBooks() {
-    // filteredBooks updates automatically through the signal.
+  isWishlisted(bookId: number): boolean {
+    return this.pageHeaderActions.wishlist().some(item => item.id === bookId);
   }
 
-  showCart() {
-    this.cartOpen.set(true);
-  }
-
-  addToCart(id: number) {
-    if (!this.cartIds().includes(id)) {
-      this.cartIds.update(ids => [...ids, id]);
+  toggleWishlist(book: Book): void {
+    if (this.isWishlisted(book.id)) {
+      this.pageHeaderActions.removeWishlist(book.id);
+      return;
     }
+
+    const item: WishlistItem = { id: book.id, title: book.title, price: book.price };
+    this.pageHeaderActions.wishlist.update(items => [...items, item]);
+    this.pageHeaderActions.saveWishlist();
   }
 
-  removeFromCart(id: number) {
-    this.cartIds.update(ids =>
-      ids.filter(item => item !== id)
+  openBookDetails(book: Book): void {
+    this.selectedBook.set(book);
+    this.detailsOpen.set(true);
+  }
+
+  closeBookDetails(): void {
+    this.detailsOpen.set(false);
+  }
+
+  starsFor(rating: number): string {
+    const filledStars = Math.max(0, Math.min(5, Math.round(rating)));
+    return String.fromCharCode(9733).repeat(filledStars)
+      + String.fromCharCode(9734).repeat(5 - filledStars);
+  }
+
+  addToCart(book: Book): void {
+    let cart: Array<{
+      id: number;
+      title: string;
+      author: string;
+      price: number;
+      quantity: number;
+      selected: boolean;
+    }> = [];
+
+    try {
+      cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    } catch {
+      cart = [];
+    }
+
+    const existingItem = cart.find(item => item.id === book.id);
+    if (existingItem) {
+      existingItem.quantity += 1;
+    } else {
+      cart.push({
+        id: book.id,
+        title: book.title,
+        author: book.author,
+        price: book.price,
+        quantity: 1,
+        selected: true
+      });
+    }
+
+    localStorage.setItem('cart', JSON.stringify(cart));
+    this.pageHeaderActions.shopCartCount.set(
+      cart.reduce((count, item) => count + item.quantity, 0)
+    );
+    this.closeBookDetails();
+    this.appDialog.show(
+      'Added to Shopping Cart',
+      `"${book.title}" has been added to your shopping cart.`,
+      'success'
     );
   }
 
@@ -177,18 +205,35 @@ export class ReaderHomePage {
     if (book) {
       const requests = this.loadRequests();
       if (requests.some((request: any) => request.bookTitle === book.title && request.reader === this.username && request.status === 'Pending')) {
-        alert('You already have a pending request for this book.');
+        this.closeBookDetails();
+        this.appDialog.show(
+          'Request Already Pending',
+          'You already have a pending request for this book.',
+          'warning'
+        );
         return;
       }
       requests.unshift({
         id: Date.now(),
         bookTitle: book.title,
+        author: book.author,
+        genre: book.genre,
+        availableCopies: book.availableCopies,
+        price: book.price,
+        rating: book.rating,
+        reviews: book.reviews,
+        synopsis: book.description,
         reader: this.username,
         status: 'Pending',
         requestedAt: new Date().toLocaleString()
       });
       localStorage.setItem('borrowRequests', JSON.stringify(requests));
-      alert('Borrow request submitted for ' + book.title + '.');
+      this.closeBookDetails();
+      this.appDialog.show(
+        'Request Submitted',
+        'Your request to borrow “' + book.title + '” has been submitted.',
+        'success'
+      );
     }
   }
 
@@ -209,7 +254,11 @@ export class ReaderHomePage {
       this.requestedTitle.trim() === '' ||
       this.requestedAuthor.trim() === ''
     ) {
-      alert('Please enter the book title and author.');
+      this.appDialog.show(
+        'Book Details Needed',
+        'Please enter both the book title and author.',
+        'warning'
+      );
       return;
     }
 
@@ -223,7 +272,11 @@ export class ReaderHomePage {
       author: this.requestedAuthor.trim()
     });
     localStorage.setItem('borrowRequests', JSON.stringify(requests));
-    alert('Your book request has been submitted!');
+    this.appDialog.show(
+      'Request Submitted',
+      'Your book request has been submitted.',
+      'success'
+    );
 
     this.requestedTitle = '';
     this.requestedAuthor = '';

@@ -1,5 +1,6 @@
 
 import { Component, signal, computed, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import {
@@ -7,16 +8,21 @@ import {
   IonButton,
   IonIcon,
   IonCard,
-  IonCardContent,
   IonBadge,
   IonModal,
-  IonSearchbar
+  IonSearchbar,
+  IonInput,
+  IonTextarea
 } from '@ionic/angular';
 
 import { addIcons } from 'ionicons';
 
 import {
   person,
+  calendarOutline,
+  homeOutline,
+  mailOutline,
+  createOutline,
   cardOutline,
   cartOutline,
   receiptOutline,
@@ -34,6 +40,7 @@ import {
 
 import { AuthService } from '../services/auth_service';
 import { PageHeaderActions } from '../services/page-header-actions';
+import { AppDialogService } from '../services/app-dialog.service';
 
 // Owned Book Interface
 interface OwnedBook {
@@ -42,6 +49,46 @@ interface OwnedBook {
   author: string;
   status: string;
   dueDate: string;
+}
+
+interface BorrowRequest {
+  id: number;
+  bookTitle: string;
+  reader: string;
+  status: string;
+  requestedAt?: string;
+  returnedAt?: string;
+  author?: string;
+  genre?: string;
+  availableCopies?: number;
+  price?: number;
+  rating?: number;
+  reviews?: number;
+  synopsis?: string;
+  orderId?: string;
+}
+
+interface PurchasedBook {
+  id: number;
+  title: string;
+  author: string;
+  price: number;
+  quantity: number;
+  orderId: string;
+  purchasedAt: string;
+}
+
+interface PurchaseHistoryOrder {
+  orderId: string;
+  date: string;
+  purchasedBy?: string;
+  items: Array<{
+    id: number;
+    title: string;
+    author: string;
+    price: number;
+    quantity: number;
+  }>;
 }
 
 interface ArchivedBook {
@@ -97,18 +144,21 @@ interface CounterPaymentSlip {
   standalone: true,
 
   imports: [
+    FormsModule,
     IonContent,
     IonButton,
     IonIcon,
     IonCard,
-    IonCardContent,
     IonBadge,
     IonModal,
-    IonSearchbar
+    IonSearchbar,
+    IonInput,
+    IonTextarea
   ]
 })
 
 export class ProfilePage {
+  private appDialog = inject(AppDialogService);
 
   // Dependency Injection
   private router = inject(Router);
@@ -117,18 +167,44 @@ export class ProfilePage {
 
   // Get Saved User Information
   private savedUser = this.authService.getUserData();
+  private savedProfile = this.authService.getProfileInformation();
+  private readonly currentReader = this.savedUser?.user?.username ||
+    this.savedUser?.username || this.savedUser?.user?.full_name || this.savedUser?.full_name || '';
 
   // Component Properties
   userName = signal(
+    this.savedProfile.fullName ||
     this.savedUser?.user?.full_name ||
     this.savedUser?.full_name ||
-    'user'
+    this.savedUser?.username ||
+    'Reader'
   );
 
   userEmail = signal(
+    this.savedProfile.email ||
     this.savedUser?.user?.email ||
     this.savedUser?.email ||
-    'user@gmail.com'
+    'Email not provided'
+  );
+
+  profileDateOfBirth = signal(this.savedProfile.dateOfBirth);
+  profileAddress = signal(this.savedProfile.address);
+  profileEditorOpen = signal(false);
+  profileEditorError = signal('');
+  editFullName = '';
+  editDateOfBirth = '';
+  editAddress = '';
+  editEmail = '';
+
+  borrowRequests = signal<BorrowRequest[]>(this.loadBorrowRequests());
+  purchasedBooks = signal<PurchasedBook[]>(this.loadPurchasedBooks());
+  borrowedDetailsOpen = signal(false);
+  selectedBorrowRequest = signal<BorrowRequest | null>(null);
+  readerBorrowRequests = computed(() => this.borrowRequests()
+    .filter(request => request.reader === this.currentReader)
+    .sort((a, b) => b.id - a.id));
+  approvedBorrowCount = computed(() =>
+    this.readerBorrowRequests().filter(request => request.status === 'Approved').length
   );
 
   cardId = signal('LIB-2026-8812');
@@ -254,6 +330,10 @@ export class ProfilePage {
     // Register Ionic Icons
     addIcons({
       person,
+      calendarOutline,
+      homeOutline,
+      mailOutline,
+      createOutline,
       cardOutline,
       cartOutline,
       receiptOutline,
@@ -268,6 +348,222 @@ export class ProfilePage {
       checkmarkDoneOutline,
       refreshOutline
     });
+  }
+
+  openProfileEditor(): void {
+    this.editFullName = this.userName() === 'Reader' ? '' : this.userName();
+    this.editDateOfBirth = this.profileDateOfBirth();
+    this.editAddress = this.profileAddress();
+    this.editEmail = this.userEmail() === 'Email not provided' ? '' : this.userEmail();
+    this.profileEditorError.set('');
+    this.profileEditorOpen.set(true);
+  }
+
+  closeProfileEditor(): void {
+    this.profileEditorOpen.set(false);
+    this.profileEditorError.set('');
+  }
+
+  saveProfileInformation(): void {
+    const profile = {
+      fullName: this.editFullName.trim(),
+      dateOfBirth: this.editDateOfBirth,
+      address: this.editAddress.trim(),
+      email: this.editEmail.trim()
+    };
+    if (!profile.fullName || !profile.dateOfBirth || !profile.address || !profile.email) {
+      this.profileEditorError.set('Please complete all personal information fields.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profile.email)) {
+      this.profileEditorError.set('Please enter a valid email address.');
+      return;
+    }
+    const birthDate = new Date(`${profile.dateOfBirth}T00:00:00`);
+    if (Number.isNaN(birthDate.getTime()) || birthDate >= new Date()) {
+      this.profileEditorError.set('Please enter a valid date of birth.');
+      return;
+    }
+
+    this.authService.saveProfileInformation(profile);
+    this.userName.set(profile.fullName);
+    this.userEmail.set(profile.email);
+    this.profileDateOfBirth.set(profile.dateOfBirth);
+    this.profileAddress.set(profile.address);
+    this.closeProfileEditor();
+    this.appDialog.show('Information Updated', 'Your personal information has been updated.', 'success');
+  }
+
+  formatProfileDate(value: string): string {
+    if (!value) return 'Not provided';
+    const date = new Date(`${value}T00:00:00`);
+    return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('en-US', {
+      month: 'long', day: 'numeric', year: 'numeric'
+    });
+  }
+
+  private loadBorrowRequests(): BorrowRequest[] {
+    try {
+      const requests = JSON.parse(localStorage.getItem('borrowRequests') || '[]');
+      const savedRequests = Array.isArray(requests) ? requests as BorrowRequest[] : [];
+      const sampleId = 999_001;
+      if (this.currentReader && !savedRequests.some(request => request.id === sampleId)) {
+        savedRequests.unshift({
+          id: sampleId,
+          bookTitle: 'The Great Gatsby',
+          author: 'F. Scott Fitzgerald',
+          reader: this.currentReader,
+          status: 'Approved',
+          requestedAt: this.formatDate(new Date()),
+          genre: 'Romance',
+          availableCopies: 10,
+          price: 350,
+          rating: 4.8,
+          reviews: 120,
+          synopsis: 'A young dreamer enters the glittering world of the Jazz Age, where ambition, love, and the past collide.'
+        });
+        localStorage.setItem('borrowRequests', JSON.stringify(savedRequests));
+      }
+      return savedRequests;
+    } catch {
+      return [];
+    }
+  }
+
+  private loadPurchasedBooks(): PurchasedBook[] {
+    try {
+      const savedOrders = JSON.parse(localStorage.getItem('orderHistory') || '[]');
+      const orders = Array.isArray(savedOrders) ? savedOrders as PurchaseHistoryOrder[] : [];
+
+      const purchasedBooks = orders
+        .filter(order => !order.purchasedBy || order.purchasedBy === this.currentReader)
+        .flatMap(order => (order.items || []).map((item, index) => ({
+          id: item.id ?? index,
+          title: item.title,
+          author: item.author,
+          price: item.price,
+          quantity: item.quantity,
+          orderId: order.orderId,
+          purchasedAt: order.date
+        })))
+        .reverse();
+
+      const sampleBook: PurchasedBook = {
+        id: -2002,
+        title: 'How Great Books Go',
+        author: 'Gabriella Smith',
+        price: 360,
+        quantity: 1,
+        orderId: `DEMO-${this.currentReader || 'READER'}-002`,
+        purchasedAt: new Date().toLocaleString()
+      };
+
+      if (purchasedBooks.length > 0) {
+        return [...purchasedBooks, sampleBook];
+      }
+
+      return [
+        {
+          ...sampleBook,
+          id: -2001,
+          title: 'The Great Gatsby',
+          author: 'F. Scott Fitzgerald',
+          price: 350,
+          orderId: `DEMO-${this.currentReader || 'READER'}-001`
+        },
+        sampleBook
+      ];
+    } catch {
+      return [];
+    }
+  }
+
+  borrowStatusClass(status: string): string {
+    const normalizedStatus = status === 'Rejected' ? 'Declined' : status;
+    return `borrow-status-${normalizedStatus.toLowerCase()}`;
+  }
+
+  borrowStatusLabel(status: string): string {
+    return status === 'Rejected' ? 'Declined' : status;
+  }
+
+  openBorrowedBookDetails(request: BorrowRequest): void {
+    this.selectedBorrowRequest.set(request);
+    this.borrowedDetailsOpen.set(true);
+  }
+
+  openPurchasedBookDetails(book: PurchasedBook): void {
+    this.selectedBorrowRequest.set({
+      id: book.id,
+      bookTitle: book.title,
+      author: book.author,
+      reader: this.currentReader,
+      status: 'Purchased',
+      requestedAt: book.purchasedAt,
+      price: book.price,
+      orderId: book.orderId
+    });
+    this.borrowedDetailsOpen.set(true);
+  }
+
+  closeBorrowedBookDetails(): void {
+    this.borrowedDetailsOpen.set(false);
+    this.selectedBorrowRequest.set(null);
+  }
+
+  starsFor(rating: number): string {
+    const filledStars = Math.max(0, Math.min(5, Math.round(rating)));
+    return '★'.repeat(filledStars) + '☆'.repeat(5 - filledStars);
+  }
+
+  borrowedBookPrice(request: BorrowRequest): string {
+    return typeof request.price === 'number' ? `₱${request.price.toFixed(2)}` : 'Not listed';
+  }
+
+  returnBorrowRequest(requestId: number): void {
+    const request = this.borrowRequests().find(item => item.id === requestId);
+    if (!request || request.status !== 'Approved') return;
+
+    const updated = this.borrowRequests().map(item => item.id === requestId
+      ? { ...item, status: 'Returned', returnedAt: this.formatDate(new Date()) }
+      : item);
+    this.borrowRequests.set(updated);
+    localStorage.setItem('borrowRequests', JSON.stringify(updated));
+  }
+
+  borrowedAuthor(request: BorrowRequest): string {
+    if (request.author?.trim()) return request.author;
+
+    const title = request.bookTitle.trim().toLowerCase();
+    const readerBookAuthors: Record<string, string> = {
+      'his unwritten promise': 'Cy Caleb Reid',
+      'dear future ex': 'Sky Mel Kordy',
+      'how great books go': 'Gabriella Smith',
+      'the midnight library': 'Matt Haig',
+      'the house beyond the fog': 'Mara Ellery',
+      'the last olympian': 'R. J. Calloway'
+    };
+    const knownAuthor = readerBookAuthors[title];
+    if (knownAuthor) return knownAuthor;
+
+    try {
+      const adminBooks = JSON.parse(localStorage.getItem('adminBooks') || '[]') as Array<{
+        title?: string;
+        author?: string;
+      }>;
+      return adminBooks.find(book => book.title?.trim().toLowerCase() === title)?.author
+        || 'Author details unavailable';
+    } catch {
+      return 'Author details unavailable';
+    }
+  }
+
+  readBorrowRequest(request: BorrowRequest): void {
+    this.closeBorrowedBookDetails();
+    this.appDialog.show(
+      'Reading View Coming Soon',
+      `The reading view for “${request.bookTitle}” is not available yet.`
+    );
   }
 
   private loadCartItems(): ProfileCartItem[] {
@@ -386,11 +682,10 @@ export class ProfilePage {
 
   // Start Reading
   startReading(book: OwnedBook) {
-
-    alert('Opening ' + book.title + '...');
-
-    // Connect to Reader Page later
-
+    this.appDialog.show(
+      'Reading View Coming Soon',
+      'The reading view for “' + book.title + '” is not available yet.'
+    );
   }
 
 }

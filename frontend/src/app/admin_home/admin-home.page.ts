@@ -2,12 +2,13 @@
 import { Component, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AppDialogService } from '../services/app-dialog.service';
+import { BookCatalogService, CatalogBook } from '../services/book-catalog.service';
 
 import {
   IonContent,
   IonHeader,
   IonToolbar,
-  IonTitle,
   IonButtons,
   IonButton,
   IonIcon,
@@ -15,6 +16,7 @@ import {
   IonBadge,
   IonModal,
   IonInput,
+  IonTextarea,
   IonSelect,
   IonSelectOption
 } from '@ionic/angular';
@@ -30,22 +32,15 @@ import {
   bookOutline,
   createOutline,
   archiveOutline,
+  refreshOutline,
+  trashOutline,
   informationCircleOutline,
   closeOutline,
   bagOutline,
   chevronForwardOutline
 } from 'ionicons/icons';
 
-interface Book {
-  id: number;
-  title: string;
-  author: string;
-  copies: number;
-  status: string;
-  lastUpdated: string;
-  genre: string;
-  price: number;
-}
+type Book = CatalogBook;
 
 interface BorrowRequest {
   id: number;
@@ -79,7 +74,6 @@ interface PurchaseOrder {
     IonContent,
     IonHeader,
     IonToolbar,
-    IonTitle,
     IonButtons,
     IonButton,
     IonIcon,
@@ -87,6 +81,7 @@ interface PurchaseOrder {
     IonBadge,
     IonModal,
     IonInput,
+    IonTextarea,
     IonSelect,
     IonSelectOption
   ]
@@ -96,23 +91,19 @@ export class AdminHomePage {
 
   // Dependency Injection
   private router = inject(Router);
+  private appDialog = inject(AppDialogService);
+  private catalog = inject(BookCatalogService);
 
-  // Sample Book Data
-  books = signal<Book[]>(this.loadData<Book[]>('adminBooks', [
-    {
-      id: 1,
-      title: 'The Rain in España',
-      author: 'Gwy Saludes',
-      copies: 12,
-      status: 'Active',
-      lastUpdated: 'Oct 25, 2026',
-      genre: 'Romance',
-      price: 350
-    }
-  ]).map(book => ({ ...book, genre: book.genre || 'Romance', price: book.price ?? 350 })));
+  // Shared catalog used by reader and shop pages.
+  readonly books = this.catalog.books;
 
   // Sample Borrow Requests
-  requests = signal<BorrowRequest[]>(this.loadData<BorrowRequest[]>('borrowRequests', []));
+  requests = signal<BorrowRequest[]>(
+    this.loadData<BorrowRequest[]>('borrowRequests', []).map(request => ({
+      ...request,
+      status: request.status === 'Rejected' ? 'Declined' : request.status
+    }))
+  );
   purchasedOrders = signal<PurchaseOrder[]>(this.loadData<PurchaseOrder[]>('orderHistory', []));
   purchasedItems = computed(() => this.purchasedOrders().flatMap(order =>
     (order.items || []).map(item => ({ ...item, orderId: order.orderId, date: order.date }))
@@ -144,6 +135,9 @@ export class AdminHomePage {
   formCopies: number = 1;
   formGenre = 'Romance';
   formPrice = 350;
+  formRating = 0;
+  formReviews = 0;
+  formSynopsis = '';
 
   // Angular Signals
   isModalOpen = signal(false);
@@ -153,12 +147,7 @@ export class AdminHomePage {
   requestsOpen = signal(false);
   logsOpen = signal(false);
   purchasedBooksOpen = signal(false);
-  logoutConfirmOpen = signal(false);
-  dialogOpen = signal(false);
-  dialogTitle = signal('');
-  dialogMessage = signal('');
-  dialogMode = signal<'message' | 'confirm' | 'report'>('message');
-  pendingDeleteId = signal<number | null>(null);
+  activeAdminAction = signal<'add' | 'requests' | 'report' | 'logs' | 'archived' | 'purchased' | null>(null);
 
   filterStatus = signal('Active');
   filterGenre = signal('');
@@ -209,6 +198,8 @@ export class AdminHomePage {
       bookOutline,
       createOutline,
       archiveOutline,
+      refreshOutline,
+      trashOutline,
       informationCircleOutline,
       closeOutline,
       bagOutline,
@@ -220,6 +211,7 @@ export class AdminHomePage {
   // Open Add Book Modal
   openAddBook() {
 
+    this.activeAdminAction.set('add');
     this.clearForm();
 
     this.isEditing.set(false);
@@ -235,6 +227,9 @@ export class AdminHomePage {
     this.formCopies = book.copies;
     this.formGenre = book.genre || 'Romance';
     this.formPrice = book.price ?? 350;
+    this.formRating = book.rating ?? 0;
+    this.formReviews = book.reviews ?? 0;
+    this.formSynopsis = book.synopsis ?? '';
 
     this.editingId.set(book.id);
 
@@ -258,6 +253,8 @@ export class AdminHomePage {
 
     const copies = parseInt(String(this.formCopies), 10);
     const price = Number(this.formPrice);
+    const rating = parseFloat(String(this.formRating));
+    const reviews = parseInt(String(this.formReviews), 10);
 
     if (!Number.isFinite(copies) || copies < 1) {
 
@@ -270,6 +267,19 @@ export class AdminHomePage {
       this.showDialog('Invalid price', 'Enter a valid price of zero or more.');
       return;
     }
+
+    if (!Number.isFinite(rating) || rating < 0 || rating > 5) {
+      this.showDialog('Invalid rating', 'Enter a rating from 0 to 5.');
+      return;
+    }
+
+    if (!Number.isFinite(reviews) || reviews < 0) {
+      this.showDialog('Invalid review count', 'Enter zero or more reviews.');
+      return;
+    }
+
+    let successTitle: string;
+    let successMessage: string;
 
     if (this.isEditing()) {
 
@@ -286,6 +296,9 @@ export class AdminHomePage {
                 copies: copies,
                 genre: this.formGenre,
                 price,
+                rating,
+                reviews,
+                synopsis: this.formSynopsis.trim(),
                 lastUpdated: this.getCurrentDate()
               }
             : book
@@ -293,12 +306,12 @@ export class AdminHomePage {
         )
 
       );
-      this.persist('adminBooks', this.books());
+      this.catalog.save();
 
       this.addLog('Updated book: ' + this.formTitle);
 
-      this.dialogTitle.set('Book updated');
-      this.dialogMessage.set('The book information was updated successfully.');
+      successTitle = 'Book Updated';
+      successMessage = `“${this.formTitle.trim()}” has been updated in the catalog.`;
 
     } else {
 
@@ -312,7 +325,10 @@ export class AdminHomePage {
         genre: this.formGenre,
         price,
         status: 'Active',
-        lastUpdated: this.getCurrentDate()
+        lastUpdated: this.getCurrentDate(),
+        rating,
+        reviews,
+        synopsis: this.formSynopsis.trim()
 
       };
 
@@ -320,18 +336,17 @@ export class AdminHomePage {
         ...bookList,
         newBook
       ]);
-      this.persist('adminBooks', this.books());
+      this.catalog.save();
 
       this.addLog('Added book: ' + newBook.title);
 
-      this.dialogTitle.set('Book added');
-      this.dialogMessage.set('The book was added to the catalog successfully.');
+      successTitle = 'Book Added';
+      successMessage = `“${newBook.title}” has been added to the catalog.`;
 
     }
 
     this.closeModal();
-    this.dialogMode.set('message');
-    this.dialogOpen.set(true);
+    this.appDialog.show(successTitle, successMessage, 'success');
 
   }
 
@@ -344,11 +359,14 @@ export class AdminHomePage {
       return;
     }
 
-    this.pendingDeleteId.set(id);
-    this.dialogTitle.set('Delete book?');
-    this.dialogMessage.set('Are you sure you want to delete ' + book.title + '?');
-    this.dialogMode.set('confirm');
-    this.dialogOpen.set(true);
+    this.activeAdminAction.set(null);
+    this.appDialog.showConfirmation(
+      'Delete this book permanently?',
+      `Are you sure you want to permanently delete “${book.title}”? This action cannot be undone.`,
+      () => this.confirmPermanentDelete(id),
+      'Delete Permanently',
+      'danger'
+    );
 
   }
 
@@ -370,10 +388,20 @@ export class AdminHomePage {
       )
 
     );
-    this.persist('adminBooks', this.books());
+    this.catalog.save();
 
     this.addLog('Archived book ID: ' + id);
 
+  }
+
+  restoreBook(id: number): void {
+    this.books.update(bookList => bookList.map(book =>
+      book.id === id
+        ? { ...book, status: 'Active', lastUpdated: this.getCurrentDate() }
+        : book
+    ));
+    this.catalog.save();
+    this.addLog('Restored book ID: ' + id);
   }
 
   // View Book Details
@@ -388,6 +416,7 @@ export class AdminHomePage {
   closeModal() {
 
     this.isModalOpen.set(false);
+    if (this.activeAdminAction() === 'add') this.activeAdminAction.set(null);
     this.clearForm();
 
   }
@@ -400,6 +429,9 @@ export class AdminHomePage {
     this.formCopies = 1;
     this.formGenre = 'Romance';
     this.formPrice = 350;
+    this.formRating = 0;
+    this.formReviews = 0;
+    this.formSynopsis = '';
 
     this.editingId.set(null);
 
@@ -408,8 +440,14 @@ export class AdminHomePage {
   // Open Borrow Requests
   openRequests() {
 
+    this.activeAdminAction.set('requests');
     this.requestsOpen.set(true);
 
+  }
+
+  closeRequests(): void {
+    this.requestsOpen.set(false);
+    if (this.activeAdminAction() === 'requests') this.activeAdminAction.set(null);
   }
 
   // Approve or Reject Request
@@ -434,42 +472,66 @@ export class AdminHomePage {
 
   // Generate Report
   generateReport() {
+    this.activeAdminAction.set(null);
+    const availableBooks = this.books().filter(book =>
+      book.status === 'Active' && book.copies > 0
+    );
+    const rows = [
+      ['Book Title', 'Available Copies'],
+      ...availableBooks.map(book => [book.title, String(book.copies)])
+    ];
+    const csv = '\uFEFF' + rows.map(row => row.map(value => {
+      const safeValue = /^[=+\-@]/.test(value) ? `'${value}` : value;
+      return `"${safeValue.replace(/"/g, '""')}"`;
+    }).join(',')).join('\r\n');
+    const file = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const fileUrl = URL.createObjectURL(file);
+    const downloadLink = document.createElement('a');
+    const date = new Date().toISOString().slice(0, 10);
+    downloadLink.href = fileUrl;
+    downloadLink.download = `available-books-${date}.csv`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    downloadLink.remove();
+    window.setTimeout(() => URL.revokeObjectURL(fileUrl), 1000);
 
-    const total = this.books().length;
-    const copies = this.activeCopies();
-    const pending = this.pendingRequests();
-
-    const report =
-      'LIBRARY REPORT\n\n' +
-      'Total Book Titles: ' + total + '\n' +
-      'Active Copies: ' + copies + '\n' +
-      'Pending Requests: ' + pending;
-
-    this.dialogTitle.set('Library Report');
-    this.dialogMessage.set(report);
-    this.dialogMode.set('report');
-    this.dialogOpen.set(true);
-
-    this.addLog('Generated library report.');
-
+    this.addLog('Downloaded available books report.');
   }
 
   // Open User Logs
   openLogs() {
 
+    this.activeAdminAction.set('logs');
     this.logsOpen.set(true);
 
   }
 
+  closeLogs(): void {
+    this.logsOpen.set(false);
+    if (this.activeAdminAction() === 'logs') this.activeAdminAction.set(null);
+  }
+
   openPurchasedBooks(): void {
+    this.activeAdminAction.set('purchased');
     this.purchasedOrders.set(this.loadData<PurchaseOrder[]>('orderHistory', []));
     this.purchasedBooksOpen.set(true);
   }
 
+  closePurchasedBooks(): void {
+    this.purchasedBooksOpen.set(false);
+    if (this.activeAdminAction() === 'purchased') this.activeAdminAction.set(null);
+  }
+
   showArchivedBooks(): void {
+    this.activeAdminAction.set('archived');
     this.filterGenre.set('');
     this.filterStatus.set('Archived');
-    document.getElementById('book-management')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  showActiveBooks(): void {
+    this.activeAdminAction.set(null);
+    this.filterGenre.set('');
+    this.filterStatus.set('Active');
   }
 
   openGenreFilter(): void {
@@ -483,28 +545,16 @@ export class AdminHomePage {
   }
 
   private showDialog(title: string, message: string): void {
-    this.dialogTitle.set(title);
-    this.dialogMessage.set(message);
-    this.dialogMode.set('message');
-    this.dialogOpen.set(true);
+    this.appDialog.show(title, message, 'warning');
   }
 
-  closeDialog(): void {
-    this.dialogOpen.set(false);
-    this.pendingDeleteId.set(null);
-  }
+  private confirmPermanentDelete(id: number): void {
+    const book = this.books().find(item => item.id === id);
+    if (!book) return;
 
-  confirmDialogAction(): void {
-    if (this.dialogMode() === 'confirm') {
-      const id = this.pendingDeleteId();
-      const book = this.books().find(item => item.id === id);
-      if (id !== null && book) {
-        this.books.update(bookList => bookList.filter(item => item.id !== id));
-        this.persist('adminBooks', this.books());
-        this.addLog('Deleted book: ' + book.title);
-      }
-    }
-    this.closeDialog();
+    this.books.update(bookList => bookList.filter(item => item.id !== id));
+    this.catalog.save();
+    this.addLog('Deleted book: ' + book.title);
   }
 
   // Add User Log
@@ -530,15 +580,15 @@ export class AdminHomePage {
   }
 
   openLogoutConfirmation(): void {
-    this.logoutConfirmOpen.set(true);
-  }
-
-  closeLogoutConfirmation(): void {
-    this.logoutConfirmOpen.set(false);
+    this.appDialog.showConfirmation(
+      'Are you sure you want to log out?',
+      '',
+      () => this.confirmLogout(),
+      'Log Out'
+    );
   }
 
   confirmLogout(): void {
-    this.closeLogoutConfirmation();
     localStorage.removeItem('userData');
     this.router.navigateByUrl('/login');
   }

@@ -5,15 +5,12 @@ ion-content {
 
 .admin-page {
   min-height: 100%;
-  max-width: 1100px;
+  width: 100%;
+  max-width: 430px;
+  box-sizing: border-box;
   margin: auto;
-  padding: 10px 15px 35px;
+  padding: 12px 14px 35px;
   background: #f3e9d9;
-}
-
-.admin-page.logout-confirm-open > :not(ion-modal) {
-  filter: blur(6px);
-  transition: filter 140ms ease;
 }
 
 /* Admin Header */
@@ -126,6 +123,15 @@ ion-content {
   font-size: 30px;
   color: #21170f;
   margin: 0;
+  text-align: center;
+}
+
+.admin-control-title {
+  margin: 0 0 12px;
+  color: #9a896f;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
 }
 
 .welcome-card > p {
@@ -143,12 +149,15 @@ ion-content {
 /* Admin Actions */
 .admin-actions {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
 .admin-actions ion-button {
   --background: #f8f3ea;
+  --background-hover: #e4dbc9;
+  --background-activated: #9eae89;
+  --background-focused: #e4dbc9;
   --color: #201a14;
   --border-color: #ad9e8c;
   --border-style: solid;
@@ -161,8 +170,26 @@ ion-content {
   margin: 0;
 }
 
+.admin-actions ion-button::part(native) {
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.admin-actions ion-button.action-selected {
+  --background: #9eae89;
+  --background-hover: #91a17c;
+  --background-activated: #879775;
+  --background-focused: #91a17c;
+  --border-color: #879775;
+  --color: #26352c;
+}
+
+.admin-actions ion-button.action-selected::part(native) {
+  background: #9eae89;
+  border-color: #879775;
+}
+
 .admin-actions ion-icon {
-  margin-right: 5px;
+  margin-right: 8px;
 }
 
 /* Management Header */
@@ -201,6 +228,32 @@ ion-content {
   font-size: 19px;
 }
 
+.management-header h3 .manage-books-button {
+  height: 32px;
+  margin: 0;
+  --background: #ead8bd;
+  --background-hover: #d6c2a3;
+  --background-activated: #9eae89;
+  --background-focused: #d6c2a3;
+  --border-color: #c0ad8c;
+  --border-style: solid;
+  --border-width: 1px;
+  --border-radius: 20px;
+  --box-shadow: none;
+  --color: #392c20;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.management-header h3 .manage-books-button::part(native) {
+  border: 1px solid #c0ad8c;
+  border-radius: 20px;
+  transition: background-color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+}
+
 .selected-genre-label {
   color: #55724c;
   font-size: 11px;
@@ -212,68 +265,84 @@ ion-content {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding-bottom: 24px;
 }
 
 .management-card {
   margin: 0;
-  padding: 12px;
+  padding: 9px;
   border: 1px solid #b3a18a;
   border-radius: 19px;
   background: #e9d8c0;
   box-shadow: none;
 
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: 1fr;
   align-items: center;
-  gap: 15px;
+  gap: 0;
 }
 
 /* Book Information */
 .book-information {
   display: flex;
-  align-items: center;
-  gap: 13px;
+  align-items: flex-start;
+  gap: 10px;
   min-width: 0;
 }
 
 .admin-book-cover {
-  width: 95px;
-  height: 110px;
-  min-width: 95px;
+  position: relative;
+  width: 68px;
+  height: 84px;
+  min-width: 68px;
 
   border: 1px solid #c2b29d;
-  border-radius: 17px;
+  border-radius: 13px;
   background: #f9f3e8;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  color: #3975ad;
-  font-size: 43px;
+  color: #55724c;
+  font-size: 34px;
+}
+
+.book-status-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 1;
+  margin: 0;
+  padding: 3px 5px;
+  border-radius: 10px;
+  font-size: 8px;
+  font-weight: 600;
 }
 
 .book-details {
+  box-sizing: border-box;
   min-width: 0;
-}
-
-.book-details ion-badge {
-  font-size: 9px;
-  font-weight: normal;
+  flex: 1;
+  height: 84px;
+  display: flex;
+  flex-direction: column;
+  padding-top: 6px;
 }
 
 .book-details h2 {
   font-family: Georgia, serif;
-  font-size: 15px;
+  font-size: 13px;
   color: #24190f;
-  margin: 5px 0;
+  margin: 0 0 5px;
+  text-align: center;
   overflow-wrap: anywhere;
 }
 
 .book-details p {
-  font-size: 11px;
+  font-size: 10px;
   color: #66513d;
-  margin: 4px 0;
+  margin: 2px 0 4px;
 }
 
 .book-details strong {
@@ -297,51 +366,118 @@ ion-content {
 
 /* Quick Actions */
 .quick-actions {
-  background: #fffaf2;
-  border: 1px solid #c3b29e;
-  border-radius: 15px;
-  padding: 10px;
-}
-
-.quick-actions > p {
-  text-align: center;
-  color: #805d3e;
-  font-size: 10px;
-  margin: 0 0 8px;
+  width: 100%;
+  margin-top: auto;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
 }
 
 .action-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.action-grid.archived-actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.archived-actions ion-button {
+  height: 38px;
+  --padding-start: 2px;
+  --padding-end: 2px;
+  font-size: 7px !important;
+  line-height: 1.05;
+  text-align: center;
+}
+
+.archived-actions ion-button::part(native) {
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  padding: 2px;
+  white-space: normal;
+  line-height: 1.05;
+}
+
+.archived-actions ion-button span {
+  white-space: normal;
+}
+
+.archived-actions ion-icon {
+  margin: 0;
 }
 
 .action-grid ion-button {
-  height: 33px;
+  height: 29px;
   margin: 0;
 
-  --border-radius: 9px;
+  --border-radius: 20px;
+  --border-color: #b3a18a;
+  --border-style: solid;
+  --border-width: 1px;
   --color: #21170f;
 
-  font-size: 10px;
+  font-size: 9px;
   font-weight: bold;
+}
+
+.action-grid ion-button::part(native) {
+  border: 1px solid #b3a18a;
+  border-radius: 20px;
+  transition: background-color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+}
+
+.action-grid ion-icon {
+  font-size: 12px;
+  margin-right: 4px;
+  flex: 0 0 auto;
 }
 
 .edit-button {
   --background: #c7d2b2;
+  --background-hover: #b7c49f;
+  --background-activated: #9eae89;
+  --background-focused: #b7c49f;
 }
 
 .delete-button {
-  --background: #d99689;
+  --background: #d7c6a8;
 }
 
 .archive-button {
-  --background: #ebd28b;
+  --background: #e2d0b1;
+  --background-hover: #d6c2a3;
+  --background-activated: #b7a17c;
+  --background-focused: #d6c2a3;
+}
+
+.restore-button {
+  --background: #c7d2b2;
+  --background-hover: #b7c49f;
+  --background-activated: #9eae89;
+  --background-focused: #b7c49f;
+}
+
+.permanent-delete-button {
+  --background: #d7c6a8;
+  --background-hover: #c9b592;
+  --background-activated: #b7a17c;
+  --background-focused: #c9b592;
+  font-size: 8px !important;
 }
 
 .details-button {
   --background: #dcc9ae;
-  grid-column: span 2;
+  --background-hover: #d0bb9d;
+  --background-activated: #b7a17c;
+  --background-focused: #d0bb9d;
+}
+
+.archived-actions .details-button {
+  grid-column: auto;
 }
 
 /* Empty List */
@@ -611,17 +747,6 @@ ion-modal ion-input {
   overflow-wrap: anywhere;
 }
 
-.logout-panel-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 16px;
-}
-
-.logout-panel-content .dialog-message {
-  margin: 0;
-}
-
 .genre-option-list {
   min-height: 0;
   flex: 1 1 auto;
@@ -688,6 +813,32 @@ ion-modal ion-input {
   font-size: 10px;
 }
 
+.request-status-badge {
+  padding: 5px 9px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.request-status-badge.status-approved {
+  --background: #37c871;
+  --color: #173b24;
+}
+
+.request-status-badge.status-declined {
+  --background: #ec5757;
+  --color: #fffaf2;
+}
+
+.request-status-badge.status-returned {
+  --background: #6ba8d8;
+  --color: #173b57;
+}
+
+.request-status-badge.status-pending {
+  --background: #f0d367;
+  --color: #594719;
+}
+
 .request-buttons {
   justify-content: flex-end;
   margin-top: 12px;
@@ -707,8 +858,8 @@ ion-modal ion-input {
 }
 
 .reject-request-button {
-  --background: #d99689;
-  --color: #392c20;
+  --background: #ec5757;
+  --color: #fffaf2;
 }
 
 .log-list-item {
@@ -794,10 +945,6 @@ ion-modal ion-input {
     grid-template-columns: 1fr;
   }
 
-  .quick-actions {
-    width: 100%;
-  }
-
 }
 
 /* Small Mobile */
@@ -826,6 +973,10 @@ ion-modal ion-input {
   .admin-book-cover {
     width: 75px;
     min-width: 75px;
+    height: 95px;
+  }
+
+  .book-details {
     height: 95px;
   }
 

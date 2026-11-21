@@ -20,75 +20,61 @@
         <div>
           <h2>Available Books to Buy</h2>
         </div>
-        <span class="item-count">{{ filteredBooks().length }} items</span>
       </div>
 
       <!-- Book Grid -->
-      <ion-grid class="book-grid">
-        <ion-row>
-          @for (book of filteredBooks(); track book.id) {
-            <ion-col size="6">
-              <ion-card class="book-card">
+      <div class="book-results-grid">
+        <ion-grid class="book-grid" [style.min-height.px]="reservedGridHeight()">
+          <ion-row>
+            @for (book of filteredBooks(); track book.id) {
+              <ion-col size="6">
+              <ion-card
+                class="book-card"
+                tabindex="0"
+                [attr.aria-label]="'View details for ' + book.title"
+                (click)="openBookDetails(book)"
+                (keyup.enter)="openBookDetails(book)">
                 <div class="book-cover">
                   <ion-icon name="book-outline"></ion-icon>
-
-                  <ion-button
-                    class="favorite-button"
-                    fill="solid"
-                    [class.wishlisted]="isWishlisted(book.id)"
-                    [attr.aria-pressed]="isWishlisted(book.id)"
-                    [attr.aria-label]="isWishlisted(book.id) ? 'Remove ' + book.title + ' from wishlist' : 'Add ' + book.title + ' to wishlist'"
-                    (click)="toggleWishlist(book)">
-                    <ion-icon
-                      slot="icon-only"
-                      [name]="isWishlisted(book.id) ? 'heart' : 'heart-outline'">
-                    </ion-icon>
-                  </ion-button>
                 </div>
 
                 <ion-card-content>
-                  <h3>{{ book.title }}</h3>
+                  <h3 (click)="$event.stopPropagation(); openBookDetails(book)">{{ book.title }}</h3>
                   <p class="book-author">{{ book.author }}</p>
-
-                  <div class="book-rating">
-                    <ion-icon name="star"></ion-icon>
-                    <span>{{ book.rating }}</span>
-                    <span class="review-count">({{ book.reviews }} reviews)</span>
-                  </div>
 
                   <p class="book-price">₱{{ book.price.toFixed(2) }}</p>
 
                   <div class="book-actions">
                     <ion-button
                       expand="block"
-                      class="add-cart-button"
-                      (click)="addToCart(book)">
-                      <ion-icon name="cart-outline" slot="start"></ion-icon>
-                      Add to Cart
+                      class="buy-button"
+                      (click)="$event.stopPropagation(); buyNow(book)">
+                      Buy this Book
                     </ion-button>
 
                     <ion-button
-                      expand="block"
-                      fill="outline"
-                      class="buy-button"
-                      (click)="buyNow(book)">
-                      Buy Now
+                      class="cart-icon-button"
+                      fill="solid"
+                      [attr.aria-label]="'Add ' + book.title + ' to shopping cart'"
+                      (click)="$event.stopPropagation(); addToCartWithConfirmation(book)">
+                      <ion-icon name="cart-outline" slot="icon-only"></ion-icon>
                     </ion-button>
                   </div>
                 </ion-card-content>
               </ion-card>
-            </ion-col>
-          } @empty {
-            <ion-col size="12">
-              <div class="empty-state">
-                <ion-icon name="book-outline"></ion-icon>
-                <h3>No books found</h3>
-                <p>Try searching with another title or author.</p>
-              </div>
-            </ion-col>
-          }
-        </ion-row>
-      </ion-grid>
+              </ion-col>
+            } @empty {
+              <ion-col size="12">
+                <div class="empty-state">
+                  <ion-icon name="book-outline"></ion-icon>
+                  <h3>No books found</h3>
+                  <p>Try searching with another title or author.</p>
+                </div>
+              </ion-col>
+            }
+          </ion-row>
+        </ion-grid>
+      </div>
     </section>
 
     <!-- Cart Drawer -->
@@ -106,7 +92,7 @@
         <div class="drawer-header">
           <div class="drawer-title">
             <ion-icon name="cart-outline"></ion-icon>
-            <h2 id="cart-drawer-title">Selected Book Cart</h2>
+            <h2 id="cart-drawer-title">Shopping Cart</h2>
           </div>
           <ion-button fill="clear" class="close-button" aria-label="Close cart" (click)="closeDrawers()">
             <ion-icon name="close-outline"></ion-icon>
@@ -173,10 +159,6 @@
           </div>
 
           <div class="cart-summary">
-            <div class="summary-line">
-              <span>Book Price</span>
-              <strong>&#8369; {{ totalAmount().toFixed(2) }}</strong>
-            </div>
             <div class="summary-line total-line">
               <span>Total Amount</span>
               <strong>&#8369; {{ totalAmount().toFixed(2) }}</strong>
@@ -251,15 +233,7 @@
         </div>
       </div>
 
-      <div class="pickup-note">
-        Present your order ID at the counter within 48 hours to pay and claim your books.
-      </div>
-
       <div class="checkout-summary">
-        <div class="checkout-summary-line">
-          <span>Book Price</span>
-          <strong>&#8369; {{ checkoutTotal().toFixed(2) }}</strong>
-        </div>
         <div class="checkout-summary-line checkout-summary-total">
           <span>Total Amount</span>
           <strong>&#8369; {{ checkoutTotal().toFixed(2) }}</strong>
@@ -269,10 +243,58 @@
           class="confirm-button"
           [disabled]="checkoutCount() === 0"
           (click)="confirmOrder()">
-          Confirm &amp; Generate Order Receipt
+          Checkout
         </ion-button>
       </div>
     </div>
+  </ng-template>
+</ion-modal>
+
+<!-- Book Details Modal -->
+<ion-modal
+  [isOpen]="detailsOpen()"
+  (didDismiss)="closeBookDetails()"
+  [backdropDismiss]="true"
+  cssClass="shop-book-details-modal">
+  <ng-template>
+    <ion-content class="book-details-scroll">
+      @if (selectedBook(); as book) {
+        <section class="book-details-sheet" aria-labelledby="shop-book-details-title">
+          <header class="book-details-heading">
+            <div class="book-details-title-group">
+              <span class="book-details-icon"><ion-icon name="book-outline"></ion-icon></span>
+              <h2 id="shop-book-details-title">Book Details</h2>
+            </div>
+            <ion-button fill="solid" aria-label="Close book details" (click)="closeBookDetails()">
+              <span class="book-details-close-mark" aria-hidden="true">&times;</span>
+            </ion-button>
+          </header>
+          <hr>
+          <div class="book-details-facts">
+            <p><strong>Title:</strong><span>{{ book.title }}</span></p>
+            <p><strong>Author:</strong><span>{{ book.author }}</span></p>
+            <p><strong>Genre:</strong><span>{{ book.genre }}</span></p>
+            <p><strong>Available copies:</strong><span>{{ book.availableCopies }}</span></p>
+            <p><strong>Price:</strong><span>&#8369;{{ book.price.toFixed(2) }}</span></p>
+          </div>
+          <div class="book-details-reviews">
+            <strong>Reviews:</strong>
+            <span class="book-details-stars">{{ starsFor(book.rating) }}</span>
+            <span>({{ book.reviews }})</span>
+          </div>
+          <h3>Synopsis:</h3>
+          <p class="book-details-synopsis">{{ book.synopsis || 'A library title ready to be discovered.' }}</p>
+          <div class="book-details-actions">
+            <ion-button expand="block" class="borrow-book-button" (click)="borrowBook(book)">
+              Borrow this Book
+            </ion-button>
+            <ion-button expand="block" class="details-cart-button" (click)="addSelectedBookToCart(book)">
+              Add to Cart
+            </ion-button>
+          </div>
+        </section>
+      }
+    </ion-content>
   </ng-template>
 </ion-modal>
 
@@ -287,7 +309,7 @@
         <div class="receipt-success-icon">
           <ion-icon name="checkmark"></ion-icon>
         </div>
-        <h2>Order Reserved!</h2>
+        <h2>Invoice</h2>
         <p class="receipt-message">Show this receipt to the counter teller</p>
 
         <div class="pickup-order-id">

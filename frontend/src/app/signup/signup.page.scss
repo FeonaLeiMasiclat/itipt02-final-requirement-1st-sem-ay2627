@@ -89,6 +89,11 @@ ion-card-content {
   font-size: 15px;
 }
 
+.signup-password-field::part(native)::-ms-reveal,
+.signup-password-field::part(native)::-ms-clear {
+  display: none;
+}
+
 /* Password Button */
 .password-button {
   --color: #111111;
@@ -140,7 +145,7 @@ ion-card-content {
 /* Messages */
 .error-message {
   text-align: center;
-  color: #c62828;
+  color: #8c594f;
   font-size: 13px;
 }
 

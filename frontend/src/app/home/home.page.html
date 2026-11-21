@@ -1,11 +1,11 @@
-<div class="ion-page app-shell-main" [class.logout-confirm-open]="logoutConfirmOpen()">
+<div class="ion-page app-shell-main">
 <ion-header class="app-header">
   <ion-toolbar class="app-toolbar">
 
     <!-- Main Navigation -->
     <ion-buttons slot="start" class="shared-navigation">
 
-      @if (!isActive('/profile')) {
+      @if (isActive('/reader-home')) {
         <ion-button
           fill="clear"
           class="menu-toggle"
@@ -114,7 +114,9 @@
           <ion-item lines="none" class="wishlist-item">
             <ion-label>
               <h3>{{ item.title }}</h3>
-              <p>₱ {{ item.price.toFixed(2) }}</p>
+              @if (item.price > 0) {
+                <p>₱ {{ item.price.toFixed(2) }}</p>
+              }
             </ion-label>
             <ion-button slot="end" fill="clear" aria-label="Remove {{ item.title }} from wishlist" (click)="removeWishlist(item.id)">
               <ion-icon name="trash-outline"></ion-icon>
@@ -131,42 +133,6 @@
     }
   </aside>
 }
-
-<ion-modal
-  [isOpen]="logoutConfirmOpen()"
-  cssClass="logout-confirm-modal"
-  [backdropDismiss]="false"
-  (didDismiss)="closeLogoutConfirmation()">
-  <ng-template>
-    <section class="logout-confirm-card" aria-labelledby="logout-confirm-title">
-      <div class="logout-confirm-icon">
-        <ion-icon name="log-out-outline"></ion-icon>
-      </div>
-      <h2 id="logout-confirm-title">Are you sure you want to log out?</h2>
-      <p class="logout-confirm-message">
-         Your books will remain safely stored.
-      </p>
-
-      <div class="logout-account-card">
-        <div class="logout-account-avatar">
-          <ion-icon name="person-outline"></ion-icon>
-        </div>
-        <div class="logout-account-copy">
-          <strong>{{ logoutAccountName }}</strong>
-        </div>
-      </div>
-
-      <div class="logout-confirm-actions">
-        <ion-button fill="clear" class="logout-cancel-button" (click)="closeLogoutConfirmation()">
-          Cancel
-        </ion-button>
-        <ion-button class="logout-confirm-button" (click)="confirmLogout()">
-          Log Out
-        </ion-button>
-      </div>
-    </section>
-  </ng-template>
-</ion-modal>
 
 <!-- Hamburger Menu -->
 @if (menuOpen()) {
@@ -207,16 +173,6 @@
 
     </div>
 
-    <!-- Search Books -->
-    <ion-searchbar
-      class="menu-search"
-      placeholder="Search books..."
-      aria-label="Search books"
-      [value]="menuSearch()"
-      (ionInput)="updateMenuSearch($event)"
-      (keydown.enter)="searchFromMenu()">
-    </ion-searchbar>
-
     <!-- Book Genres -->
     <section class="menu-section">
 
@@ -246,8 +202,6 @@
 
     <!-- Support and Information -->
     <section class="menu-support">
-
-      <h2>SUPPORT &amp; INFO</h2>
 
       <ion-list lines="none" class="support-list">
 
@@ -282,7 +236,7 @@
 
       <ion-icon name="business-outline"></ion-icon>
       <strong>Library Management System</strong>
-      <span>Headquarters Library</span>
+      <span>In partial fulfillment of the final requirement for the course IT-IPT02</span>
 
     </footer>
 

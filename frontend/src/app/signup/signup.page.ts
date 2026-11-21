@@ -85,61 +85,55 @@ export class SignupPage {
 
   }
 
+  clearMessages(): void {
+    this.errorMessage.set('');
+    this.successMessage.set('');
+  }
+
   // Register Account
   register() {
 
     this.errorMessage.set('');
     this.successMessage.set('');
 
-    // Check Empty Inputs
-    if (
-      this.fullName.trim() === '' ||
-      this.dateOfBirth === '' ||
-      this.address.trim() === '' ||
-      this.email.trim() === '' ||
-      this.password.trim() === ''
-    ) {
+    const missingFields: string[] = [];
+    if (!this.fullName.trim()) missingFields.push('Full name');
+    if (!this.dateOfBirth.trim()) missingFields.push('Date of birth');
+    if (!this.address.trim()) missingFields.push('Address');
+    if (!this.email.trim()) missingFields.push('Email address');
+    if (!this.password.trim()) missingFields.push('Password');
 
-      this.errorMessage.set(
-        'Please complete all required fields.'
-      );
-
+    if (missingFields.length > 0) {
+      const missingList = missingFields.join(', ');
+      const dateHint = missingFields.includes('Date of birth')
+        ? ' Tap the calendar field and choose your birth date.'
+        : '';
+      this.errorMessage.set(`Missing information: ${missingList}.${dateHint}`);
       return;
     }
 
-    // Check Email Format
-    if (!this.email.includes('@') || !this.email.includes('.')) {
-
-      this.errorMessage.set(
-        'Please enter a valid email address.'
-      );
-
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(this.email.trim())) {
+      this.errorMessage.set('Email address looks incomplete. Enter a valid address, such as name@example.com.');
       return;
     }
 
     // Check Password Length
     if (this.password.length < 6) {
 
-      this.errorMessage.set(
-        'Password must contain at least 6 characters.'
-      );
-
+      this.errorMessage.set('Password is too short. Use at least 6 characters.');
       return;
     }
 
-    // Check Date of Birth
-    const birthDate = new Date(this.dateOfBirth);
+    const birthDate = new Date(`${this.dateOfBirth}T00:00:00`);
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     if (
-      isNaN(birthDate.getTime()) ||
+      Number.isNaN(birthDate.getTime()) ||
       birthDate >= today
     ) {
-
-      this.errorMessage.set(
-        'Please enter a valid date of birth.'
-      );
-
+      this.errorMessage.set('Date of birth must be a valid date in the past. Please check the selected date.');
       return;
     }
 
@@ -165,6 +159,13 @@ export class SignupPage {
           'Account created successfully!'
         );
 
+        this.authService.saveRegisteredProfile({
+          fullName: userData.fullName,
+          dateOfBirth: userData.dateOfBirth,
+          address: userData.address,
+          email: userData.email
+        });
+
         this.isLoading.set(false);
 
         // Clear Form
@@ -185,10 +186,7 @@ export class SignupPage {
 
         console.log('Registration failed:', error);
 
-        this.errorMessage.set(
-          error?.error?.message ||
-          'Registration failed. Please try again.'
-        );
+        this.errorMessage.set(this.registrationErrorMessage(error));
 
         this.isLoading.set(false);
 
@@ -196,6 +194,26 @@ export class SignupPage {
 
     });
 
+  }
+
+  private registrationErrorMessage(error: any): string {
+    const serverMessage = typeof error?.error?.message === 'string'
+      ? error.error.message
+      : typeof error?.error === 'string'
+        ? error.error
+        : '';
+    const details = `${serverMessage} ${error?.message || ''}`.toLowerCase();
+
+    if (
+      error?.status === 0 ||
+      details.includes('failed to fetch') ||
+      details.includes('network error') ||
+      details.includes('load failed')
+    ) {
+      return 'Cannot connect to the registration server at localhost:3000. Start the backend API, then try again. Your details are still in the form.';
+    }
+
+    return serverMessage || 'Registration did not go through. Please try again.';
   }
 
 }

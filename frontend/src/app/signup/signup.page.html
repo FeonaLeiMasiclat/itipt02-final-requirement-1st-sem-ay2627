@@ -8,7 +8,7 @@
 
       <div class="signup-heading">
         <h1>Sign Up</h1>
-        <p>Please provide your credentials</p>
+        <p>Provide your credentials.</p>
       </div>
 
       <ion-card-content>
@@ -24,6 +24,8 @@
               name="fullName"
               placeholder="Full Name"
               [(ngModel)]="fullName"
+              (ionInput)="clearMessages()"
+              aria-label="Full name, required"
               required
               autocomplete="name">
             </ion-input>
@@ -36,8 +38,10 @@
             <ion-input
               type="date"
               name="dateOfBirth"
+              aria-label="Date of birth, required"
               placeholder="Date of Birth"
               [(ngModel)]="dateOfBirth"
+              (ionInput)="clearMessages()"
               required>
             </ion-input>
           </div>
@@ -51,6 +55,8 @@
               name="address"
               placeholder="Address"
               [(ngModel)]="address"
+              (ionInput)="clearMessages()"
+              aria-label="Address, required"
               required
               autocomplete="street-address">
             </ion-input>
@@ -65,6 +71,8 @@
               name="email"
               placeholder="Email Address"
               [(ngModel)]="email"
+              (ionInput)="clearMessages()"
+              aria-label="Email address, required"
               required
               autocomplete="email">
             </ion-input>
@@ -75,13 +83,17 @@
             <ion-icon name="lock-closed" class="input-icon"></ion-icon>
 
             <ion-input
+              class="signup-password-field"
               [type]="showPassword() ? 'text' : 'password'"
-              name="password"
+              name="accountPassword"
               placeholder="Password"
               [(ngModel)]="password"
+              (ionInput)="clearMessages()"
+              aria-label="Password, required"
               required
               minlength="6"
-              autocomplete="new-password">
+              autocomplete="off"
+              spellcheck="false">
             </ion-input>
 
             <ion-button
@@ -99,7 +111,7 @@
 
           <!-- Error Message -->
           @if (errorMessage()) {
-            <p class="error-message">
+            <p class="error-message" role="alert" aria-live="assertive">
               {{ errorMessage() }}
             </p>
           }

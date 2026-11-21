@@ -14,12 +14,14 @@ ion-button::part(native) {
 
 .profile-page {
   width: 100%;
-  max-width: 720px;
+  max-width: 430px;
+  box-sizing: border-box;
   min-height: max-content;
   margin: auto;
-  padding: 8px 15px 35px;
+  padding: 8px 12px 30px;
   background: #f5ead6;
   transition: filter 160ms ease;
+  container: profile / inline-size;
 }
 
 .profile-page.fine-slip-background-blur {
@@ -35,6 +37,239 @@ ion-button::part(native) {
   border-radius: 28px;
   box-shadow: 0 4px 12px rgb(75 60 39 / 7%);
 }
+
+.personal-information {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.personal-information-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 0 14px;
+  border-bottom: 1px solid #e4d8c2;
+}
+
+.personal-information-eyebrow {
+  color: #8c806a;
+  font: 700 10px Arial, sans-serif;
+  letter-spacing: 1.2px;
+}
+
+.personal-information-heading h3 {
+  margin: 4px 0 0;
+  color: #304536;
+  font: 600 21px Georgia, serif;
+}
+
+.personal-information-icon,
+.profile-editor-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  color: #627956;
+  background: #e4eadb;
+}
+
+.personal-information-list {
+  display: grid;
+  gap: 0;
+  padding: 14px 0;
+}
+
+.personal-information-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px 4px;
+  border-bottom: 1px solid #e4d8c2;
+  background: transparent;
+}
+
+.personal-information-row:last-child {
+  border-bottom: 0;
+}
+
+.personal-information-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+}
+
+.personal-information-icon ion-icon { font-size: 19px; }
+.personal-information-row div { min-width: 0; }
+.personal-information-row small { display: block; margin-bottom: 3px; color: #887b66; font: 11px Arial, sans-serif; }
+.personal-information-row strong { display: block; overflow-wrap: anywhere; color: #3e382e; font: 600 14px Arial, sans-serif; }
+
+.update-information-button {
+  min-height: 44px;
+  margin: 0;
+  --background: #91a680;
+  --color: #fffdf7;
+  --border-radius: 22px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.borrowed-books-section { margin: 0 0 20px; }
+
+.borrowed-requests-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 4px 10px;
+}
+
+.borrowed-requests-heading h2 {
+  margin: 0;
+  color: #304536;
+  font: 700 15px Arial, sans-serif;
+}
+
+.borrowed-count-badge {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border-radius: 14px;
+  color: #4a6041;
+  background: #dce7d3;
+  font: 600 10px Arial, sans-serif;
+}
+
+.borrowed-books-row {
+  display: flex;
+  min-width: 0;
+  overflow-x: auto;
+  gap: 10px;
+  padding: 0 0 8px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: #b8a583 transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.borrowed-book-card {
+  position: relative;
+  display: flex;
+  flex: 0 0 190px;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px;
+  border-radius: 20px;
+  color: #322b22;
+  background: #ead9bd;
+  box-shadow: 0 5px 14px rgb(75 60 39 / 8%);
+  text-align: center;
+  scroll-snap-align: start;
+  cursor: pointer;
+}
+
+.borrowed-book-card:focus-visible {
+  outline: 3px solid #8fa57a;
+  outline-offset: 2px;
+}
+
+.borrowed-book-cover {
+  display: grid;
+  width: 100%;
+  height: 116px;
+  margin-bottom: 8px;
+  place-items: center;
+  border-radius: 16px;
+  color: #a77c47;
+  background: #f7e5c7;
+}
+
+.borrowed-book-cover ion-icon { font-size: 62px; }
+
+.borrowed-book-card h3 {
+  overflow: hidden;
+  display: -webkit-box;
+  min-height: 34px;
+  margin: 2px 2px 3px;
+  color: #30291f;
+  font: 700 13px/1.25 Georgia, serif;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.borrowed-book-status {
+  margin: 0 0 8px;
+  font: 600 10px Arial, sans-serif;
+}
+.borrow-status-approved { color: #3f6448; }
+.borrow-status-pending { color: #795e22; }
+.borrow-status-declined { color: #8a4942; }
+.borrow-status-returned { color: #536b5c; }
+.borrow-status-purchased { color: #536b5c; }
+.borrowed-book-actions {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: auto;
+}
+.borrowed-book-actions ion-button {
+  min-height: 34px;
+  margin: 0;
+  --background: #91a680;
+  --color: #fffdf7;
+  --border-radius: 18px;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: none;
+}
+.borrowed-book-actions .return-request-button { --background: #829874; }
+.borrowed-book-date { margin: 0 0 8px; color: #847762; font: 9px Arial, sans-serif; }
+.borrowed-request-empty {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 22px 10px 8px;
+  color: #776d5d;
+  text-align: center;
+}
+.borrowed-request-empty ion-icon { color: #8d9f7b; font-size: 26px; }
+.borrowed-request-empty p { margin: 0; font: 11px Arial, sans-serif; }
+
+.profile-editor-card {
+  padding: 22px;
+  border: 1px solid #d7c6a8;
+  border-radius: 24px;
+  background: #faf4e8;
+  box-shadow: 0 14px 36px rgb(45 39 29 / 20%);
+}
+
+.profile-editor-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.profile-editor-icon { width: 44px; height: 44px; border-radius: 14px; }
+.profile-editor-icon ion-icon { font-size: 22px; }
+.profile-editor-heading h2 { margin: 0; color: #304536; font: 600 21px Georgia, serif; }
+.profile-editor-heading p { margin: 4px 0 0; color: #776d5d; font: 12px Arial, sans-serif; }
+.profile-editor-close { margin-left: auto; --color: #776d5d; }
+.profile-editor-form { display: grid; gap: 12px; }
+.profile-editor-form ion-input,
+.profile-editor-form ion-textarea {
+  --background: #f1e8d9;
+  --border-color: #d8c9ae;
+  --border-radius: 14px;
+  --color: #3e382e;
+  --highlight-color-focused: #718764;
+  font-size: 14px;
+}
+.profile-editor-form ion-input::part(label),
+.profile-editor-form ion-textarea::part(label) { color: #6f6657; font-size: 12px; }
+.profile-editor-error { margin: 0; color: #8c594f; font: 12px Arial, sans-serif; }
+.profile-editor-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+.profile-editor-actions ion-button { min-height: 42px; margin: 0; border-radius: 22px; font-size: 12px; font-weight: 600; text-transform: none; }
+.profile-editor-cancel { --border-color: #b6a78c; --color: #625745; }
+.profile-editor-save { --background: #91a680; --color: #fffdf7; }
 
 /* User Information */
 .user-information {
@@ -78,6 +313,10 @@ ion-button::part(native) {
   font-size: 34px;
   color: #352e27;
   margin: 0 0 4px;
+}
+
+.user-details {
+  flex: 1;
 }
 
 .user-details p {
@@ -209,7 +448,7 @@ ion-button::part(native) {
   border-radius: 20px;
   padding: 5px 12px;
   color: #574a28;
-  background: #f7d56c;
+  background: #ead9a5;
 }
 
 /* Pending Orders */
@@ -712,8 +951,8 @@ ion-button::part(native) {
   align-items: center;
   padding: 5px 10px;
   border-radius: 16px;
-  color: #67501e;
-  background: #f1e2b4;
+  color: #594719;
+  background: #f0d367;
   font: 600 11px Arial, sans-serif;
 }
 
@@ -724,8 +963,28 @@ ion-button::part(native) {
 }
 
 .archived-book-status {
-  color: #3e6045;
-  background: #dce8da;
+  color: #173b57;
+  background: #6ba8d8;
+}
+
+.borrowed-book-status.borrow-status-approved {
+  color: #173b24;
+  background: #37c871;
+}
+
+.borrowed-book-status.borrow-status-declined {
+  color: #fffaf2;
+  background: #ec5757;
+}
+
+.borrowed-book-status.borrow-status-returned {
+  color: #173b57;
+  background: #6ba8d8;
+}
+
+.borrowed-book-status.borrow-status-pending {
+  color: #594719;
+  background: #f0d367;
 }
 
 .borrowed-book-details .borrowed-book-due,
@@ -933,7 +1192,15 @@ ion-button::part(native) {
 }
 
 /* Small Screens */
-@media (max-width: 500px) {
+@container profile (max-width: 500px) {
+  .personal-information { padding: 0; border-radius: 0; }
+  .borrowed-requests-heading h2 { font-size: 18px; }
+  .borrowed-book-cover { height: 100px; }
+  .borrowed-book-card { flex-basis: 180px; }
+  .personal-information-heading h3 { font-size: 18px; }
+  .personal-information-row { padding: 10px 2px; }
+  .personal-information-row strong { font-size: 12px; }
+  .profile-editor-card { padding: 17px; border-radius: 20px; }
   .profile-page {
     padding: 8px 12px 30px;
   }
@@ -1292,7 +1559,7 @@ ion-button::part(native) {
   }
 }
 
-@media (max-width: 360px) {
+@container profile (max-width: 360px) {
   .profile-card {
     padding: 10px;
   }

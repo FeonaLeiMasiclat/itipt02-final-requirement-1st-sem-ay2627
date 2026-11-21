@@ -13,9 +13,7 @@ import {
   IonButton,
   IonIcon,
   IonBadge,
-  IonModal,
   IonRouterOutlet,
-  IonSearchbar,
   IonList,
   IonItem,
   IonLabel,
@@ -46,6 +44,7 @@ import {
 } from 'ionicons/icons';
 
 import { PageHeaderActions } from '../services/page-header-actions';
+import { AppDialogService } from '../services/app-dialog.service';
 
 @Component({
   selector: 'app-home',
@@ -59,9 +58,7 @@ import { PageHeaderActions } from '../services/page-header-actions';
     IonButton,
     IonIcon,
     IonBadge,
-    IonModal,
     IonRouterOutlet,
-    IonSearchbar,
     IonList,
     IonItem,
     IonLabel
@@ -72,20 +69,11 @@ export class HomePage {
   private router = inject(Router);
   private authService = inject(AuthService);
   readonly pageHeaderActions = inject(PageHeaderActions);
-  readonly logoutUser = this.authService.getUserData();
-  readonly logoutAccountName = this.logoutUser?.user?.full_name
-    || this.logoutUser?.full_name
-    || this.logoutUser?.user?.username
-    || this.logoutUser?.username
-    || 'user';
+  private appDialog = inject(AppDialogService);
 
   // Hamburger Menu State
   menuOpen = signal(false);
   wishlistOpen = signal(false);
-  logoutConfirmOpen = signal(false);
-
-  // Search Input
-  menuSearch = signal('');
 
   // Book Genres
   readonly genres = [
@@ -160,36 +148,15 @@ export class HomePage {
     this.pageHeaderActions.shopCartRequested.next();
   }
 
-  // Update search input
-  updateMenuSearch(event: CustomEvent): void {
-    const value = (event.detail as { value?: string | null }).value;
-    this.menuSearch.set(value ?? '');
-  }
-
-  // Search books in Book Shop
-  searchFromMenu(): void {
-    const searchValue = this.menuSearch().trim();
-
-    this.router.navigate(['/book-shop'], {
-      queryParams: {
-        search: searchValue || null,
-        genre: null
-      }
-    });
-
-    this.closeMenu();
-  }
-
   // Select book genre
   selectGenre(genre: string): void {
-    this.router.navigate(['/book-shop'], {
+    this.router.navigate(['/reader-home'], {
       queryParams: {
         genre: genre || null,
         search: null
       }
     });
 
-    this.menuSearch.set('');
     this.closeMenu();
   }
 
@@ -200,15 +167,17 @@ export class HomePage {
 
   // About Us
   showAbout(): void {
-    alert(
-      'Library Management System — Read, borrow, and discover your next book at Headquarters Library.'
+    this.appDialog.show(
+      'About the Library',
+      'Read, borrow, and discover your next book at Headquarters Library.'
     );
   }
 
   // Need Help
   showHelp(): void {
-    alert(
-      'Need help? Visit the library desk at Headquarters Library for assistance with searching, borrowing, or purchases.'
+    this.appDialog.show(
+      'Need Help?',
+      'Visit the library desk at Headquarters Library for assistance with searching, borrowing, or purchases.'
     );
   }
 
@@ -219,15 +188,15 @@ export class HomePage {
 
   // Logout
   openLogoutConfirmation(): void {
-    this.logoutConfirmOpen.set(true);
-  }
-
-  closeLogoutConfirmation(): void {
-    this.logoutConfirmOpen.set(false);
+    this.appDialog.showConfirmation(
+      'Are you sure you want to log out?',
+      '',
+      () => this.confirmLogout(),
+      'Log Out'
+    );
   }
 
   confirmLogout(): void {
-    this.closeLogoutConfirmation();
     this.authService.logout();
     this.router.navigateByUrl('/login');
   }

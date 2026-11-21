@@ -1,3 +1,44 @@
 <ion-app>
   <ion-router-outlet></ion-router-outlet>
+
+  <ion-modal
+    [isOpen]="appDialog.current() !== null"
+    cssClass="app-message-modal"
+    [backdropDismiss]="true"
+    (didDismiss)="appDialog.close()">
+    <ng-template>
+      @if (appDialog.current(); as dialog) {
+        <section
+          class="app-message-card"
+          [class.logout-confirmation]="!!dialog.confirmAction"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="app-message-title">
+          <div
+            class="app-message-icon"
+            [class.success]="dialog.kind === 'success'"
+            [class.warning]="dialog.kind === 'warning'">
+            <ion-icon [name]="dialog.kind === 'success' ? 'checkmark-circle-outline' : dialog.kind === 'warning' ? 'alert-circle-outline' : 'information-circle-outline'"></ion-icon>
+          </div>
+          <h2 id="app-message-title">{{ dialog.title }}</h2>
+          @if (dialog.message) {
+            <p>{{ dialog.message }}</p>
+          }
+          @if (dialog.confirmAction) {
+            <div class="app-message-actions">
+              <ion-button fill="outline" class="app-message-cancel" (click)="appDialog.close()">Cancel</ion-button>
+              <ion-button
+                class="app-message-confirm"
+                [class.destructive]="dialog.confirmTone === 'danger'"
+                (click)="appDialog.confirm()">
+                {{ dialog.confirmLabel || 'Confirm' }}
+              </ion-button>
+            </div>
+          } @else {
+            <ion-button expand="block" (click)="appDialog.close()">Okay</ion-button>
+          }
+        </section>
+      }
+    </ng-template>
+  </ion-modal>
 </ion-app>
