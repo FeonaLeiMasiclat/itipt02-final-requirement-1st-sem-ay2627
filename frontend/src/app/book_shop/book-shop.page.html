@@ -34,9 +34,13 @@
 
                   <ion-button
                     class="favorite-button"
-                    fill="clear"
+                    fill="solid"
+                    [class.wishlisted]="isWishlisted(book.id)"
+                    [attr.aria-pressed]="isWishlisted(book.id)"
+                    [attr.aria-label]="isWishlisted(book.id) ? 'Remove ' + book.title + ' from wishlist' : 'Add ' + book.title + ' to wishlist'"
                     (click)="toggleWishlist(book)">
                     <ion-icon
+                      slot="icon-only"
                       [name]="isWishlisted(book.id) ? 'heart' : 'heart-outline'">
                     </ion-icon>
                   </ion-button>

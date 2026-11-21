@@ -252,6 +252,10 @@ export class BookShopPage {
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.openCart());
 
+    this.pageHeaderActions.shopCheckoutRequested
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.proceedToCheckout());
+
     this.route.queryParamMap.subscribe(params => {
       const search = params.get('search') ?? '';
       this.searchText = search;

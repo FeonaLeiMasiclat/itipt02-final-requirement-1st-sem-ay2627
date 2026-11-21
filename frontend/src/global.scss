@@ -83,6 +83,29 @@ ion-modal.receipt-modal::part(content) {
   box-shadow: none;
 }
 
+ion-modal.fine-payment-slip-modal {
+  --width: min(430px, calc(100% - 32px));
+  --height: auto;
+  --max-height: calc(100% - 32px);
+  --background: transparent;
+  --border-radius: 22px;
+  --box-shadow: none;
+  --backdrop-opacity: 0.3;
+  --backdrop-filter: blur(7px);
+}
+
+ion-modal.fine-payment-slip-modal::part(backdrop) {
+  background: rgb(53 48 39 / 30%);
+  -webkit-backdrop-filter: blur(7px);
+  backdrop-filter: blur(7px);
+}
+
+ion-modal.fine-payment-slip-modal::part(content) {
+  overflow: auto;
+  background: transparent;
+  box-shadow: none;
+}
+
 .app-shell-main:has(.shop-page.modal-open) > ion-header {
   filter: blur(6px);
   transition: filter 140ms ease;

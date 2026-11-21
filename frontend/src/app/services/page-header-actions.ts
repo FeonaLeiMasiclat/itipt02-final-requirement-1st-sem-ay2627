@@ -19,6 +19,7 @@ function loadWishlist(): WishlistItem[] {
 @Injectable({ providedIn: 'root' })
 export class PageHeaderActions {
   readonly shopCartRequested = new Subject<void>();
+  readonly shopCheckoutRequested = new Subject<void>();
   readonly wishlist = signal<WishlistItem[]>(loadWishlist());
   readonly shopWishlistCount = computed(() => this.wishlist().length);
   readonly shopCartCount = signal(0);

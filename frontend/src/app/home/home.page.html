@@ -5,7 +5,7 @@
     <!-- Main Navigation -->
     <ion-buttons slot="start" class="shared-navigation">
 
-      @if (!isActive('/book-shop') && !isActive('/profile')) {
+      @if (!isActive('/profile')) {
         <ion-button
           fill="clear"
           class="menu-toggle"
@@ -182,15 +182,13 @@
   </div>
 
   <!-- Side Menu -->
-  <aside class="library-menu">
+  <aside class="library-menu" role="dialog" aria-modal="true" aria-label="Library navigation">
 
     <!-- Menu Header -->
     <div class="menu-brand">
 
-      <div class="brand-mark">
-        <span></span>
-        <span></span>
-        <span></span>
+      <div class="brand-mark" aria-hidden="true">
+        <ion-icon name="library-outline"></ion-icon>
       </div>
 
       <div class="brand-copy">
@@ -231,11 +229,11 @@
             button
             detail="false"
             class="menu-link"
+            [class.selected]="isGenreSelected(genre.value)"
+            [attr.aria-current]="isGenreSelected(genre.value) ? 'page' : null"
             (click)="selectGenre(genre.value)">
 
-            <span class="genre-emoji" slot="start">
-              {{ genre.icon }}
-            </span>
+            <ion-icon [name]="genre.icon" slot="start"></ion-icon>
 
             <ion-label>{{ genre.label }}</ion-label>
 
@@ -282,7 +280,7 @@
     <!-- Menu Footer -->
     <footer class="menu-footer">
 
-      <ion-icon name="library-outline"></ion-icon>
+      <ion-icon name="business-outline"></ion-icon>
       <strong>Library Management System</strong>
       <span>Headquarters Library</span>
 

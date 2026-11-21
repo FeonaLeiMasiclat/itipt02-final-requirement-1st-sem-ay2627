@@ -186,17 +186,40 @@
 
 .favorite-button {
   position: absolute;
+  z-index: 2;
   top: 5px;
   right: 5px;
-  --color: #5546a8;
-  --background: #ffffff;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  margin: 0;
+  --color: #70634f;
+  --background: #f4eee3;
+  --background-hover: #e8ddcb;
+  --background-activated: #d9cdb8;
   --border-radius: 50%;
-  width: 35px;
-  height: 35px;
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+.favorite-button::part(native) {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border-radius: 50%;
 }
 
 .favorite-button ion-icon {
-  font-size: 19px;
+  width: 20px;
+  height: 20px;
+  color: inherit;
+  font-size: 20px;
+}
+
+.favorite-button.wishlisted {
+  --color: #a2474d;
+  --background: #f1ddda;
 }
 
 .book-card ion-card-content {
@@ -899,10 +922,16 @@ ion-button::part(native) {
 .favorite-button {
   top: 4px;
   right: 4px;
-  width: 27px;
-  height: 27px;
-  --color: #34503e;
-  --background: #d7dfce;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.favorite-button ion-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
 }
 
 .book-card ion-card-content {

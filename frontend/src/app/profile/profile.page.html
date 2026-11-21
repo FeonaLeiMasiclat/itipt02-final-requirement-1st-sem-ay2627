@@ -1,7 +1,7 @@
 
 <ion-content>
 
-  <div class="profile-page">
+  <div class="profile-page" [class.fine-slip-background-blur]="counterPaymentSlip() !== null">
 
     <!-- Profile Information -->
     <ion-card class="profile-card">
@@ -10,7 +10,7 @@
 
         <div class="avatar-container">
 
-          <ion-icon name="person-circle"></ion-icon>
+          <ion-icon name="person"></ion-icon>
 
           <span class="online-indicator"></span>
 
@@ -22,7 +22,10 @@
 
           <p>{{ userEmail() }}</p>
 
-          <small>CARD ID: {{ cardId() }}</small>
+          <small>
+            <ion-icon name="card-outline"></ion-icon>
+            CARD ID: {{ cardId() }}
+          </small>
 
         </div>
 
@@ -33,10 +36,15 @@
 
         <ion-card class="stat-card"
           button="true"
+          [class.selected]="selectedSection() === 'cart'"
+          [attr.aria-pressed]="selectedSection() === 'cart'"
           (click)="showSection('cart')">
 
           <ion-card-content>
-            <h2>{{ addToCartCount() }}</h2>
+            <div class="stat-value">
+              <ion-icon name="cart-outline"></ion-icon>
+              <h2>{{ addToCartCount() }}</h2>
+            </div>
             <p>Add to Cart</p>
           </ion-card-content>
 
@@ -44,21 +52,31 @@
 
         <ion-card class="stat-card"
           button="true"
+          [class.selected]="selectedSection() === 'counter'"
+          [attr.aria-pressed]="selectedSection() === 'counter'"
           (click)="showSection('counter')">
 
           <ion-card-content>
-            <h2>{{ counterOrderCount() }}</h2>
+            <div class="stat-value">
+              <ion-icon name="receipt-outline"></ion-icon>
+              <h2>{{ counterOrderCount() }}</h2>
+            </div>
             <p>Counter Order</p>
           </ion-card-content>
 
         </ion-card>
 
-        <ion-card class="stat-card darker"
+        <ion-card class="stat-card"
           button="true"
+          [class.selected]="selectedSection() === 'borrowed'"
+          [attr.aria-pressed]="selectedSection() === 'borrowed'"
           (click)="showSection('borrowed')">
 
           <ion-card-content>
-            <h2>{{ borrowedCount() }}</h2>
+            <div class="stat-value">
+              <ion-icon name="book-outline"></ion-icon>
+              <h2>{{ borrowedCount() }}</h2>
+            </div>
             <p>Borrowed Books</p>
           </ion-card-content>
 
@@ -66,10 +84,15 @@
 
         <ion-card class="stat-card"
           button="true"
+          [class.selected]="selectedSection() === 'fines'"
+          [attr.aria-pressed]="selectedSection() === 'fines'"
           (click)="showSection('fines')">
 
           <ion-card-content>
-            <h2>{{ finesDue() }}</h2>
+            <div class="stat-value">
+              <ion-icon name="alert-circle-outline"></ion-icon>
+              <h2>{{ finesDue() }}</h2>
+            </div>
             <p>Fines Due</p>
           </ion-card-content>
 
@@ -77,10 +100,15 @@
 
         <ion-card class="stat-card archive-card"
           button="true"
+          [class.selected]="selectedSection() === 'archive'"
+          [attr.aria-pressed]="selectedSection() === 'archive'"
           (click)="showSection('archive')">
 
           <ion-card-content>
-            <h2>{{ archiveCount() }}</h2>
+            <div class="stat-value">
+              <ion-icon name="archive-outline"></ion-icon>
+              <h2>{{ archiveCount() }}</h2>
+            </div>
             <p>Archive</p>
           </ion-card-content>
 
@@ -91,62 +119,288 @@
     </ion-card>
 
     <!-- Selected Statistics Section -->
-    @if (selectedSection()) {
-
-      <ion-card class="details-card">
-
-        <ion-card-header>
-
-          <ion-card-title>
-            {{ sectionTitle() }}
-          </ion-card-title>
-
+    @if (selectedSection() === 'cart') {
+      <ion-card class="profile-cart-panel" aria-labelledby="profile-cart-title">
+        <div class="profile-cart-header">
+          <div class="profile-cart-heading">
+            <span class="profile-cart-icon">
+              <ion-icon name="cart-outline"></ion-icon>
+            </span>
+            <div>
+              <h2 id="profile-cart-title">Your Book Cart</h2>
+              <p>
+                {{ addToCartCount() }}
+                {{ addToCartCount() === 1 ? 'item' : 'items' }} ready for checkout
+              </p>
+            </div>
+          </div>
           <ion-button
             fill="clear"
-            size="small"
-            (click)="selectedSection.set('')">
-
-            Close
-
+            class="profile-cart-close"
+            aria-label="Close cart"
+            (click)="closeSelectedSection()">
+            <ion-icon name="close-outline"></ion-icon>
           </ion-button>
+        </div>
 
-        </ion-card-header>
-
-        <ion-card-content>
-
-          @switch (selectedSection()) {
-
-            @case ('cart') {
-              <p>You have {{ addToCartCount() }} items in your cart.</p>
-              <ion-button expand="block" (click)="goShop()">
-                Visit Book Shop
-              </ion-button>
+        @if (cartItems().length > 0) {
+          <div class="profile-cart-items">
+            @for (item of cartItems(); track item.id) {
+              <div class="profile-cart-item">
+                <span class="profile-cart-book-icon">
+                  <ion-icon name="book-outline"></ion-icon>
+                </span>
+                <div class="profile-cart-item-details">
+                  <h3>{{ item.title }}</h3>
+                  <p>{{ item.author || 'Library book' }}</p>
+                  <span>
+                    Purchase
+                    @if (item.quantity > 1) {
+                      · Qty {{ item.quantity }}
+                    }
+                  </span>
+                </div>
+                <strong class="profile-cart-price">
+                  ₱{{ (item.price * item.quantity).toFixed(2) }}
+                </strong>
+                <ion-button
+                  fill="clear"
+                  class="profile-cart-remove"
+                  aria-label="Remove {{ item.title }} from cart"
+                  (click)="removeCartItem(item.id)">
+                  <ion-icon name="trash-outline"></ion-icon>
+                </ion-button>
+              </div>
             }
+          </div>
 
-            @case ('counter') {
-              <p>{{ counterOrderCount() }} counter orders recorded.</p>
-            }
+          <div class="profile-cart-total">
+            <span>Total Amount</span>
+            <strong>₱{{ cartTotal().toFixed(2) }}</strong>
+          </div>
+        } @else {
+          <div class="profile-cart-empty">
+            <ion-icon name="cart-outline"></ion-icon>
+            <p>Your cart is empty. Visit the Book Shop to add books.</p>
+          </div>
+        }
 
-            @case ('borrowed') {
-              @for (book of ownedBooks(); track book.id) {
-                <p>{{ book.title }} - {{ book.status }}</p>
-              }
-            }
+        <div class="profile-cart-actions">
+          <ion-button fill="outline" class="visit-shop-button" (click)="goShop()">
+            <ion-icon name="storefront-outline" slot="start"></ion-icon>
+            Visit Book Shop
+          </ion-button>
+          <ion-button
+            class="checkout-now-button"
+            [disabled]="cartItems().length === 0"
+            (click)="checkoutCart()">
+            <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+            Checkout Now
+          </ion-button>
+        </div>
+      </ion-card>
+    } @else if (selectedSection() === 'fines') {
+      <ion-card class="profile-cart-panel profile-fines-panel" aria-labelledby="profile-fines-title">
+        <div class="profile-cart-header">
+          <div class="profile-cart-heading">
+            <span class="profile-cart-icon">
+              <ion-icon name="alert-circle-outline"></ion-icon>
+            </span>
+            <div>
+              <h2 id="profile-fines-title">Fines Due</h2>
+              <p>{{ finesDue() }} overdue items requiring settlement</p>
+            </div>
+          </div>
+          <ion-button
+            fill="clear"
+            class="profile-cart-close"
+            aria-label="Close fines"
+            (click)="closeSelectedSection()">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+        </div>
 
-            @case ('fines') {
-              <p>Total fines due: ₱{{ finesDueAmount() }}</p>
-            }
-
-            @case ('archive') {
-              <p>You have {{ archiveCount() }} archived books.</p>
-            }
-
+        <div class="profile-fine-items">
+          @for (fine of fineItems(); track fine.id) {
+            <div class="profile-fine-item">
+              <div>
+                <h3>{{ fine.title }} ({{ fine.daysLate }} days late)</h3>
+                <p>Returned {{ fine.returnedDate }}</p>
+              </div>
+              <strong>₱{{ fine.amount.toFixed(2) }}</strong>
+            </div>
           }
+        </div>
 
-        </ion-card-content>
+        <div class="profile-fine-total">
+          <span>Total Fines Due</span>
+          <strong>₱{{ finesDueAmount().toFixed(2) }}</strong>
+        </div>
+
+        <ion-button
+          expand="block"
+          class="generate-fine-slip-button"
+          [disabled]="fineItems().length === 0"
+          (click)="generateCounterPaymentSlip()">
+          Generate Counter Payment Slip
+        </ion-button>
 
       </ion-card>
+    } @else if (selectedSection() === 'counter') {
+      <ion-card class="profile-cart-panel profile-counter-panel" aria-labelledby="counter-orders-title">
+        <div class="profile-cart-header">
+          <div class="profile-cart-heading">
+            <span class="profile-cart-icon">
+              <ion-icon name="receipt-outline"></ion-icon>
+            </span>
+            <div>
+              <h2 id="counter-orders-title">Counter Orders</h2>
+              <p>
+                {{ counterOrderCount() }}
+                {{ counterOrderCount() === 1 ? 'counter pickup order' : 'counter pickup orders' }}
+              </p>
+            </div>
+          </div>
+          <ion-button
+            fill="clear"
+            class="profile-cart-close"
+            aria-label="Close counter orders"
+            (click)="closeSelectedSection()">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+        </div>
 
+        <div class="profile-counter-orders">
+          @for (order of counterOrders(); track order.id) {
+            <div class="profile-counter-order">
+              <div class="profile-counter-order-copy">
+                <span class="profile-counter-order-id">ORDER #{{ order.id }}</span>
+                <h3>{{ order.bookTitle }}</h3>
+                <p>Counter Desk {{ order.counterDesk }} · ₱{{ order.price }}</p>
+              </div>
+              <ion-badge
+                class="profile-counter-status"
+                [class.verification]="order.status === 'For Verification'">
+                {{ order.status }}
+              </ion-badge>
+            </div>
+          }
+        </div>
+      </ion-card>
+    } @else if (selectedSection() === 'borrowed') {
+      <ion-card class="profile-cart-panel profile-borrowed-panel" aria-labelledby="borrowed-books-title">
+        <div class="profile-cart-header">
+          <div class="profile-cart-heading">
+            <span class="profile-cart-icon">
+              <ion-icon name="book-outline"></ion-icon>
+            </span>
+            <div>
+              <h2 id="borrowed-books-title">Borrowed Books</h2>
+              <p>{{ borrowedCount() }} currently borrowed</p>
+            </div>
+          </div>
+          <ion-button
+            fill="clear"
+            class="profile-cart-close"
+            aria-label="Close borrowed books"
+            (click)="closeSelectedSection()">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+        </div>
+
+        @if (ownedBooks().length > 0) {
+          <div class="profile-borrowed-books">
+            @for (book of ownedBooks(); track book.id) {
+              <div class="profile-borrowed-book">
+                <span class="borrowed-book-icon">
+                  <ion-icon name="book-outline"></ion-icon>
+                </span>
+                <div class="borrowed-book-details">
+                  <h3>{{ book.title }}</h3>
+                  <p>{{ book.author }}</p>
+                  <ion-badge class="borrowed-book-status">
+                    <ion-icon name="time-outline"></ion-icon>
+                    Borrowed
+                  </ion-badge>
+                  <p class="borrowed-book-due">Due: {{ book.dueDate }}</p>
+                </div>
+                <ion-button
+                  fill="outline"
+                  class="return-book-button"
+                  aria-label="Return {{ book.title }}"
+                  (click)="returnBorrowedBook(book.id)">
+                  Return
+                </ion-button>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="profile-books-empty">No books are currently borrowed.</p>
+        }
+      </ion-card>
+    } @else if (selectedSection() === 'archive') {
+      <ion-card class="profile-cart-panel profile-archive-panel" aria-labelledby="archived-books-title">
+        <div class="profile-cart-header">
+          <div class="profile-cart-heading">
+            <span class="profile-cart-icon">
+              <ion-icon name="archive-outline"></ion-icon>
+            </span>
+            <div>
+              <h2 id="archived-books-title">Archived Books</h2>
+              <p>
+                {{ archiveCount() }} returned &amp; completed
+                {{ archiveCount() === 1 ? 'book' : 'books' }}
+              </p>
+            </div>
+          </div>
+          <ion-button
+            fill="clear"
+            class="profile-cart-close"
+            aria-label="Close archived books"
+            (click)="closeSelectedSection()">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+        </div>
+
+        <ion-searchbar
+          class="archive-searchbar"
+          placeholder="Search returned books..."
+          aria-label="Search returned books"
+          [value]="archiveSearch()"
+          (ionInput)="updateArchiveSearch($event)">
+        </ion-searchbar>
+
+        @if (filteredArchiveBooks().length > 0) {
+          <div class="profile-archive-books">
+            @for (book of filteredArchiveBooks(); track book.id) {
+              <div class="profile-archived-book">
+                <span class="archived-book-icon">
+                  <ion-icon name="checkmark-done-outline"></ion-icon>
+                </span>
+                <div class="archived-book-details">
+                  <h3>{{ book.title }}</h3>
+                  <p>{{ book.author }}</p>
+                  <ion-badge class="archived-book-status">
+                    <ion-icon name="checkmark-circle"></ion-icon>
+                    Returned
+                  </ion-badge>
+                  <p class="archived-book-return-date">Returned: {{ book.returnedDate }}</p>
+                </div>
+                <ion-button
+                  fill="clear"
+                  class="reborrow-book-button"
+                  aria-label="Re-borrow {{ book.title }}"
+                  (click)="reborrowBook(book.id)">
+                  <ion-icon name="refresh-outline" slot="start"></ion-icon>
+                  Re-borrow
+                </ion-button>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="profile-books-empty">No returned books match your search.</p>
+        }
+      </ion-card>
     }
 
     <!-- Pending Counter Payment -->
@@ -254,3 +508,46 @@
   </div>
 
 </ion-content>
+
+<ion-modal
+  [isOpen]="counterPaymentSlip() !== null"
+  cssClass="fine-payment-slip-modal"
+  [backdropDismiss]="true"
+  (didDismiss)="closeFinePaymentSlip()">
+  <ng-template>
+    @if (counterPaymentSlip(); as slip) {
+      <section class="fine-payment-slip-card" aria-labelledby="fine-slip-title">
+        <div class="fine-slip-heading">
+          <ion-icon name="receipt-outline"></ion-icon>
+          <div>
+            <h2 id="fine-slip-title">Counter Payment Slip Ready</h2>
+            <p>Present this slip at the library counter.</p>
+          </div>
+          <ion-button
+            fill="clear"
+            class="fine-slip-close"
+            aria-label="Close payment slip"
+            (click)="closeFinePaymentSlip()">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+        </div>
+        <div class="fine-slip-row">
+          <span>Reference</span>
+          <strong>{{ slip.reference }}</strong>
+        </div>
+        <div class="fine-slip-row">
+          <span>Generated</span>
+          <strong>{{ slip.generatedAt }}</strong>
+        </div>
+        <div class="fine-slip-row">
+          <span>Overdue items</span>
+          <strong>{{ slip.itemCount }}</strong>
+        </div>
+        <div class="fine-slip-row fine-slip-total">
+          <span>Amount due</span>
+          <strong>₱{{ slip.total.toFixed(2) }}</strong>
+        </div>
+      </section>
+    }
+  </ng-template>
+</ion-modal>
