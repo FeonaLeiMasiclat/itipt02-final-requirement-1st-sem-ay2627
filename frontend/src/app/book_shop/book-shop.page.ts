@@ -34,7 +34,9 @@ import {
   star,
   cashOutline,
   checkmarkCircle,
-  checkmark
+  checkmark,
+  addOutline,
+  removeOutline
 } from 'ionicons/icons';
 
 interface Book {
@@ -280,7 +282,9 @@ export class BookShopPage {
       star,
       cashOutline,
       checkmarkCircle,
-      checkmark
+      checkmark,
+      addOutline,
+      removeOutline
     });
   }
 

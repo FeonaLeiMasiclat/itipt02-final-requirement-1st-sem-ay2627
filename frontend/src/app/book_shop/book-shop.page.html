@@ -93,15 +93,22 @@
 
     <!-- Cart Drawer -->
     @if (showCart()) {
-      <div class="drawer-backdrop" (click)="closeDrawers()"></div>
+      <div
+        class="drawer-backdrop"
+        role="button"
+        tabindex="0"
+        aria-label="Close cart"
+        (click)="closeDrawers()"
+        (keydown.enter)="closeDrawers()">
+      </div>
 
-      <div class="side-drawer">
+      <div class="side-drawer" role="dialog" aria-modal="true" aria-labelledby="cart-drawer-title">
         <div class="drawer-header">
           <div class="drawer-title">
             <ion-icon name="cart-outline"></ion-icon>
-            <h2>Selected Book Cart</h2>
+            <h2 id="cart-drawer-title">Selected Book Cart</h2>
           </div>
-          <ion-button fill="clear" class="close-button" (click)="closeDrawers()">
+          <ion-button fill="clear" class="close-button" aria-label="Close cart" (click)="closeDrawers()">
             <ion-icon name="close-outline"></ion-icon>
           </ion-button>
         </div>
@@ -110,28 +117,57 @@
           <div class="cart-items">
             @for (item of cart(); track item.id) {
               <div class="drawer-item cart-item">
-              <ion-checkbox
-                [checked]="item.selected"
-                (ionChange)="toggleCartSelection(item.id, $event.detail.checked)">
-              </ion-checkbox>
+                <div class="cart-item-top">
+                  <ion-checkbox
+                    [attr.aria-label]="'Select ' + item.title + ' for checkout'"
+                    [checked]="item.selected"
+                    (ionChange)="toggleCartSelection(item.id, $event.detail.checked)">
+                  </ion-checkbox>
 
-              <div class="drawer-book-icon">
-                <ion-icon name="book-outline"></ion-icon>
-              </div>
+                  <div class="drawer-book-icon">
+                    <ion-icon name="book-outline"></ion-icon>
+                  </div>
 
-              <div class="drawer-item-details">
-                <h3>{{ item.title }}</h3>
-                <small>{{ item.author || 'Library book' }}</small>
-                <p>&#8369; {{ item.price.toFixed(2) }} | Qty {{ item.quantity }}</p>
-              </div>
+                  <div class="drawer-item-details">
+                    <h3>{{ item.title }}</h3>
+                    <small>{{ item.author || 'Library book' }}</small>
+                    <p>&#8369; {{ item.price.toFixed(2) }} each</p>
+                  </div>
+                </div>
 
-              <ion-button
-                fill="clear"
-                class="remove-cart-button"
-                aria-label="Remove {{ item.title }} from cart"
-                (click)="removeCart(item.id)">
-                <ion-icon name="trash-outline"></ion-icon>
-              </ion-button>
+                <div class="cart-item-footer">
+                  <div class="cart-item-subtotal">
+                    <span>SUBTOTAL</span>
+                    <strong>&#8369; {{ (item.price * item.quantity).toFixed(2) }}</strong>
+                  </div>
+
+                  <div class="cart-item-actions">
+                    <div class="quantity-control" role="group" aria-label="Book quantity">
+                      <ion-button
+                        fill="clear"
+                        aria-label="Decrease quantity of {{ item.title }}"
+                        [disabled]="item.quantity <= 1"
+                        (click)="decreaseQuantity(item.id)">
+                        <ion-icon name="remove-outline"></ion-icon>
+                      </ion-button>
+                      <span>{{ item.quantity }}</span>
+                      <ion-button
+                        fill="solid"
+                        aria-label="Increase quantity of {{ item.title }}"
+                        (click)="increaseQuantity(item.id)">
+                        <ion-icon name="add-outline"></ion-icon>
+                      </ion-button>
+                    </div>
+
+                    <ion-button
+                      fill="solid"
+                      class="remove-cart-button"
+                      aria-label="Remove {{ item.title }} from cart"
+                      (click)="removeCart(item.id)">
+                      <ion-icon name="trash-outline"></ion-icon>
+                    </ion-button>
+                  </div>
+                </div>
               </div>
             }
           </div>
