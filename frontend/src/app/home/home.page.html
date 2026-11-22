@@ -108,7 +108,12 @@
       </ion-button>
     </div>
 
-    @if (pageHeaderActions.wishlist().length > 0) {
+    @if (shop.error()) {
+      <div class="wishlist-empty">
+        <p role="alert">{{ shop.error() }}</p>
+        <ion-button fill="clear" (click)="shop.refresh()">Retry</ion-button>
+      </div>
+    } @else if (pageHeaderActions.wishlist().length > 0) {
       <ion-list lines="none" class="wishlist-list">
         @for (item of pageHeaderActions.wishlist(); track item.id) {
           <ion-item lines="none" class="wishlist-item">
@@ -127,8 +132,12 @@
     } @else {
       <div class="wishlist-empty">
         <ion-icon name="heart-outline"></ion-icon>
-        <h3>Your wishlist is empty</h3>
-        <p>Save books with the heart button to find them here.</p>
+        @if (shop.loading()) {
+          <p role="status">Loading wishlist…</p>
+        } @else {
+          <h3>Your wishlist is empty</h3>
+          <p>Save books with the heart button to find them here.</p>
+        }
       </div>
     }
   </aside>

@@ -1,7 +1,7 @@
 <ion-content>
   <div class="reader-page">
     <section class="reader-welcome" aria-label="Welcome">
-      <h1>Welcome, {{ username }}!</h1>
+      <h1>Welcome, {{ readerName() }}!</h1>
       <p>Read and discover books that you love.</p>
     </section>
 
@@ -39,13 +39,14 @@
             </ion-card-header>
             <ion-card-content>
               <div class="card-buttons">
-                <ion-button size="small" (click)="$event.stopPropagation(); borrowBook(book.id)">
+                <ion-button size="small" [disabled]="sendingRequest()" (click)="$event.stopPropagation(); borrowBook(book.id)">
                   Start Reading
                 </ion-button>
                 <ion-button
                   size="small"
                   fill="clear"
                   class="wishlist-button"
+                  [disabled]="wishlistBusy()"
                   [class.wishlisted]="isWishlisted(book.id)"
                   [attr.aria-label]="isWishlisted(book.id) ? 'Remove ' + book.title + ' from wishlist' : 'Add ' + book.title + ' to wishlist'"
                   (click)="$event.stopPropagation(); toggleWishlist(book)">
@@ -58,10 +59,18 @@
       </div>
     </section>
 
-    @if (filteredBooks().length === 0) {
+    @if (catalog.error()) {
+      <div class="empty-message">
+        <p role="alert">{{ catalog.error() }}</p>
+        <ion-button (click)="catalog.refresh()">Retry</ion-button>
+      </div>
+    } @else if (filteredBooks().length === 0 && catalog.loading()) {
+      <div class="empty-message" role="status"><p>Loading books...</p></div>
+    } @else if (filteredBooks().length === 0) {
       <div class="empty-message">
         <ion-icon name="book-outline"></ion-icon>
         <p>No books found.</p>
+        <ion-button fill="outline" (click)="requestBook()">Request a Book</ion-button>
       </div>
     }
 
@@ -99,10 +108,10 @@
               <h3>Synopsis:</h3>
               <p class="book-details-synopsis">{{ book.description || 'A library title ready to be discovered.' }}</p>
               <div class="book-details-actions">
-                <ion-button expand="block" class="borrow-book-button" (click)="borrowBook(book.id)">
+                <ion-button expand="block" class="borrow-book-button" [disabled]="sendingRequest()" (click)="borrowBook(book.id)">
                   Borrow this Book
                 </ion-button>
-                <ion-button expand="block" class="details-cart-button" (click)="addToCart(book)">
+                <ion-button expand="block" class="details-cart-button" [disabled]="cartBusy() || book.availableCopies === 0" (click)="addToCart(book)">
                   Add to Cart
                 </ion-button>
               </div>
@@ -125,7 +134,7 @@
         <ion-content class="ion-padding">
           <ion-input label="Book Title" labelPlacement="floating" [(ngModel)]="requestedTitle"></ion-input>
           <ion-input label="Author" labelPlacement="floating" [(ngModel)]="requestedAuthor"></ion-input>
-          <ion-button expand="block" (click)="submitRequest()">Submit Request</ion-button>
+          <ion-button expand="block" [disabled]="sendingRequest()" (click)="submitRequest()">Submit Request</ion-button>
         </ion-content>
       </ng-template>
     </ion-modal>

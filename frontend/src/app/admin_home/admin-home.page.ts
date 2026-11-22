@@ -1,9 +1,14 @@
 
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, HostListener, signal, computed, inject } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AppDialogService } from '../services/app-dialog.service';
-import { BookCatalogService, CatalogBook } from '../services/book-catalog.service';
+import { AuthService, authErrorMessage } from '../services/auth_service';
+import { BookCatalogService, BookDetails, BookStatus, CatalogBook } from '../services/book-catalog.service';
+import { BorrowDecision, BorrowRequest, BorrowingService } from '../services/borrowing.service';
+import { OrderCustomer, ShopOrder, ShopService } from '../services/shop.service';
+import { finalize, Observable, Subscription, tap } from 'rxjs';
 
 import {
   IonContent,
@@ -14,10 +19,7 @@ import {
   IonIcon,
   IonCard,
   IonBadge,
-  IonLabel,
   IonModal,
-  IonSegment,
-  IonSegmentButton,
   IonSearchbar,
   IonInput,
   IonTextarea,
@@ -51,6 +53,7 @@ import {
   bagOutline,
   bagCheckOutline,
   chevronForwardOutline,
+  chevronBackOutline,
   chevronDownOutline,
   layersOutline,
   sparklesOutline,
@@ -64,16 +67,8 @@ import {
 
 type Book = CatalogBook;
 
-interface BorrowRequest {
-  id: number;
-  bookTitle: string;
-  reader: string;
-  status: string;
-  requestedAt?: string;
-  author?: string;
-}
-
-type RequestStatusFilter = 'All' | 'Approved' | 'Returned';
+const requestFilters = ['All', 'Pending', 'Approved', 'Return Pending', 'Returned', 'Declined'] as const;
+type RequestStatusFilter = typeof requestFilters[number];
 type AdminLogCategory = 'Books' | 'Requests' | 'Reports';
 type AdminLogFilter = 'All' | AdminLogCategory;
 
@@ -94,25 +89,13 @@ interface AdminLogGroup {
   entries: AdminLogEntry[];
 }
 
-interface PurchaseItem {
-  title: string;
-  author: string;
-  price: number;
-  quantity: number;
-}
-
-interface PurchaseOrder {
-  orderId: string;
-  date: string;
-  items: PurchaseItem[];
-}
-
 @Component({
   selector: 'app-admin-home',
   templateUrl: './admin-home.page.html',
   styleUrls: ['./admin-home.page.scss'],
   standalone: true,
   imports: [
+    DatePipe,
     FormsModule,
     IonContent,
     IonHeader,
@@ -122,10 +105,7 @@ interface PurchaseOrder {
     IonIcon,
     IonCard,
     IonBadge,
-    IonLabel,
     IonModal,
-    IonSegment,
-    IonSegmentButton,
     IonSearchbar,
     IonInput,
     IonTextarea,
@@ -138,36 +118,40 @@ export class AdminHomePage {
 
   // Dependency Injection
   private router = inject(Router);
+  private authService = inject(AuthService);
   private appDialog = inject(AppDialogService);
-  private catalog = inject(BookCatalogService);
+  readonly catalog = inject(BookCatalogService);
+  readonly borrowing = inject(BorrowingService);
+  private readonly shop = inject(ShopService);
 
   // Shared catalog used by reader and shop pages.
   readonly books = this.catalog.books;
 
-  // Sample Borrow Requests
-  requests = signal<BorrowRequest[]>(
-    this.loadData<BorrowRequest[]>('borrowRequests', []).map(request => ({
-      ...request,
-      status: request.status === 'Rejected' ? 'Declined' : request.status
-    }))
-  );
+  readonly requests = this.borrowing.requests;
+  readonly decidingRequest = signal(false);
+  readonly requestActionError = signal('');
+  readonly requestFilters = requestFilters;
   requestStatusFilter = signal<RequestStatusFilter>('All');
   requestCounts = computed(() => {
-    const requests = this.requests();
-    return {
-      all: requests.length,
-      approved: requests.filter(request => request.status === 'Approved').length,
-      returned: requests.filter(request => request.status === 'Returned').length
+    const counts: Record<RequestStatusFilter, number> = {
+      All: 0, Pending: 0, Approved: 0, 'Return Pending': 0, Returned: 0, Declined: 0,
     };
+    for (const request of this.requests()) {
+      counts.All++;
+      counts[request.status]++;
+    }
+    return counts;
   });
   filteredRequests = computed(() => {
     const status = this.requestStatusFilter();
     return this.requests().filter(request => status === 'All' || request.status === status);
   });
-  purchasedOrders = signal<PurchaseOrder[]>(this.loadData<PurchaseOrder[]>('orderHistory', []));
-  purchasedItems = computed(() => this.purchasedOrders().flatMap(order =>
-    (order.items || []).map(item => ({ ...item, orderId: order.orderId, date: order.date }))
-  ));
+  readonly purchasedOrders = signal<ShopOrder[]>([]);
+  readonly orderCustomers = signal<OrderCustomer[]>([]);
+  readonly selectedCustomer = signal<OrderCustomer | null>(null);
+  readonly ordersLoading = signal(false);
+  readonly ordersError = signal('');
+  private ordersRequest?: Subscription;
 
   // User Logs
   logs = signal<string[]>(this.loadData<string[]>('adminLogs', [
@@ -220,6 +204,7 @@ export class AdminHomePage {
   formTitle = '';
   formAuthor = '';
   formCopies: number = 1;
+  private startingCopies: number | null = null;
   formGenre = 'Romance';
   formPrice = 350;
   formRating = 0;
@@ -229,6 +214,8 @@ export class AdminHomePage {
   // Angular Signals
   isModalOpen = signal(false);
   isEditing = signal(false);
+  readonly savingBook = signal(false);
+  readonly changingBook = signal(false);
 
   detailsOpen = signal(false);
   requestsOpen = signal(false);
@@ -312,6 +299,7 @@ export class AdminHomePage {
       bagOutline,
       bagCheckOutline,
       chevronForwardOutline,
+      chevronBackOutline,
       chevronDownOutline,
       layersOutline,
       sparklesOutline,
@@ -325,7 +313,11 @@ export class AdminHomePage {
 
   }
 
-  // Open Add Book Modal
+  ionViewWillEnter(): void {
+    this.catalog.refresh();
+    this.borrowing.refresh();
+  }
+
   openAddBook() {
 
     this.activeAdminAction.set('add');
@@ -342,6 +334,7 @@ export class AdminHomePage {
     this.formTitle = book.title;
     this.formAuthor = book.author;
     this.formCopies = book.copies;
+    this.startingCopies = book.copies;
     this.formGenre = book.genre || 'Romance';
     this.formPrice = book.price ?? 350;
     this.formRating = book.rating ?? 0;
@@ -355,116 +348,56 @@ export class AdminHomePage {
 
   }
 
-  // Save or Update Book
-  saveBook() {
+  saveBook(): void {
+    if (this.savingBook()) return;
 
-    if (
-      this.formTitle.trim() === '' ||
-      this.formAuthor.trim() === ''
-    ) {
+    const details: BookDetails = {
+      title: this.formTitle.trim(),
+      author: this.formAuthor.trim(),
+      copies: Number(this.formCopies),
+      genre: this.formGenre,
+      price: Number(this.formPrice),
+      rating: Number(this.formRating),
+      reviews: Number(this.formReviews),
+      synopsis: this.formSynopsis.trim(),
+    };
 
-      this.showDialog('Missing information', 'Please complete all book information.');
+    if (!details.title || !details.author) {
+      this.showDialog('Missing information', 'Please enter the book title and author.');
       return;
-
     }
-
-    const copies = parseInt(String(this.formCopies), 10);
-    const price = Number(this.formPrice);
-    const rating = parseFloat(String(this.formRating));
-    const reviews = parseInt(String(this.formReviews), 10);
-
-    if (!Number.isFinite(copies) || copies < 1) {
-
-      this.showDialog('Invalid copies', 'Please enter at least one copy.');
+    if (!String(this.formCopies ?? '').trim() || !Number.isInteger(details.copies) || details.copies < 0) {
+      this.showDialog('Invalid copies', 'Enter zero or more whole copies.');
       return;
-
     }
-
-    if (!Number.isFinite(price) || price < 0) {
+    if (!Number.isFinite(details.price) || details.price < 0) {
       this.showDialog('Invalid price', 'Enter a valid price of zero or more.');
       return;
     }
-
-    if (!Number.isFinite(rating) || rating < 0 || rating > 5) {
+    if (!Number.isFinite(details.rating) || details.rating < 0 || details.rating > 5) {
       this.showDialog('Invalid rating', 'Enter a rating from 0 to 5.');
       return;
     }
-
-    if (!Number.isFinite(reviews) || reviews < 0) {
-      this.showDialog('Invalid review count', 'Enter zero or more reviews.');
+    if (!Number.isInteger(details.reviews) || details.reviews < 0) {
+      this.showDialog('Invalid review count', 'Enter zero or more whole reviews.');
       return;
     }
 
-    let successTitle: string;
-    let successMessage: string;
-
-    if (this.isEditing()) {
-
-      // UPDATE BOOK
-      this.books.update(bookList =>
-
-        bookList.map(book =>
-
-          book.id === this.editingId()
-            ? {
-                ...book,
-                title: this.formTitle.trim(),
-                author: this.formAuthor.trim(),
-                copies: copies,
-                genre: this.formGenre,
-                price,
-                rating,
-                reviews,
-                synopsis: this.formSynopsis.trim(),
-                lastUpdated: this.getCurrentDate()
-              }
-            : book
-
-        )
-
-      );
-      this.catalog.save();
-
-      this.addLog('Updated book: ' + this.formTitle);
-
-      successTitle = 'Book Updated';
-      successMessage = `“${this.formTitle.trim()}” has been updated in the catalog.`;
-
-    } else {
-
-      // CREATE BOOK
-      const newBook: Book = {
-
-        id: Date.now(),
-        title: this.formTitle.trim(),
-        author: this.formAuthor.trim(),
-        copies: copies,
-        genre: this.formGenre,
-        price,
-        status: 'Active',
-        lastUpdated: this.getCurrentDate(),
-        rating,
-        reviews,
-        synopsis: this.formSynopsis.trim()
-
-      };
-
-      this.books.update(bookList => [
-        ...bookList,
-        newBook
-      ]);
-      this.catalog.save();
-
-      this.addLog('Added book: ' + newBook.title);
-
-      successTitle = 'Book Added';
-      successMessage = `“${newBook.title}” has been added to the catalog.`;
-
-    }
-
-    this.closeModal();
-    this.appDialog.show(successTitle, successMessage, 'success');
-
+    const id = this.editingId();
+    this.savingBook.set(true);
+    this.catalog.save(details, id, this.startingCopies).pipe(finalize(() => this.savingBook.set(false))).subscribe({
+      next: book => {
+        const verb = id === null ? 'added' : 'updated';
+        this.addLog((id === null ? 'Added book: ' : 'Updated book: ') + book.title);
+        this.closeModal();
+        this.appDialog.show(
+          id === null ? 'Book Added' : 'Book Updated',
+          `"${book.title}" has been ${verb} in the catalog.`,
+          'success'
+        );
+      },
+      error: error => this.showDialog('Unable to save book', authErrorMessage(error, 'Check the book information and try again.')),
+    });
   }
 
   // Delete Book
@@ -487,38 +420,21 @@ export class AdminHomePage {
 
   }
 
-  // Archive Book
-  archiveBook(id: number) {
-
-    this.books.update(bookList =>
-
-      bookList.map(book =>
-
-        book.id === id
-          ? {
-              ...book,
-              status: 'Archived',
-              lastUpdated: this.getCurrentDate()
-            }
-          : book
-
-      )
-
-    );
-    this.catalog.save();
-
-    this.addLog('Archived book ID: ' + id);
-
+  archiveBook(id: number): void {
+    this.updateBookStatus(id, 'Archived');
   }
 
   restoreBook(id: number): void {
-    this.books.update(bookList => bookList.map(book =>
-      book.id === id
-        ? { ...book, status: 'Active', lastUpdated: this.getCurrentDate() }
-        : book
-    ));
-    this.catalog.save();
-    this.addLog('Restored book ID: ' + id);
+    this.updateBookStatus(id, 'Active');
+  }
+
+  private updateBookStatus(id: number, status: BookStatus): void {
+    if (this.changingBook()) return;
+    this.changingBook.set(true);
+    this.catalog.changeStatus(id, status).pipe(finalize(() => this.changingBook.set(false))).subscribe({
+      next: book => this.addLog((status === 'Archived' ? 'Archived book: ' : 'Restored book: ') + book.title),
+      error: error => this.showDialog('Unable to change book status', authErrorMessage(error, 'Please try again.')),
+    });
   }
 
   // View Book Details
@@ -544,6 +460,7 @@ export class AdminHomePage {
     this.formTitle = '';
     this.formAuthor = '';
     this.formCopies = 1;
+    this.startingCopies = null;
     this.formGenre = 'Romance';
     this.formPrice = 350;
     this.formRating = 0;
@@ -558,7 +475,9 @@ export class AdminHomePage {
   openRequests() {
 
     this.activeAdminAction.set('requests');
+    this.requestActionError.set('');
     this.requestsOpen.set(true);
+    this.borrowing.refresh();
 
   }
 
@@ -567,30 +486,26 @@ export class AdminHomePage {
     if (this.activeAdminAction() === 'requests') this.activeAdminAction.set(null);
   }
 
-  setRequestStatusFilter(value: unknown): void {
-    if (value === 'All' || value === 'Approved' || value === 'Returned') {
-      this.requestStatusFilter.set(value);
-    }
+  updateRequest(id: number, status: BorrowDecision): void {
+    this.runRequestAction(() => this.borrowing.decide(id, status));
   }
 
-  // Approve or Reject Request
-  updateRequest(id: number, status: string) {
+  confirmReturn(id: number): void {
+    this.runRequestAction(() => this.borrowing.confirmReturn(id));
+  }
 
-    this.requests.update(requestList =>
-
-      requestList.map(request =>
-
-        request.id === id
-          ? { ...request, status: status }
-          : request
-
-      )
-
-    );
-    this.persist('borrowRequests', this.requests());
-
-    this.addLog('Request ' + id + ' was ' + status);
-
+  private runRequestAction(action: () => Observable<BorrowRequest>): void {
+    if (this.decidingRequest()) return;
+    this.requestActionError.set('');
+    this.decidingRequest.set(true);
+    action().pipe(finalize(() => this.decidingRequest.set(false))).subscribe({
+      next: request => this.addLog('Request ' + request.id + ' was ' + request.status),
+      error: error => {
+        this.requestActionError.set(authErrorMessage(error, 'Unable to update the request. Please try again.'));
+        this.borrowing.refresh();
+        this.catalog.refresh();
+      },
+    });
   }
 
   // Generate Report
@@ -636,11 +551,42 @@ export class AdminHomePage {
 
   openPurchasedBooks(): void {
     this.activeAdminAction.set('purchased');
-    this.purchasedOrders.set(this.loadData<PurchaseOrder[]>('orderHistory', []));
     this.purchasedBooksOpen.set(true);
+    this.selectedCustomer.set(null);
+    this.loadOrders();
+  }
+
+  showCustomerOrders(customer: OrderCustomer): void {
+    this.selectedCustomer.set(customer);
+    this.purchasedOrders.set([]);
+    this.loadOrders();
+  }
+
+  showOrderCustomers(): void {
+    this.selectedCustomer.set(null);
+    this.loadOrders();
+  }
+
+  @HostListener('window:focus')
+  refreshOpenOrders(): void {
+    if (this.purchasedBooksOpen()) this.loadOrders();
+  }
+
+  loadOrders(): void {
+    this.ordersRequest?.unsubscribe();
+    this.ordersLoading.set(true);
+    this.ordersError.set('');
+    const customer = this.selectedCustomer();
+    const request: Observable<unknown> = customer
+      ? this.shop.adminOrders(customer.id).pipe(tap(orders => this.purchasedOrders.set(orders)))
+      : this.shop.orderCustomers().pipe(tap(customers => this.orderCustomers.set(customers)));
+    this.ordersRequest = request.pipe(finalize(() => this.ordersLoading.set(false))).subscribe({
+      error: error => this.ordersError.set(authErrorMessage(error, 'Unable to load pickup orders.')),
+    });
   }
 
   closePurchasedBooks(): void {
+    this.ordersRequest?.unsubscribe();
     this.purchasedBooksOpen.set(false);
     if (this.activeAdminAction() === 'purchased') this.activeAdminAction.set(null);
   }
@@ -681,11 +627,13 @@ export class AdminHomePage {
 
   private confirmPermanentDelete(id: number): void {
     const book = this.books().find(item => item.id === id);
-    if (!book) return;
+    if (!book || this.changingBook()) return;
 
-    this.books.update(bookList => bookList.filter(item => item.id !== id));
-    this.catalog.save();
-    this.addLog('Deleted book: ' + book.title);
+    this.changingBook.set(true);
+    this.catalog.remove(id).pipe(finalize(() => this.changingBook.set(false))).subscribe({
+      next: () => this.addLog('Deleted book: ' + book.title),
+      error: error => this.showDialog('Unable to delete book', authErrorMessage(error, 'Please try again.')),
+    });
   }
 
   private parseAdminLog(log: string, id: number): AdminLogEntry {
@@ -753,14 +701,10 @@ export class AdminHomePage {
   }
 
   // Get Current Date
-  getCurrentDate(): string {
-
-    return new Date().toLocaleDateString('en-US', {
-      month: 'short',
-      day: '2-digit',
-      year: 'numeric'
+  formatBookDate(value: string): string {
+    return new Date(value + 'T00:00:00Z').toLocaleDateString('en-US', {
+      year: 'numeric', month: 'short', day: '2-digit', timeZone: 'UTC',
     });
-
   }
 
   openLogoutConfirmation(): void {
@@ -773,8 +717,8 @@ export class AdminHomePage {
   }
 
   confirmLogout(): void {
-    localStorage.removeItem('userData');
-    this.router.navigateByUrl('/login');
+    this.authService.logout();
+    void this.router.navigateByUrl('/login', { replaceUrl: true });
   }
 
 }

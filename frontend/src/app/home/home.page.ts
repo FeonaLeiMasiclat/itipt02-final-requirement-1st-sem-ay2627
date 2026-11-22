@@ -1,10 +1,10 @@
 
 import { Component, inject, signal } from '@angular/core';
-import { NavigationStart, Router } from '@angular/router';
+import { NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter } from 'rxjs';
 
-import { AuthService } from '../services/auth_service';
+import { AuthService, authErrorMessage } from '../services/auth_service';
+import { ShopService } from '../services/shop.service';
 
 import {
   IonHeader,
@@ -67,7 +67,9 @@ import { AppDialogService } from '../services/app-dialog.service';
 export class HomePage {
 
   private router = inject(Router);
+  private readonly currentPath = signal(this.router.url);
   private authService = inject(AuthService);
+  readonly shop = inject(ShopService);
   readonly pageHeaderActions = inject(PageHeaderActions);
   private appDialog = inject(AppDialogService);
 
@@ -87,11 +89,11 @@ export class HomePage {
 
   constructor() {
     this.router.events
-      .pipe(
-        filter(event => event instanceof NavigationStart),
-        takeUntilDestroyed()
-      )
-      .subscribe(() => this.closeWishlist());
+      .pipe(takeUntilDestroyed())
+      .subscribe(event => {
+        if (event instanceof NavigationStart) this.closeWishlist();
+        if (event instanceof NavigationEnd) this.currentPath.set(event.urlAfterRedirects);
+      });
 
     addIcons({
       homeOutline,
@@ -133,6 +135,7 @@ export class HomePage {
   }
 
   openReaderWishlist(): void {
+    this.shop.refresh();
     this.wishlistOpen.set(true);
   }
 
@@ -141,7 +144,9 @@ export class HomePage {
   }
 
   removeWishlist(bookId: number): void {
-    this.pageHeaderActions.removeWishlist(bookId);
+    this.shop.setWishlisted(bookId, false).subscribe({
+      error: error => this.appDialog.show('Unable to update wishlist', authErrorMessage(error, 'Please try again.'), 'warning'),
+    });
   }
 
   openShopCart(): void {
@@ -183,7 +188,7 @@ export class HomePage {
 
   // Check active navigation page
   isActive(path: string): boolean {
-    return this.router.url.startsWith(path);
+    return this.currentPath().startsWith(path);
   }
 
   // Logout
@@ -198,7 +203,7 @@ export class HomePage {
 
   confirmLogout(): void {
     this.authService.logout();
-    this.router.navigateByUrl('/login');
+    void this.router.navigateByUrl('/login', { replaceUrl: true });
   }
 
 }

@@ -27,7 +27,7 @@ import {
   heartCircle
 } from 'ionicons/icons';
 
-import { AuthService } from '../services/auth_service';
+import { AuthService, authErrorMessage } from '../services/auth_service';
 
 @Component({
   selector: 'app-login',
@@ -55,7 +55,7 @@ export class LoginPage {
   private router = inject(Router);
 
   // Component Properties
-  username: string = '';
+  identifier = '';
   password: string = '';
 
   // Angular Signals
@@ -87,78 +87,29 @@ export class LoginPage {
 
   }
 
-  
-  // Login Method
-  login() {
-
+  login(): void {
+    if (this.isLoading()) return;
     this.errorMessage.set('');
-
-    // Get Input Values
-    const enteredUsername = this.username.trim();
-    const enteredPassword = this.password.trim();
-
-    // Check Empty Inputs
-    if (
-      enteredUsername === '' ||
-      enteredPassword === ''
-    ) {
-
-      this.errorMessage.set(
-        'Please enter your username and password.'
-      );
-
+    const identifier = this.identifier.trim();
+    if (!identifier || !this.password) {
+      this.errorMessage.set('Please enter your email or username and password.');
       return;
     }
 
     this.isLoading.set(true);
-
-    // READER LOGIN
-    if (
-      enteredUsername === 'user' &&
-      enteredPassword === 'user'
-    ) {
-
-      localStorage.setItem('userData', JSON.stringify({
-        username: 'user',
-        role: 'reader'
-      }));
-
-      this.authService.isAuthenticated.set(true);
-      this.isLoading.set(false);
-
-      this.router.navigateByUrl('/reader-home');
-
-    }
-
-    // ADMIN LOGIN
-    else if (
-      enteredUsername === 'admin' &&
-      enteredPassword === 'admin'
-    ) {
-
-      localStorage.setItem('userData', JSON.stringify({
-        username: 'admin',
-        role: 'admin'
-      }));
-
-      this.authService.isAuthenticated.set(true);
-      this.isLoading.set(false);
-
-      this.router.navigateByUrl('/admin-home');
-
-    }
-
-    // INVALID LOGIN
-    else {
-
-      this.isLoading.set(false);
-
-      this.errorMessage.set(
-        'Invalid username or password.'
-      );
-
-    }
-
+    this.authService.login(identifier, this.password).subscribe({
+      next: ({ user }) => {
+        this.password = '';
+        this.isLoading.set(false);
+        void this.router.navigateByUrl(user.role === 'admin' ? '/admin-home' : '/reader-home', {
+          replaceUrl: true,
+        });
+      },
+      error: error => {
+        this.isLoading.set(false);
+        this.errorMessage.set(authErrorMessage(error, 'Unable to sign in. Please try again.'));
+      },
+    });
   }
 
 

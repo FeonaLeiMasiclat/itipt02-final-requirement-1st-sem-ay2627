@@ -1,4 +1,5 @@
 import type { Routes } from '@angular/router';
+import { requireAdmin, requireReader } from './services/auth.guard';
 
 export const routes: Routes = [
   {
@@ -16,6 +17,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin-home',
+    canActivate: [requireAdmin],
     loadComponent: () =>
       import('./admin_home/admin-home.page').then(m => m.AdminHomePage)
   },
@@ -27,6 +29,7 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () => import('./home/home.page').then(m => m.HomePage),
+    canActivateChild: [requireReader],
     children: [
       {
         path: 'reader-home',
