@@ -14,6 +14,7 @@ import {
 
 import { addIcons } from 'ionicons';
 import {
+  atOutline,
   person,
   calendar,
   home,
@@ -24,7 +25,7 @@ import {
   play
 } from 'ionicons/icons';
 
-import { AuthService } from '../services/auth_service';
+import { AuthService, authErrorMessage } from '../services/auth_service';
 
 @Component({
   selector: 'app-signup',
@@ -54,6 +55,7 @@ export class SignupPage {
   dateOfBirth: string = '';
   address: string = '';
   email: string = '';
+  username: string = '';
   password: string = '';
 
   // Angular Signals
@@ -66,6 +68,7 @@ export class SignupPage {
 
     // Register Ionic Icons
     addIcons({
+      atOutline,
       person,
       calendar,
       home,
@@ -92,15 +95,17 @@ export class SignupPage {
 
   // Register Account
   register() {
-
+    if (this.isLoading() || this.successMessage()) return;
     this.errorMessage.set('');
     this.successMessage.set('');
+    const username = this.username.trim();
 
     const missingFields: string[] = [];
     if (!this.fullName.trim()) missingFields.push('Full name');
     if (!this.dateOfBirth.trim()) missingFields.push('Date of birth');
     if (!this.address.trim()) missingFields.push('Address');
     if (!this.email.trim()) missingFields.push('Email address');
+    if (!username) missingFields.push('Username');
     if (!this.password.trim()) missingFields.push('Password');
 
     if (missingFields.length > 0) {
@@ -118,10 +123,15 @@ export class SignupPage {
       return;
     }
 
-    // Check Password Length
-    if (this.password.length < 6) {
+    if (!/^[A-Za-z0-9_.-]{3,64}$/.test(username)) {
+      this.errorMessage.set('Use 3 to 64 letters, numbers, periods, underscores, or hyphens for your username.');
+      return;
+    }
 
-      this.errorMessage.set('Password is too short. Use at least 6 characters.');
+    // Check Password Length
+    if (this.password.length < 6 || this.password.length > 128) {
+
+      this.errorMessage.set('Use a password between 6 and 128 characters.');
       return;
     }
 
@@ -143,6 +153,7 @@ export class SignupPage {
       dateOfBirth: this.dateOfBirth,
       address: this.address.trim(),
       email: this.email.trim(),
+      username,
       password: this.password
     };
 
@@ -151,20 +162,11 @@ export class SignupPage {
     // Call Authentication Service
     this.authService.register(userData).subscribe({
 
-      next: (response) => {
-
-        console.log('Registration successful:', response);
+      next: () => {
 
         this.successMessage.set(
           'Account created successfully!'
         );
-
-        this.authService.saveRegisteredProfile({
-          fullName: userData.fullName,
-          dateOfBirth: userData.dateOfBirth,
-          address: userData.address,
-          email: userData.email
-        });
 
         this.isLoading.set(false);
 
@@ -173,6 +175,7 @@ export class SignupPage {
         this.dateOfBirth = '';
         this.address = '';
         this.email = '';
+        this.username = '';
         this.password = '';
 
         // Navigate to Login
@@ -184,9 +187,7 @@ export class SignupPage {
 
       error: (error) => {
 
-        console.log('Registration failed:', error);
-
-        this.errorMessage.set(this.registrationErrorMessage(error));
+        this.errorMessage.set(authErrorMessage(error, 'Registration did not go through. Please try again.'));
 
         this.isLoading.set(false);
 
@@ -194,26 +195,6 @@ export class SignupPage {
 
     });
 
-  }
-
-  private registrationErrorMessage(error: any): string {
-    const serverMessage = typeof error?.error?.message === 'string'
-      ? error.error.message
-      : typeof error?.error === 'string'
-        ? error.error
-        : '';
-    const details = `${serverMessage} ${error?.message || ''}`.toLowerCase();
-
-    if (
-      error?.status === 0 ||
-      details.includes('failed to fetch') ||
-      details.includes('network error') ||
-      details.includes('load failed')
-    ) {
-      return 'Cannot connect to the registration server at localhost:3000. Start the backend API, then try again. Your details are still in the form.';
-    }
-
-    return serverMessage || 'Registration did not go through. Please try again.';
   }
 
 }

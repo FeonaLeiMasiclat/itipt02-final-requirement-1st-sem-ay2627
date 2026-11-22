@@ -78,6 +78,25 @@
             </ion-input>
           </div>
 
+          <!-- Username -->
+          <div class="input-container">
+            <ion-icon name="at-outline" class="input-icon"></ion-icon>
+
+            <ion-input
+              type="text"
+              name="username"
+              placeholder="Username"
+              [(ngModel)]="username"
+              (ionInput)="clearMessages()"
+              aria-label="Username, required"
+              required
+              maxlength="64"
+              autocomplete="username"
+              autocapitalize="off"
+              spellcheck="false">
+            </ion-input>
+          </div>
+
           <!-- Password -->
           <div class="input-container">
             <ion-icon name="lock-closed" class="input-icon"></ion-icon>

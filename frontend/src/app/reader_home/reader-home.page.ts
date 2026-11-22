@@ -3,9 +3,11 @@ import { Component, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AuthService } from '../services/auth_service';
+import { AuthService, authErrorMessage } from '../services/auth_service';
+import { BorrowingService } from '../services/borrowing.service';
+import { finalize } from 'rxjs';
 import { PageHeaderActions } from '../services/page-header-actions';
-import type { WishlistItem } from '../services/page-header-actions';
+import { ShopService } from '../services/shop.service';
 import { AppDialogService } from '../services/app-dialog.service';
 import { BookCatalogService } from '../services/book-catalog.service';
 
@@ -64,14 +66,16 @@ interface Book {
 export class ReaderHomePage {
 
   private authService = inject(AuthService);
+  private borrowing = inject(BorrowingService);
+  private shop = inject(ShopService);
+  readonly wishlistBusy = signal(false);
+  readonly cartBusy = signal(false);
   private route = inject(ActivatedRoute);
   private appDialog = inject(AppDialogService);
   readonly pageHeaderActions = inject(PageHeaderActions);
-  readonly username = this.authService.getUserData()?.user?.username
-    || this.authService.getUserData()?.username
-    || 'Reader';
+  readonly readerName = computed(() => this.authService.currentUser()?.fullName || 'Reader');
 
-  private catalog = inject(BookCatalogService);
+  readonly catalog = inject(BookCatalogService);
   readonly books = computed<Book[]>(() => this.catalog.books()
     .filter(book => book.status === 'Active')
     .map(book => ({
@@ -93,6 +97,7 @@ export class ReaderHomePage {
 
   // Signals
   requestOpen = signal(false);
+  readonly sendingRequest = signal(false);
   selectedGenre = signal('');
   detailsOpen = signal(false);
   selectedBook = signal<Book | null>(null);
@@ -131,15 +136,19 @@ export class ReaderHomePage {
     return this.pageHeaderActions.wishlist().some(item => item.id === bookId);
   }
 
-  toggleWishlist(book: Book): void {
-    if (this.isWishlisted(book.id)) {
-      this.pageHeaderActions.removeWishlist(book.id);
-      return;
-    }
+  ionViewWillEnter(): void {
+    this.catalog.refresh();
+    this.shop.refresh();
+  }
 
-    const item: WishlistItem = { id: book.id, title: book.title, price: book.price };
-    this.pageHeaderActions.wishlist.update(items => [...items, item]);
-    this.pageHeaderActions.saveWishlist();
+  toggleWishlist(book: Book): void {
+    if (this.wishlistBusy()) return;
+    this.wishlistBusy.set(true);
+    this.shop.setWishlisted(book.id, !this.isWishlisted(book.id)).pipe(
+      finalize(() => this.wishlistBusy.set(false)),
+    ).subscribe({
+      error: error => this.appDialog.show('Unable to update wishlist', authErrorMessage(error, 'Please try again.'), 'warning'),
+    });
   }
 
   openBookDetails(book: Book): void {
@@ -158,129 +167,54 @@ export class ReaderHomePage {
   }
 
   addToCart(book: Book): void {
-    let cart: Array<{
-      id: number;
-      title: string;
-      author: string;
-      price: number;
-      quantity: number;
-      selected: boolean;
-    }> = [];
-
-    try {
-      cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    } catch {
-      cart = [];
-    }
-
-    const existingItem = cart.find(item => item.id === book.id);
-    if (existingItem) {
-      existingItem.quantity += 1;
-    } else {
-      cart.push({
-        id: book.id,
-        title: book.title,
-        author: book.author,
-        price: book.price,
-        quantity: 1,
-        selected: true
-      });
-    }
-
-    localStorage.setItem('cart', JSON.stringify(cart));
-    this.pageHeaderActions.shopCartCount.set(
-      cart.reduce((count, item) => count + item.quantity, 0)
-    );
-    this.closeBookDetails();
-    this.appDialog.show(
-      'Added to Shopping Cart',
-      `"${book.title}" has been added to your shopping cart.`,
-      'success'
-    );
-  }
-
-  borrowBook(id: number) {
-    const book = this.books().find(item => item.id === id);
-
-    if (book) {
-      const requests = this.loadRequests();
-      if (requests.some((request: any) => request.bookTitle === book.title && request.reader === this.username && request.status === 'Pending')) {
+    if (this.cartBusy()) return;
+    this.cartBusy.set(true);
+    this.shop.changeCart(book.id, 1).pipe(finalize(() => this.cartBusy.set(false))).subscribe({
+      next: () => {
         this.closeBookDetails();
-        this.appDialog.show(
-          'Request Already Pending',
-          'You already have a pending request for this book.',
-          'warning'
-        );
-        return;
-      }
-      requests.unshift({
-        id: Date.now(),
-        bookTitle: book.title,
-        author: book.author,
-        genre: book.genre,
-        availableCopies: book.availableCopies,
-        price: book.price,
-        rating: book.rating,
-        reviews: book.reviews,
-        synopsis: book.description,
-        reader: this.username,
-        status: 'Pending',
-        requestedAt: new Date().toLocaleString()
-      });
-      localStorage.setItem('borrowRequests', JSON.stringify(requests));
-      this.closeBookDetails();
-      this.appDialog.show(
-        'Request Submitted',
-        'Your request to borrow “' + book.title + '” has been submitted.',
-        'success'
-      );
-    }
+        this.appDialog.show('Added to Shopping Cart', `"${book.title}" has been added to your shopping cart.`, 'success');
+      },
+      error: error => this.appDialog.show('Unable to update cart', authErrorMessage(error, 'Please try again.'), 'warning'),
+    });
   }
 
-  private loadRequests(): any[] {
-    try {
-      return JSON.parse(localStorage.getItem('borrowRequests') || '[]');
-    } catch {
-      return [];
-    }
+  borrowBook(id: number): void {
+    if (this.sendingRequest()) return;
+    this.sendingRequest.set(true);
+    this.borrowing.requestBook(id).pipe(finalize(() => this.sendingRequest.set(false))).subscribe({
+      next: request => {
+        this.closeBookDetails();
+        this.appDialog.show('Request Submitted', `Your request to borrow "${request.bookTitle}" has been submitted.`, 'success');
+      },
+      error: error => {
+        this.closeBookDetails();
+        this.appDialog.show('Unable to submit request', authErrorMessage(error, 'Please try again.'), 'warning');
+      },
+    });
   }
 
-  requestBook() {
+  requestBook(): void {
     this.requestOpen.set(true);
   }
 
-  submitRequest() {
-    if (
-      this.requestedTitle.trim() === '' ||
-      this.requestedAuthor.trim() === ''
-    ) {
-      this.appDialog.show(
-        'Book Details Needed',
-        'Please enter both the book title and author.',
-        'warning'
-      );
+  submitRequest(): void {
+    const title = this.requestedTitle.trim();
+    const author = this.requestedAuthor.trim();
+    if (!title || !author) {
+      this.appDialog.show('Book Details Needed', 'Please enter both the book title and author.', 'warning');
       return;
     }
+    if (this.sendingRequest()) return;
 
-    const requests = this.loadRequests();
-    requests.unshift({
-      id: Date.now(),
-      bookTitle: this.requestedTitle.trim(),
-      reader: this.username,
-      status: 'Pending',
-      requestedAt: new Date().toLocaleString(),
-      author: this.requestedAuthor.trim()
+    this.sendingRequest.set(true);
+    this.borrowing.requestAcquisition(title, author).pipe(finalize(() => this.sendingRequest.set(false))).subscribe({
+      next: () => {
+        this.requestedTitle = '';
+        this.requestedAuthor = '';
+        this.requestOpen.set(false);
+        this.appDialog.show('Request Submitted', 'Your acquisition request has been submitted.', 'success');
+      },
+      error: error => this.appDialog.show('Unable to submit request', authErrorMessage(error, 'Please try again.'), 'warning'),
     });
-    localStorage.setItem('borrowRequests', JSON.stringify(requests));
-    this.appDialog.show(
-      'Request Submitted',
-      'Your book request has been submitted.',
-      'success'
-    );
-
-    this.requestedTitle = '';
-    this.requestedAuthor = '';
-    this.requestOpen.set(false);
   }
-
 }

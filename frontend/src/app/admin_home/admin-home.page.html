@@ -214,11 +214,11 @@
               <div class="quick-actions">
                 <div class="action-grid" [class.archived-actions]="book.status === 'Archived'">
                   @if (book.status === 'Archived') {
-                    <ion-button class="restore-button" (click)="restoreBook(book.id)">
+                    <ion-button class="restore-button" [disabled]="changingBook()" (click)="restoreBook(book.id)">
                       <ion-icon name="refresh-outline"></ion-icon>
                       <span>Restore Book</span>
                     </ion-button>
-                    <ion-button class="permanent-delete-button" (click)="deleteBook(book.id)">
+                    <ion-button class="permanent-delete-button" [disabled]="changingBook()" (click)="deleteBook(book.id)">
                       <ion-icon name="trash-outline"></ion-icon>
                       <span>Delete Permanently</span>
                     </ion-button>
@@ -227,7 +227,7 @@
                       <ion-icon name="create-outline"></ion-icon>
                       Edit
                     </ion-button>
-                    <ion-button class="archive-button" (click)="archiveBook(book.id)">
+                    <ion-button class="archive-button" [disabled]="changingBook()" (click)="archiveBook(book.id)">
                       <ion-icon name="archive-outline"></ion-icon>
                       Archive
                     </ion-button>
@@ -244,7 +244,14 @@
 
       }
 
-      @if (filteredBooks().length === 0) {
+      @if (catalog.error()) {
+        <div class="empty-list">
+          <p role="alert">{{ catalog.error() }}</p>
+          <ion-button (click)="catalog.refresh()">Retry</ion-button>
+        </div>
+      } @else if (filteredBooks().length === 0 && catalog.loading()) {
+        <div class="empty-list" role="status"><p>Loading books...</p></div>
+      } @else if (filteredBooks().length === 0) {
 
         <div class="empty-list">
           <ion-icon name="book-outline"></ion-icon>
@@ -295,7 +302,7 @@
               <div class="book-form-field-row">
                 <div class="book-form-field">
                   <label for="book-copies">Copies</label>
-                  <ion-input id="book-copies" type="number" min="1" name="copies" [(ngModel)]="formCopies" required></ion-input>
+                  <ion-input id="book-copies" type="number" min="0" step="1" name="copies" [(ngModel)]="formCopies" required></ion-input>
                 </div>
                 <div class="book-form-field">
                   <label for="book-price">Price (₱)</label>
@@ -336,7 +343,9 @@
 
             <div class="form-actions">
               <ion-button type="button" class="cancel-button" fill="outline" (click)="closeModal()">Cancel</ion-button>
-              <ion-button type="submit" class="save-button">{{ isEditing() ? 'Update Book' : 'Save Book' }}</ion-button>
+              <ion-button type="submit" class="save-button" [disabled]="savingBook()">
+                {{ savingBook() ? 'Saving...' : (isEditing() ? 'Update Book' : 'Save Book') }}
+              </ion-button>
             </div>
           </form>
         </section>
@@ -398,7 +407,9 @@
               </article>
               <article class="admin-list-item book-detail-item">
                 <div class="book-detail-label"><ion-icon name="time-outline"></ion-icon><strong>Last Updated</strong></div>
-                <span>{{ selectedBook()?.lastUpdated }}</span>
+                @if (selectedBook(); as book) {
+                  <span>{{ formatBookDate(book.lastUpdated) }}</span>
+                }
               </article>
             }
           </div>
@@ -424,39 +435,60 @@
               <ion-icon name="close-outline"></ion-icon>
             </ion-button>
           </header>
-          <ion-segment
-            class="request-status-tabs"
-            [value]="requestStatusFilter()"
-            (ionChange)="setRequestStatusFilter($event.detail.value)">
-            <ion-segment-button value="All"><ion-label>All ({{ requestCounts().all }})</ion-label></ion-segment-button>
-            <ion-segment-button value="Approved"><ion-label>Approved ({{ requestCounts().approved }})</ion-label></ion-segment-button>
-            <ion-segment-button value="Returned"><ion-label>Returned ({{ requestCounts().returned }})</ion-label></ion-segment-button>
-          </ion-segment>
+          <div class="request-status-tabs" role="group" aria-label="Filter borrow requests">
+            @for (status of requestFilters; track status) {
+              <button
+                type="button"
+                class="request-status-filter"
+                [attr.aria-pressed]="requestStatusFilter() === status"
+                (click)="requestStatusFilter.set(status)">
+                {{ status }} ({{ requestCounts()[status] }})
+              </button>
+            }
+          </div>
+          @if (requestStatusFilter() === 'Return Pending' && filteredRequests().length) {
+            <p class="request-requested-at">Confirm the return after receiving the book.</p>
+          }
+          @if (requestActionError() || borrowing.error()) {
+            <p role="alert">{{ requestActionError() || borrowing.error() }}</p>
+            @if (borrowing.error()) {
+              <ion-button fill="clear" (click)="borrowing.refresh()">Retry</ion-button>
+            }
+          }
           <div class="admin-list-content">
             @for (request of filteredRequests(); track request.id) {
               <article class="admin-list-item request-list-item">
                 <div class="request-item-heading">
                   <div class="request-book-info">
                     <h3>{{ request.bookTitle }}</h3>
-                    <p>Reader: {{ request.reader }}</p>
+                    <p>Reader: {{ request.readerName }}</p>
+                    @if (request.kind === 'Acquisition') {
+                      <small>Acquisition request by title and author ({{ request.author }})</small>
+                    }
                   </div>
                   <ion-badge
                     class="request-status-badge"
                     [class.status-approved]="request.status === 'Approved'"
-                    [class.status-declined]="request.status === 'Declined' || request.status === 'Rejected'"
+                    [class.status-declined]="request.status === 'Declined'"
                     [class.status-returned]="request.status === 'Returned'"
-                    [class.status-pending]="request.status === 'Pending'">
+                    [class.status-pending]="request.status === 'Pending' || request.status === 'Return Pending'">
                     <span class="request-status-dot" aria-hidden="true"></span>
-                    {{ request.status === 'Rejected' ? 'Declined' : request.status }}
+                    {{ request.status }}
                   </ion-badge>
                 </div>
-                @if (request.requestedAt) {
-                  <small class="request-requested-at">Requested: {{ request.requestedAt }}</small>
+                @if (request.status === 'Return Pending') {
+                  <small class="request-requested-at">Return requested: {{ request.returnRequestedAt | date:'medium' }}</small>
+                } @else {
+                  <small class="request-requested-at">Requested: {{ request.requestedAt | date:'medium' }}</small>
                 }
                 @if (request.status === 'Pending') {
                   <div class="request-buttons">
-                    <ion-button class="approve-request-button" (click)="updateRequest(request.id, 'Approved')">Approve</ion-button>
-                    <ion-button class="reject-request-button" (click)="updateRequest(request.id, 'Declined')">Decline</ion-button>
+                    <ion-button class="approve-request-button" [disabled]="decidingRequest()" (click)="updateRequest(request.id, 'Approved')">Approve</ion-button>
+                    <ion-button class="reject-request-button" [disabled]="decidingRequest()" (click)="updateRequest(request.id, 'Declined')">Decline</ion-button>
+                  </div>
+                } @else if (request.status === 'Return Pending') {
+                  <div class="request-buttons">
+                    <ion-button class="approve-request-button" [disabled]="decidingRequest()" (click)="confirmReturn(request.id)">Confirm Return</ion-button>
                   </div>
                 }
               </article>
@@ -464,8 +496,7 @@
             @if (filteredRequests().length === 0) {
               <div class="admin-panel-empty">
                 <ion-icon name="time-outline"></ion-icon>
-                <p>{{ requestStatusFilter() === 'All' ? 'No borrow requests yet' : 'No ' + requestStatusFilter().toLowerCase() + ' requests yet' }}</p>
-                <small>Reader acquisition requests will appear here.</small>
+                <p>{{ borrowing.loading() ? 'Loading book requests…' : requestStatusFilter() === 'All' ? 'No borrow requests yet' : 'No ' + requestStatusFilter().toLowerCase() + ' requests yet' }}</p>
               </div>
             }
           </div>
@@ -563,27 +594,60 @@
               <ion-icon name="close-outline"></ion-icon>
             </ion-button>
           </header>
-          <div class="admin-list-content">
-            @for (item of purchasedItems(); track $index) {
-              <article class="admin-list-item purchased-list-item">
-                <div class="purchased-item-main">
+          @if (ordersError()) {
+            <p role="alert">{{ ordersError() }}</p>
+            <ion-button fill="clear" (click)="loadOrders()">Retry</ion-button>
+          }
+          @if (selectedCustomer(); as customer) {
+            <ion-button fill="clear" size="small" class="ion-align-self-start" (click)="showOrderCustomers()">
+              <ion-icon name="chevron-back-outline" slot="start"></ion-icon>
+              Back to customers
+            </ion-button>
+            <h3 class="purchased-item-name ion-margin-bottom">{{ customer.name }}</h3>
+            <section class="admin-list-content" aria-label="Customer orders">
+              @for (order of purchasedOrders(); track order.orderId) {
+                <article class="admin-list-item purchased-list-item">
                   <div class="purchased-item-title-row">
-                    <h3>{{ item.title }}</h3>
-                    <ion-badge class="purchased-price-badge">₱{{ (item.price * item.quantity).toFixed(2) }}</ion-badge>
+                    <h3>Order {{ order.orderId }}</h3>
+                    <ion-badge class="purchased-price-badge">₱{{ order.total.toFixed(2) }}</ion-badge>
                   </div>
-                  <p>By {{ item.author }} · {{ item.quantity }} {{ item.quantity === 1 ? 'copy' : 'copies' }}</p>
-                  <small>Order {{ item.orderId }} · {{ item.date }}</small>
-                </div>
-              </article>
-            }
-            @if (purchasedItems().length === 0) {
-              <div class="admin-panel-empty">
-                <ion-icon name="bag-outline"></ion-icon>
-                <p>No purchased books yet</p>
-                <small>Completed book orders will appear here.</small>
-              </div>
-            }
-          </div>
+                  <small>{{ order.date | date:'medium' }} · {{ order.status }}</small>
+                  @for (item of order.items; track item.id) {
+                    <div class="purchased-order-line">
+                      <div class="purchased-item-title-row">
+                        <strong class="purchased-item-name">{{ item.title }}</strong>
+                        <span>×{{ item.quantity }}</span>
+                      </div>
+                      <small>By {{ item.author }} · ₱{{ item.price.toFixed(2) }} each</small>
+                    </div>
+                  }
+                </article>
+              } @empty {
+                @if (!ordersError()) {
+                  <p role="status">{{ ordersLoading() ? 'Loading customer orders…' : 'No orders for this customer' }}</p>
+                }
+              }
+            </section>
+          } @else {
+            <section class="admin-list-content" aria-label="Customers with orders">
+              @for (customer of orderCustomers(); track customer.id) {
+                <button type="button" class="purchased-list-item purchased-customer-row" (click)="showCustomerOrders(customer)">
+                  <span class="purchased-item-title-row">
+                    <strong class="purchased-item-name">{{ customer.name }}</strong>
+                    <span class="purchased-price-badge">{{ customer.orderCount }} {{ customer.orderCount === 1 ? 'order' : 'orders' }}</span>
+                  </span>
+                  <small>{{ customer.username ? '@' + customer.username : 'Customer #' + customer.id }}</small>
+                </button>
+              } @empty {
+                @if (!ordersError()) {
+                  <div class="admin-panel-empty">
+                    <ion-icon name="bag-outline"></ion-icon>
+                    <p>{{ ordersLoading() ? 'Loading customers…' : 'No pickup orders yet' }}</p>
+                  </div>
+                }
+              }
+            </section>
+          }
         </section>
       </ng-template>
     </ion-modal>

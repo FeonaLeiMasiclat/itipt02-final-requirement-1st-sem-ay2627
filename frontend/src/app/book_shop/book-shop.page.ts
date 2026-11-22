@@ -1,11 +1,15 @@
 
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PageHeaderActions } from '../services/page-header-actions';
-import { AuthService } from '../services/auth_service';
+import { authErrorMessage } from '../services/auth_service';
+import { BorrowingService } from '../services/borrowing.service';
+import { finalize, Observable } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { CartItem, Checkout, ShopOrder, ShopService } from '../services/shop.service';
 import { AppDialogService } from '../services/app-dialog.service';
 import { BookCatalogService } from '../services/book-catalog.service';
 
@@ -52,24 +56,7 @@ interface Book {
   synopsis?: string;
 }
 
-interface CartItem {
-  id: number;
-  title: string;
-  author: string;
-  price: number;
-  quantity: number;
-  selected: boolean;
-}
-
-interface OrderReceipt {
-  orderId: string;
-  purchasedBy: string;
-  items: CartItem[];
-  total: number;
-  paymentMethod: string;
-  counter: number;
-  date: string;
-}
+type SelectedCartItem = CartItem & { selected: boolean };
 
 @Component({
   selector: 'app-book-shop',
@@ -95,11 +82,10 @@ interface OrderReceipt {
 export class BookShopPage {
   private route = inject(ActivatedRoute);
   private pageHeaderActions = inject(PageHeaderActions);
-  private authService = inject(AuthService);
+  readonly shop = inject(ShopService);
+  private borrowing = inject(BorrowingService);
+  readonly sendingRequest = signal(false);
   private appDialog = inject(AppDialogService);
-  readonly username = this.authService.getUserData()?.user?.username
-    || this.authService.getUserData()?.username
-    || 'Reader';
   selectedGenre = signal('');
   detailsOpen = signal(false);
   selectedBook = signal<Book | null>(null);
@@ -108,7 +94,7 @@ export class BookShopPage {
   searchText = '';
   searchQuery = signal('');
 
-  private catalog = inject(BookCatalogService);
+  readonly catalog = inject(BookCatalogService);
   readonly books = computed<Book[]>(() => this.catalog.books()
     .filter(book => book.status === 'Active')
     .map(book => ({
@@ -142,33 +128,20 @@ export class BookShopPage {
     );
   });
 
-  // Cart
+  private readonly unselectedBookIds = signal<number[]>([]);
+  readonly cart = computed(() => this.shop.cart().map(item => ({
+    ...item, selected: !this.unselectedBookIds().includes(item.id),
+  })));
+  readonly directCheckoutItem = signal<SelectedCartItem | null>(null);
+  readonly cartBusy = signal(false);
+  readonly checkoutBusy = signal(false);
+  readonly checkoutError = signal('');
+  private checkoutAttempt: { selection: string; key: string } | null = null;
 
-  cart = signal<CartItem[]>(
-    this.loadData<CartItem[]>('cart', [])
-  );
-  directCheckoutItem = signal<CartItem | null>(null);
-
-  // Cart drawer visibility
   showCart = signal(false);
-
-  // Checkout and receipt visibility
   showCheckout = signal(false);
   showReceipt = signal(false);
-
-  // Payment method
-  paymentMethod = signal('Counter Cash');
-
-  // Receipt
-  orderReceipt = signal<OrderReceipt | null>(null);
-
-  // Number of items in cart, including quantities
-  cartCount = computed(() => {
-    return this.cart().reduce(
-      (total, item) => total + item.quantity,
-      0
-    );
-  });
+  orderReceipt = signal<ShopOrder | null>(null);
 
   // Selected cart item count
   selectedItems = computed(() => {
@@ -216,17 +189,16 @@ export class BookShopPage {
 
     this.pageHeaderActions.shopCheckoutRequested
       .pipe(takeUntilDestroyed())
-      .subscribe(() => this.proceedToCheckout());
+      .subscribe(() => {
+        this.unselectedBookIds.set([]);
+        this.proceedToCheckout();
+      });
 
     this.route.queryParamMap.subscribe(params => {
       const search = params.get('search') ?? '';
       this.searchText = search;
       this.searchQuery.set(search);
       this.selectedGenre.set(params.get('genre') ?? '');
-    });
-
-    effect(() => {
-      this.pageHeaderActions.shopCartCount.set(this.cartCount());
     });
 
     addIcons({
@@ -246,25 +218,9 @@ export class BookShopPage {
     });
   }
 
-  // Load data from localStorage
-  loadData<T>(key: string, defaultValue: T): T {
-    try {
-      const savedData = localStorage.getItem(key);
-
-      if (savedData) {
-        return JSON.parse(savedData) as T;
-      }
-
-      return defaultValue;
-    } catch (error) {
-      console.error('Error loading data:', error);
-      return defaultValue;
-    }
-  }
-
-  // Save cart
-  saveCart(): void {
-    localStorage.setItem('cart', JSON.stringify(this.cart()));
+  ionViewWillEnter(): void {
+    this.catalog.refresh();
+    this.shop.refresh();
   }
 
   // Search books
@@ -279,37 +235,12 @@ export class BookShopPage {
     });
   }
 
-  // Add book to cart
-  addToCart(book: Book): void {
-    const existingItem = this.cart().find(item => item.id === book.id);
-
-    if (existingItem) {
-      this.cart.update(items =>
-        items.map(item =>
-          item.id === book.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      );
-    } else {
-      const newItem: CartItem = {
-        id: book.id,
-        title: book.title,
-        author: book.author,
-        price: book.price,
-        quantity: 1,
-        selected: true
-      };
-
-      this.cart.update(items => [...items, newItem]);
-    }
-
-    this.saveCart();
-  }
-
-  addToCartWithConfirmation(book: Book): void {
-    this.addToCart(book);
-    this.showAddedToCartMessage(book);
+  addToCartWithConfirmation(book: Book, closeDetails = false): void {
+    this.updateCart(() => this.shop.changeCart(book.id, 1), () => {
+      this.toggleCartSelection(book.id, true);
+      if (closeDetails) this.closeBookDetails();
+      this.showAddedToCartMessage(book);
+    });
   }
 
   private showAddedToCartMessage(book: Book): void {
@@ -336,131 +267,81 @@ export class BookShopPage {
   }
 
   borrowBook(book: Book): void {
-    const requests = this.loadData<any[]>('borrowRequests', []);
-    if (requests.some(request => request.bookTitle === book.title
-      && request.reader === this.username && request.status === 'Pending')) {
-      this.closeBookDetails();
-      this.appDialog.show(
-        'Request Already Pending',
-        'You already have a pending request for this book.',
-        'warning'
-      );
-      return;
-    }
-
-    requests.unshift({
-      id: Date.now(),
-      bookTitle: book.title,
-      author: book.author,
-      genre: book.genre,
-      availableCopies: book.availableCopies,
-      price: book.price,
-      rating: book.rating,
-      reviews: book.reviews,
-      synopsis: book.synopsis,
-      reader: this.username,
-      status: 'Pending',
-      requestedAt: new Date().toLocaleString()
+    if (this.sendingRequest()) return;
+    this.sendingRequest.set(true);
+    this.borrowing.requestBook(book.id).pipe(finalize(() => this.sendingRequest.set(false))).subscribe({
+      next: request => {
+        this.closeBookDetails();
+        this.appDialog.show('Request Submitted', `Your request to borrow "${request.bookTitle}" has been submitted.`, 'success');
+      },
+      error: error => {
+        this.closeBookDetails();
+        this.appDialog.show('Unable to submit request', authErrorMessage(error, 'Please try again.'), 'warning');
+      },
     });
-    localStorage.setItem('borrowRequests', JSON.stringify(requests));
-    this.closeBookDetails();
-    this.appDialog.show(
-      'Request Submitted',
-      `Your request to borrow "${book.title}" has been submitted.`,
-      'success'
-    );
   }
 
-  addSelectedBookToCart(book: Book): void {
-    this.addToCart(book);
-    this.closeBookDetails();
-    this.showAddedToCartMessage(book);
-  }
-
-  // Buy now
   buyNow(book: Book): void {
+    if (this.checkoutBusy() || book.availableCopies === 0) return;
     this.directCheckoutItem.set({
-      id: book.id,
-      title: book.title,
-      author: book.author,
-      price: book.price,
-      quantity: 1,
-      selected: true
+      id: book.id, title: book.title, author: book.author, price: book.price,
+      availableCopies: book.availableCopies, status: 'Active', quantity: 1, selected: true,
     });
+    this.checkoutError.set('');
     this.showCart.set(false);
     this.showCheckout.set(true);
   }
 
-  // Open cart
   openCart(): void {
+    this.shop.refresh();
     this.showCart.set(true);
   }
 
-  // Select or unselect cart item
   toggleCartSelection(bookId: number, checked: boolean): void {
-    this.cart.update(items =>
-      items.map(item =>
-        item.id === bookId
-          ? { ...item, selected: checked }
-          : item
-      )
-    );
-
-    this.saveCart();
+    this.unselectedBookIds.update(ids => checked ? ids.filter(id => id !== bookId) : [...ids, bookId]);
   }
 
-  // Remove item from cart
   removeCart(bookId: number): void {
-    this.cart.update(items =>
-      items.filter(item => item.id !== bookId)
-    );
-
-    this.saveCart();
+    this.updateCart(() => this.shop.removeFromCart(bookId), () => this.toggleCartSelection(bookId, true));
   }
 
-  // Increase quantity
   increaseQuantity(bookId: number): void {
-    const directItem = this.directCheckoutItem();
-    if (directItem?.id === bookId) {
-      this.directCheckoutItem.update(item => item
-        ? { ...item, quantity: item.quantity + 1 }
-        : null);
-      return;
-    }
-
-    this.cart.update(items =>
-      items.map(item =>
-        item.id === bookId
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      )
-    );
-
-    this.saveCart();
+    this.changeQuantity(bookId, 1);
   }
 
-  // Decrease quantity
   decreaseQuantity(bookId: number): void {
+    this.changeQuantity(bookId, -1);
+  }
+
+  private changeQuantity(bookId: number, delta: -1 | 1): void {
+    if (this.checkoutBusy()) return;
     const directItem = this.directCheckoutItem();
     if (directItem?.id === bookId) {
-      this.directCheckoutItem.update(item => item
-        ? { ...item, quantity: Math.max(1, item.quantity - 1) }
-        : null);
+      const quantity = directItem.quantity + delta;
+      if (quantity >= 1 && quantity <= directItem.availableCopies) {
+        this.directCheckoutItem.set({ ...directItem, quantity });
+      }
       return;
     }
+    this.updateCart(() => this.shop.changeCart(bookId, delta));
+  }
 
-    this.cart.update(items =>
-      items.map(item =>
-        item.id === bookId
-          ? {
-              ...item,
-              quantity: Math.max(1, item.quantity - 1)
-            }
-          : item
-      )
-    );
-
-    this.saveCart();
+  private updateCart(action: () => Observable<CartItem[]>, done?: () => void): void {
+    if (this.cartBusy() || this.checkoutBusy()) return;
+    this.checkoutError.set('');
+    this.cartBusy.set(true);
+    action().pipe(finalize(() => this.cartBusy.set(false))).subscribe({
+      next: () => done?.(),
+      error: error => {
+        const message = authErrorMessage(error, 'Unable to update your cart. Please try again.');
+        if (this.showCheckout()) {
+          this.checkoutError.set(message);
+        } else {
+          this.appDialog.show('Unable to update cart', message, 'warning');
+        }
+        this.shop.refresh();
+      },
+    });
   }
 
   // Close cart drawer
@@ -481,99 +362,57 @@ export class BookShopPage {
 
     this.showCart.set(false);
     this.directCheckoutItem.set(null);
+    this.checkoutError.set('');
     this.showCheckout.set(true);
   }
 
-  // Confirm order and create receipt
   confirmOrder(): void {
-    const itemsToPurchase = this.checkoutItems();
-
-    if (itemsToPurchase.length === 0) {
-      this.appDialog.show('Cart is Empty', 'Your checkout list is empty.', 'warning');
+    if (this.checkoutBusy() || this.cartBusy()) return;
+    const items = this.checkoutItems().map(item => ({ bookId: item.id, quantity: item.quantity }));
+    if (items.length === 0) {
+      this.checkoutError.set('Your checkout list is empty.');
       return;
     }
 
-    const currentYear = new Date().getFullYear();
-
-    let orderCounter = parseInt(
-      localStorage.getItem('orderCounter') || '0',
-      10
-    );
-
-    orderCounter++;
-
-    localStorage.setItem('orderCounter', orderCounter.toString());
-
-    const orderId =
-      'LMS-' +
-      currentYear +
-      '-' +
-      orderCounter.toString().padStart(4, '0');
-
-    const receipt: OrderReceipt = {
-      orderId: orderId,
-      purchasedBy: this.username,
-      items: itemsToPurchase.map(item => ({ ...item })),
-      total: this.checkoutTotal(),
-      paymentMethod: this.paymentMethod(),
-      counter: orderCounter,
-      date: new Date().toLocaleString()
+    const data: Checkout = {
+      source: this.directCheckoutItem() ? 'direct' : 'cart',
+      items: items.sort((a, b) => a.bookId - b.bookId),
     };
-
-    this.orderReceipt.set(receipt);
-
-    localStorage.setItem(
-      'lastOrderReceipt',
-      JSON.stringify(receipt)
-    );
-
-    this.showCheckout.set(false);
-    this.showReceipt.set(true);
-  }
-
-  // Finish order
-  finishOrder(): void {
-    const receipt = this.orderReceipt();
-    const isDirectPurchase = this.directCheckoutItem() !== null;
-
-    if (receipt) {
-      if (!isDirectPurchase) {
-        const purchasedIds = receipt.items.map(item => item.id);
-        this.cart.update(items =>
-          items.filter(item => !purchasedIds.includes(item.id))
-        );
-        this.saveCart();
-      }
-
-      // Save order to order history
-      const orderHistory = this.loadData<OrderReceipt[]>(
-        'orderHistory',
-        []
-      );
-
-      orderHistory.push(receipt);
-
-      localStorage.setItem(
-        'orderHistory',
-        JSON.stringify(orderHistory)
-      );
+    const selection = JSON.stringify(data);
+    if (this.checkoutAttempt?.selection !== selection) {
+      this.checkoutAttempt = { selection, key: crypto.randomUUID() };
     }
-
-    this.showReceipt.set(false);
-    this.orderReceipt.set(null);
-    this.directCheckoutItem.set(null);
+    this.checkoutError.set('');
+    this.checkoutBusy.set(true);
+    this.shop.checkout(data, this.checkoutAttempt.key).pipe(
+      finalize(() => this.checkoutBusy.set(false)),
+    ).subscribe({
+      next: order => {
+        this.checkoutAttempt = null;
+        this.orderReceipt.set(order);
+        this.showCheckout.set(false);
+        this.directCheckoutItem.set(null);
+        this.showReceipt.set(true);
+      },
+      error: error => {
+        this.checkoutError.set(authErrorMessage(error, 'Unable to save the order. Please try again.'));
+        if (error instanceof HttpErrorResponse && error.status === 409) {
+          this.shop.refresh();
+          this.catalog.refresh();
+        }
+      },
+    });
   }
 
-  // Close checkout modal
   closeCheckout(): void {
+    if (this.checkoutBusy()) return;
     this.showCheckout.set(false);
     this.directCheckoutItem.set(null);
   }
 
-  // Close receipt modal
   closeReceipt(): void {
     this.showReceipt.set(false);
-    this.directCheckoutItem.set(null);
+    this.orderReceipt.set(null);
   }
 
   // Request book acquisition

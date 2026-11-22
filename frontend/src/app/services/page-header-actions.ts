@@ -1,35 +1,14 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 
-export interface WishlistItem {
-  id: number;
-  title: string;
-  price: number;
-}
-
-function loadWishlist(): WishlistItem[] {
-  try {
-    const savedWishlist = globalThis.localStorage?.getItem('wishlist');
-    return savedWishlist ? (JSON.parse(savedWishlist) as WishlistItem[]) : [];
-  } catch {
-    return [];
-  }
-}
+import { ShopService } from './shop.service';
 
 @Injectable({ providedIn: 'root' })
 export class PageHeaderActions {
+  private readonly shop = inject(ShopService);
   readonly shopCartRequested = new Subject<void>();
   readonly shopCheckoutRequested = new Subject<void>();
-  readonly wishlist = signal<WishlistItem[]>(loadWishlist());
+  readonly wishlist = this.shop.wishlist;
   readonly shopWishlistCount = computed(() => this.wishlist().length);
-  readonly shopCartCount = signal(0);
-
-  saveWishlist(): void {
-    globalThis.localStorage?.setItem('wishlist', JSON.stringify(this.wishlist()));
-  }
-
-  removeWishlist(bookId: number): void {
-    this.wishlist.update(items => items.filter(item => item.id !== bookId));
-    this.saveWishlist();
-  }
+  readonly shopCartCount = computed(() => this.shop.cart().reduce((count, item) => count + item.quantity, 0));
 }

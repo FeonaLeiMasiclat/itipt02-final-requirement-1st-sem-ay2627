@@ -1,5 +1,7 @@
 
 import { Component, signal, computed, inject } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { finalize } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -38,35 +40,17 @@ import {
   refreshOutline
 } from 'ionicons/icons';
 
-import { AuthService } from '../services/auth_service';
+import { AuthService, authErrorMessage } from '../services/auth_service';
 import { PageHeaderActions } from '../services/page-header-actions';
 import { AppDialogService } from '../services/app-dialog.service';
+import { BorrowRequest, BorrowingService } from '../services/borrowing.service';
+import { ShopService } from '../services/shop.service';
 
-// Owned Book Interface
-interface OwnedBook {
-  id: number;
-  title: string;
-  author: string;
-  status: string;
-  dueDate: string;
-}
-
-interface BorrowRequest {
-  id: number;
-  bookTitle: string;
-  reader: string;
-  status: string;
-  requestedAt?: string;
-  returnedAt?: string;
-  author?: string;
-  genre?: string;
-  availableCopies?: number;
-  price?: number;
-  rating?: number;
-  reviews?: number;
-  synopsis?: string;
-  orderId?: string;
-}
+type ProfileBookDetails = Pick<BorrowRequest, 'id' | 'bookTitle' | 'author'> &
+  Partial<Omit<BorrowRequest, 'id' | 'bookTitle' | 'author' | 'status'>> & {
+    status: BorrowRequest['status'] | 'Awaiting Pickup';
+    orderId?: string;
+  };
 
 interface PurchasedBook {
   id: number;
@@ -76,50 +60,7 @@ interface PurchasedBook {
   quantity: number;
   orderId: string;
   purchasedAt: string;
-}
-
-interface PurchaseHistoryOrder {
-  orderId: string;
-  date: string;
-  purchasedBy?: string;
-  items: Array<{
-    id: number;
-    title: string;
-    author: string;
-    price: number;
-    quantity: number;
-  }>;
-}
-
-interface ArchivedBook {
-  id: number;
-  title: string;
-  author: string;
-  returnedDate: string;
-}
-
-// Counter Order Interface
-interface CounterOrder {
-  id: string;
-  bookTitle: string;
-  counterDesk: number;
-  price: number;
-  status: string;
-}
-
-interface PendingCounterOrder {
-  id: number;
-  bookTitle: string;
-  status: string;
-}
-
-interface ProfileCartItem {
-  id: number;
-  title: string;
-  author: string;
-  price: number;
-  quantity: number;
-  selected: boolean;
+  status: 'Awaiting Pickup';
 }
 
 interface FineItem {
@@ -144,6 +85,7 @@ interface CounterPaymentSlip {
   standalone: true,
 
   imports: [
+    DatePipe,
     FormsModule,
     IonContent,
     IonButton,
@@ -163,77 +105,42 @@ export class ProfilePage {
   // Dependency Injection
   private router = inject(Router);
   private authService = inject(AuthService);
+  readonly borrowing = inject(BorrowingService);
+  readonly shop = inject(ShopService);
   private pageHeaderActions = inject(PageHeaderActions);
 
-  // Get Saved User Information
-  private savedUser = this.authService.getUserData();
-  private savedProfile = this.authService.getProfileInformation();
-  private readonly currentReader = this.savedUser?.user?.username ||
-    this.savedUser?.username || this.savedUser?.user?.full_name || this.savedUser?.full_name || '';
-
-  // Component Properties
-  userName = signal(
-    this.savedProfile.fullName ||
-    this.savedUser?.user?.full_name ||
-    this.savedUser?.full_name ||
-    this.savedUser?.username ||
-    'Reader'
-  );
-
-  userEmail = signal(
-    this.savedProfile.email ||
-    this.savedUser?.user?.email ||
-    this.savedUser?.email ||
-    'Email not provided'
-  );
-
-  profileDateOfBirth = signal(this.savedProfile.dateOfBirth);
-  profileAddress = signal(this.savedProfile.address);
+  userName = computed(() => this.authService.currentUser()?.fullName || 'Reader');
+  userEmail = computed(() => this.authService.currentUser()?.email || 'Email not provided');
+  profileDateOfBirth = computed(() => this.authService.currentUser()?.dateOfBirth ?? '');
+  profileAddress = computed(() => this.authService.currentUser()?.address ?? '');
   profileEditorOpen = signal(false);
   profileEditorError = signal('');
+  profileSaving = signal(false);
   editFullName = '';
   editDateOfBirth = '';
   editAddress = '';
   editEmail = '';
 
-  borrowRequests = signal<BorrowRequest[]>(this.loadBorrowRequests());
-  purchasedBooks = signal<PurchasedBook[]>(this.loadPurchasedBooks());
+  readonly readerBorrowRequests = this.borrowing.requests;
+  readonly changingLoan = signal(false);
+  readonly purchasedBooks = computed<PurchasedBook[]>(() => this.shop.orders().flatMap(order =>
+    order.items.map(item => ({ ...item, orderId: order.orderId, purchasedAt: order.date, status: order.status }))
+  ));
   borrowedDetailsOpen = signal(false);
-  selectedBorrowRequest = signal<BorrowRequest | null>(null);
-  readerBorrowRequests = computed(() => this.borrowRequests()
-    .filter(request => request.reader === this.currentReader)
-    .sort((a, b) => b.id - a.id));
-  approvedBorrowCount = computed(() =>
-    this.readerBorrowRequests().filter(request => request.status === 'Approved').length
-  );
+  selectedBorrowRequest = signal<ProfileBookDetails | null>(null);
 
   cardId = signal('LIB-2026-8812');
 
   // Account Statistics
-  cartItems = signal<ProfileCartItem[]>(this.loadCartItems());
+  readonly cartItems = this.shop.cart;
   addToCartCount = computed(() =>
     this.cartItems().reduce((total, item) => total + item.quantity, 0)
   );
   cartTotal = computed(() =>
     this.cartItems().reduce((total, item) => total + item.price * item.quantity, 0)
   );
-  counterOrders = signal<CounterOrder[]>([
-    {
-      id: 'ORD-4091',
-      bookTitle: 'Chasing in the Wild',
-      counterDesk: 2,
-      price: 310,
-      status: 'Processing'
-    },
-    {
-      id: 'ORD-4088',
-      bookTitle: 'Golden Scenery of Tomorrow',
-      counterDesk: 1,
-      price: 340,
-      status: 'For Verification'
-    }
-  ]);
-  counterOrderCount = computed(() => this.counterOrders().length);
+  readonly counterOrders = this.shop.orders;
+  readonly counterOrderCount = computed(() => this.counterOrders().length);
   archiveSearch = signal('');
 
   fineItems = signal<FineItem[]>([
@@ -265,61 +172,21 @@ export class ProfilePage {
   );
   counterPaymentSlip = signal<CounterPaymentSlip | null>(null);
 
-  archivedBooks = signal<ArchivedBook[]>([
-    {
-      id: 5,
-      title: 'Safe Skies, Archer',
-      author: 'Gwy Saludes',
-      returnedDate: 'Nov 21, 2026'
-    }
-  ]);
+  readonly archivedBooks = computed(() => this.readerBorrowRequests().filter(
+    request => request.kind === 'Borrow' && request.status === 'Returned'
+  ));
   archiveCount = computed(() => this.archivedBooks().length);
   filteredArchiveBooks = computed(() => {
     const search = this.archiveSearch().trim().toLowerCase();
     return this.archivedBooks().filter(book =>
-      book.title.toLowerCase().includes(search) ||
+      book.bookTitle.toLowerCase().includes(search) ||
       book.author.toLowerCase().includes(search)
     );
   });
 
-  // Pending Orders
-  pendingOrders = signal<PendingCounterOrder[]>([]);
-
-  pendingCounterOrders = computed(() => {
-    return this.pendingOrders().length;
-  });
-
-  // Owned Books
-  ownedBooks = signal<OwnedBook[]>([
-    {
-      id: 2,
-      title: 'The Pragmatic Programmer',
-      author: 'Andrew Hunt',
-      status: 'Borrowed',
-      dueDate: 'Dec 05, 2026'
-    },
-    {
-      id: 3,
-      title: 'Clean Code',
-      author: 'Robert C. Martin',
-      status: 'Borrowed',
-      dueDate: 'Dec 05, 2026'
-    },
-    {
-      id: 1,
-      title: 'The Rain in España',
-      author: 'Gwy Saludes',
-      status: 'Borrowed',
-      dueDate: 'Dec 05, 2026'
-    },
-    {
-      id: 4,
-      title: 'Chasing in the Wild',
-      author: 'Gwy Saludes',
-      status: 'Borrowed',
-      dueDate: 'Dec 05, 2026'
-    }
-  ]);
+  readonly ownedBooks = computed(() => this.readerBorrowRequests().filter(
+    request => request.kind === 'Borrow' && (request.status === 'Approved' || request.status === 'Return Pending')
+  ));
   borrowedCount = computed(() => this.ownedBooks().length);
 
   // Selected Statistics Section
@@ -351,10 +218,11 @@ export class ProfilePage {
   }
 
   openProfileEditor(): void {
-    this.editFullName = this.userName() === 'Reader' ? '' : this.userName();
+    const user = this.authService.currentUser();
+    this.editFullName = user?.fullName ?? '';
     this.editDateOfBirth = this.profileDateOfBirth();
     this.editAddress = this.profileAddress();
-    this.editEmail = this.userEmail() === 'Email not provided' ? '' : this.userEmail();
+    this.editEmail = user?.email ?? '';
     this.profileEditorError.set('');
     this.profileEditorOpen.set(true);
   }
@@ -365,6 +233,7 @@ export class ProfilePage {
   }
 
   saveProfileInformation(): void {
+    if (this.profileSaving()) return;
     const profile = {
       fullName: this.editFullName.trim(),
       dateOfBirth: this.editDateOfBirth,
@@ -380,18 +249,26 @@ export class ProfilePage {
       return;
     }
     const birthDate = new Date(`${profile.dateOfBirth}T00:00:00`);
-    if (Number.isNaN(birthDate.getTime()) || birthDate >= new Date()) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (Number.isNaN(birthDate.getTime()) || birthDate >= today) {
       this.profileEditorError.set('Please enter a valid date of birth.');
       return;
     }
 
-    this.authService.saveProfileInformation(profile);
-    this.userName.set(profile.fullName);
-    this.userEmail.set(profile.email);
-    this.profileDateOfBirth.set(profile.dateOfBirth);
-    this.profileAddress.set(profile.address);
-    this.closeProfileEditor();
-    this.appDialog.show('Information Updated', 'Your personal information has been updated.', 'success');
+    this.profileEditorError.set('');
+    this.profileSaving.set(true);
+    this.authService.saveProfileInformation(profile).subscribe({
+      next: () => {
+        this.profileSaving.set(false);
+        this.closeProfileEditor();
+        this.appDialog.show('Information Updated', 'Your personal information has been updated.', 'success');
+      },
+      error: error => {
+        this.profileSaving.set(false);
+        this.profileEditorError.set(authErrorMessage(error, 'Unable to save your personal information.'));
+      },
+    });
   }
 
   formatProfileDate(value: string): string {
@@ -402,89 +279,13 @@ export class ProfilePage {
     });
   }
 
-  private loadBorrowRequests(): BorrowRequest[] {
-    try {
-      const requests = JSON.parse(localStorage.getItem('borrowRequests') || '[]');
-      const savedRequests = Array.isArray(requests) ? requests as BorrowRequest[] : [];
-      const sampleId = 999_001;
-      if (this.currentReader && !savedRequests.some(request => request.id === sampleId)) {
-        savedRequests.unshift({
-          id: sampleId,
-          bookTitle: 'The Great Gatsby',
-          author: 'F. Scott Fitzgerald',
-          reader: this.currentReader,
-          status: 'Approved',
-          requestedAt: this.formatDate(new Date()),
-          genre: 'Romance',
-          availableCopies: 10,
-          price: 350,
-          rating: 4.8,
-          reviews: 120,
-          synopsis: 'A young dreamer enters the glittering world of the Jazz Age, where ambition, love, and the past collide.'
-        });
-        localStorage.setItem('borrowRequests', JSON.stringify(savedRequests));
-      }
-      return savedRequests;
-    } catch {
-      return [];
-    }
-  }
-
-  private loadPurchasedBooks(): PurchasedBook[] {
-    try {
-      const savedOrders = JSON.parse(localStorage.getItem('orderHistory') || '[]');
-      const orders = Array.isArray(savedOrders) ? savedOrders as PurchaseHistoryOrder[] : [];
-
-      const purchasedBooks = orders
-        .filter(order => !order.purchasedBy || order.purchasedBy === this.currentReader)
-        .flatMap(order => (order.items || []).map((item, index) => ({
-          id: item.id ?? index,
-          title: item.title,
-          author: item.author,
-          price: item.price,
-          quantity: item.quantity,
-          orderId: order.orderId,
-          purchasedAt: order.date
-        })))
-        .reverse();
-
-      const sampleBook: PurchasedBook = {
-        id: -2002,
-        title: 'How Great Books Go',
-        author: 'Gabriella Smith',
-        price: 360,
-        quantity: 1,
-        orderId: `DEMO-${this.currentReader || 'READER'}-002`,
-        purchasedAt: new Date().toLocaleString()
-      };
-
-      if (purchasedBooks.length > 0) {
-        return [...purchasedBooks, sampleBook];
-      }
-
-      return [
-        {
-          ...sampleBook,
-          id: -2001,
-          title: 'The Great Gatsby',
-          author: 'F. Scott Fitzgerald',
-          price: 350,
-          orderId: `DEMO-${this.currentReader || 'READER'}-001`
-        },
-        sampleBook
-      ];
-    } catch {
-      return [];
-    }
+  ionViewWillEnter(): void {
+    this.borrowing.refresh();
+    this.shop.refresh();
   }
 
   borrowStatusClass(status: string): string {
-    const normalizedStatus = status === 'Rejected' ? 'Declined' : status;
-    return `borrow-status-${normalizedStatus.toLowerCase()}`;
-  }
-
-  borrowStatusLabel(status: string): string {
-    return status === 'Rejected' ? 'Declined' : status;
+    return status === 'Return Pending' ? 'borrow-status-pending' : `borrow-status-${status.toLowerCase()}`;
   }
 
   openBorrowedBookDetails(request: BorrowRequest): void {
@@ -497,8 +298,7 @@ export class ProfilePage {
       id: book.id,
       bookTitle: book.title,
       author: book.author,
-      reader: this.currentReader,
-      status: 'Purchased',
+      status: book.status,
       requestedAt: book.purchasedAt,
       price: book.price,
       orderId: book.orderId
@@ -516,49 +316,28 @@ export class ProfilePage {
     return '★'.repeat(filledStars) + '☆'.repeat(5 - filledStars);
   }
 
-  borrowedBookPrice(request: BorrowRequest): string {
+  borrowedBookPrice(request: ProfileBookDetails): string {
     return typeof request.price === 'number' ? `₱${request.price.toFixed(2)}` : 'Not listed';
   }
 
   returnBorrowRequest(requestId: number): void {
-    const request = this.borrowRequests().find(item => item.id === requestId);
-    if (!request || request.status !== 'Approved') return;
-
-    const updated = this.borrowRequests().map(item => item.id === requestId
-      ? { ...item, status: 'Returned', returnedAt: this.formatDate(new Date()) }
-      : item);
-    this.borrowRequests.set(updated);
-    localStorage.setItem('borrowRequests', JSON.stringify(updated));
+    if (this.changingLoan()) return;
+    this.changingLoan.set(true);
+    this.borrowing.requestReturn(requestId).pipe(finalize(() => this.changingLoan.set(false))).subscribe({
+      next: request => {
+        this.closeBorrowedBookDetails();
+        if (request.status === 'Return Pending') {
+          this.appDialog.show('Return Requested', 'The library will confirm the return once it receives the book.', 'success');
+        }
+      },
+      error: error => {
+        this.closeBorrowedBookDetails();
+        this.appDialog.show('Unable to request return', authErrorMessage(error, 'Please try again.'), 'warning');
+      },
+    });
   }
 
-  borrowedAuthor(request: BorrowRequest): string {
-    if (request.author?.trim()) return request.author;
-
-    const title = request.bookTitle.trim().toLowerCase();
-    const readerBookAuthors: Record<string, string> = {
-      'his unwritten promise': 'Cy Caleb Reid',
-      'dear future ex': 'Sky Mel Kordy',
-      'how great books go': 'Gabriella Smith',
-      'the midnight library': 'Matt Haig',
-      'the house beyond the fog': 'Mara Ellery',
-      'the last olympian': 'R. J. Calloway'
-    };
-    const knownAuthor = readerBookAuthors[title];
-    if (knownAuthor) return knownAuthor;
-
-    try {
-      const adminBooks = JSON.parse(localStorage.getItem('adminBooks') || '[]') as Array<{
-        title?: string;
-        author?: string;
-      }>;
-      return adminBooks.find(book => book.title?.trim().toLowerCase() === title)?.author
-        || 'Author details unavailable';
-    } catch {
-      return 'Author details unavailable';
-    }
-  }
-
-  readBorrowRequest(request: BorrowRequest): void {
+  readBorrowRequest(request: ProfileBookDetails): void {
     this.closeBorrowedBookDetails();
     this.appDialog.show(
       'Reading View Coming Soon',
@@ -566,23 +345,10 @@ export class ProfilePage {
     );
   }
 
-  private loadCartItems(): ProfileCartItem[] {
-    try {
-      const savedCart = localStorage.getItem('cart');
-      return savedCart ? JSON.parse(savedCart) as ProfileCartItem[] : [];
-    } catch (error) {
-      console.error('Error loading cart:', error);
-      return [];
-    }
-  }
-
-  private saveCartItems(): void {
-    localStorage.setItem('cart', JSON.stringify(this.cartItems()));
-  }
-
   removeCartItem(bookId: number): void {
-    this.cartItems.update(items => items.filter(item => item.id !== bookId));
-    this.saveCartItems();
+    this.shop.removeFromCart(bookId).subscribe({
+      error: error => this.appDialog.show('Unable to remove book', authErrorMessage(error, 'Please try again.'), 'warning'),
+    });
   }
 
   // Show Statistics Details
@@ -619,50 +385,14 @@ export class ProfilePage {
     this.archiveSearch.set(value ?? '');
   }
 
-  returnBorrowedBook(bookId: number): void {
-    const book = this.ownedBooks().find(item => item.id === bookId);
-    if (!book) {
-      return;
-    }
+  reborrowBook(requestId: number): void {
+    const book = this.archivedBooks().find(item => item.id === requestId);
+    if (book?.bookId == null || book.bookStatus !== 'Active' || this.changingLoan()) return;
 
-    this.ownedBooks.update(items => items.filter(item => item.id !== bookId));
-    this.archivedBooks.update(items => [
-      ...items,
-      {
-        id: book.id,
-        title: book.title,
-        author: book.author,
-        returnedDate: this.formatDate(new Date())
-      }
-    ]);
-  }
-
-  reborrowBook(bookId: number): void {
-    const book = this.archivedBooks().find(item => item.id === bookId);
-    if (!book) {
-      return;
-    }
-
-    this.archivedBooks.update(items => items.filter(item => item.id !== bookId));
-    const dueDate = new Date();
-    dueDate.setDate(dueDate.getDate() + 14);
-    this.ownedBooks.update(items => [
-      ...items,
-      {
-        id: book.id,
-        title: book.title,
-        author: book.author,
-        status: 'Borrowed',
-        dueDate: this.formatDate(dueDate)
-      }
-    ]);
-  }
-
-  private formatDate(date: Date): string {
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: '2-digit',
-      year: 'numeric'
+    this.changingLoan.set(true);
+    this.borrowing.requestBook(book.bookId).pipe(finalize(() => this.changingLoan.set(false))).subscribe({
+      next: () => this.appDialog.show('Request Submitted', 'Your new borrow request is pending approval.', 'success'),
+      error: error => this.appDialog.show('Unable to submit request', authErrorMessage(error, 'Please try again.'), 'warning'),
     });
   }
 
@@ -671,21 +401,11 @@ export class ProfilePage {
   }
 
   async checkoutCart(): Promise<void> {
-    this.cartItems.update(items => items.map(item => ({ ...item, selected: true })));
-    this.saveCartItems();
-
     const navigated = await this.router.navigateByUrl('/book-shop');
     if (navigated) {
       this.pageHeaderActions.shopCheckoutRequested.next();
     }
   }
 
-  // Start Reading
-  startReading(book: OwnedBook) {
-    this.appDialog.show(
-      'Reading View Coming Soon',
-      'The reading view for “' + book.title + '” is not available yet.'
-    );
-  }
 
 }

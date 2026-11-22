@@ -54,6 +54,12 @@
         <h2 id="borrowed-requests-title">Borrowed Books</h2>
       </div>
 
+      @if (borrowing.error()) {
+        <div class="borrowed-request-empty">
+          <p role="alert">{{ borrowing.error() }}</p>
+          <ion-button fill="clear" (click)="borrowing.refresh()">Retry</ion-button>
+        </div>
+      }
       @if (readerBorrowRequests().length > 0) {
         <div class="borrowed-books-row horizontal-scroll">
           @for (request of readerBorrowRequests(); track request.id) {
@@ -68,31 +74,43 @@
                 <ion-icon name="book-outline"></ion-icon>
               </div>
               <h3>{{ request.bookTitle }}</h3>
-              @if (request.returnedAt) {
-                <small class="borrowed-book-date">Returned {{ request.returnedAt }}</small>
-              } @else if (request.requestedAt) {
-                <small class="borrowed-book-date">Requested {{ request.requestedAt }}</small>
+              @if (request.kind === 'Acquisition') {
+                <small class="borrowed-book-date">Acquisition request</small>
+              } @else if (request.returnedAt) {
+                <small class="borrowed-book-date">Returned {{ request.returnedAt | date:'mediumDate' }}</small>
+              } @else if (request.status === 'Return Pending') {
+                <small class="borrowed-book-date">Waiting for admin confirmation</small>
+              } @else if (request.status === 'Approved' && request.dueDate) {
+                <small class="borrowed-book-date">Due {{ request.dueDate | date:'mediumDate' }}</small>
+              } @else {
+                <small class="borrowed-book-date">Requested {{ request.requestedAt | date:'mediumDate' }}</small>
               }
               <small class="borrowed-book-status" [class]="borrowStatusClass(request.status)">
-                {{ borrowStatusLabel(request.status) }}
+                {{ request.status }}
               </small>
-              @if (request.status === 'Approved') {
+              @if (request.kind === 'Borrow' && request.status === 'Approved') {
                 <div class="borrowed-book-actions">
                   <ion-button class="read-request-button" size="small" (click)="$event.stopPropagation(); readBorrowRequest(request)">
                     Read
                   </ion-button>
-                  <ion-button class="return-request-button" size="small" (click)="$event.stopPropagation(); returnBorrowRequest(request.id)">
-                    Return
+                  <ion-button class="return-request-button" size="small" [disabled]="changingLoan()" (click)="$event.stopPropagation(); returnBorrowRequest(request.id)">
+                    Request Return
+                  </ion-button>
+                </div>
+              } @else if (request.status === 'Returned' && request.bookId && request.bookStatus === 'Active') {
+                <div class="borrowed-book-actions">
+                  <ion-button class="return-request-button" size="small" [disabled]="changingLoan()" (click)="$event.stopPropagation(); reborrowBook(request.id)">
+                    Re-borrow
                   </ion-button>
                 </div>
               }
             </article>
           }
         </div>
-      } @else {
+      } @else if (!borrowing.error()) {
         <div class="borrowed-request-empty">
           <ion-icon name="book-outline"></ion-icon>
-          <p>No borrowed book requests yet.</p>
+          <p>{{ borrowing.loading() ? 'Loading book requests…' : 'No borrowed book requests yet.' }}</p>
         </div>
       }
     </section>
@@ -116,15 +134,20 @@
                 <ion-icon name="book-outline"></ion-icon>
               </div>
               <h3>{{ book.title }}</h3>
-              <small class="borrowed-book-date">Purchased {{ book.purchasedAt }}</small>
-              <small class="borrowed-book-status borrow-status-purchased">Purchased</small>
+              <small class="borrowed-book-date">Ordered {{ book.purchasedAt | date:'mediumDate' }}</small>
+              <small class="borrowed-book-status borrow-status-purchased">{{ book.status }}</small>
             </article>
           }
         </div>
       } @else {
         <div class="borrowed-request-empty">
           <ion-icon name="book-outline"></ion-icon>
-          <p>No purchased books yet.</p>
+          @if (shop.error()) {
+            <p role="alert">{{ shop.error() }}</p>
+            <ion-button fill="clear" (click)="shop.refresh()">Retry</ion-button>
+          } @else {
+            <p>{{ shop.loading() ? 'Loading pickup orders…' : 'No book orders yet.' }}</p>
+          }
         </div>
       }
     </section>
@@ -282,16 +305,17 @@
         </div>
 
         <div class="profile-counter-orders">
-          @for (order of counterOrders(); track order.id) {
+          @for (order of counterOrders(); track order.orderId) {
             <div class="profile-counter-order">
               <div class="profile-counter-order-copy">
-                <span class="profile-counter-order-id">ORDER #{{ order.id }}</span>
-                <h3>{{ order.bookTitle }}</h3>
-                <p>Counter Desk {{ order.counterDesk }} · ₱{{ order.price }}</p>
+                <span class="profile-counter-order-id">ORDER #{{ order.orderId }}</span>
+                @for (item of order.items; track item.id) {
+                  <h3>{{ item.title }} ×{{ item.quantity }}</h3>
+                }
+                <p>Main Library Counter · ₱{{ order.total.toFixed(2) }}</p>
               </div>
               <ion-badge
-                class="profile-counter-status"
-                [class.verification]="order.status === 'For Verification'">
+                class="profile-counter-status verification">
                 {{ order.status }}
               </ion-badge>
             </div>
@@ -327,21 +351,24 @@
                   <ion-icon name="book-outline"></ion-icon>
                 </span>
                 <div class="borrowed-book-details">
-                  <h3>{{ book.title }}</h3>
+                  <h3>{{ book.bookTitle }}</h3>
                   <p>{{ book.author }}</p>
                   <ion-badge class="borrowed-book-status">
                     <ion-icon name="time-outline"></ion-icon>
-                    Borrowed
+                    {{ book.status === 'Return Pending' ? 'Return Pending' : 'Borrowed' }}
                   </ion-badge>
-                  <p class="borrowed-book-due">Due: {{ book.dueDate }}</p>
+                  <p class="borrowed-book-due">Due: {{ book.dueDate | date:'mediumDate' }}</p>
                 </div>
-                <ion-button
-                  fill="outline"
-                  class="return-book-button"
-                  aria-label="Return {{ book.title }}"
-                  (click)="returnBorrowedBook(book.id)">
-                  Return
-                </ion-button>
+                @if (book.status === 'Approved') {
+                  <ion-button
+                    fill="outline"
+                    class="return-book-button"
+                    aria-label="Request return for {{ book.bookTitle }}"
+                    [disabled]="changingLoan()"
+                    (click)="returnBorrowRequest(book.id)">
+                    Request Return
+                  </ion-button>
+                }
               </div>
             }
           </div>
@@ -389,18 +416,19 @@
                   <ion-icon name="checkmark-done-outline"></ion-icon>
                 </span>
                 <div class="archived-book-details">
-                  <h3>{{ book.title }}</h3>
+                  <h3>{{ book.bookTitle }}</h3>
                   <p>{{ book.author }}</p>
                   <ion-badge class="archived-book-status">
                     <ion-icon name="checkmark-circle"></ion-icon>
                     Returned
                   </ion-badge>
-                  <p class="archived-book-return-date">Returned: {{ book.returnedDate }}</p>
+                  <p class="archived-book-return-date">Returned: {{ book.returnedAt | date:'mediumDate' }}</p>
                 </div>
                 <ion-button
                   fill="clear"
                   class="reborrow-book-button"
-                  aria-label="Re-borrow {{ book.title }}"
+                  aria-label="Re-borrow {{ book.bookTitle }}"
+                  [disabled]="changingLoan() || !book.bookId || book.bookStatus !== 'Active'"
                   (click)="reborrowBook(book.id)">
                   <ion-icon name="refresh-outline" slot="start"></ion-icon>
                   Re-borrow
@@ -439,35 +467,38 @@
           <hr>
           <div class="book-details-facts">
             <p><strong>Title:</strong><span>{{ book.bookTitle }}</span></p>
-            <p><strong>Author:</strong><span>{{ borrowedAuthor(book) }}</span></p>
+            <p><strong>Author:</strong><span>{{ book.author || 'Author details unavailable' }}</span></p>
             <p><strong>Genre:</strong><span>{{ book.genre || 'Not listed' }}</span></p>
             <p><strong>Available copies:</strong><span>{{ book.availableCopies ?? 'Not listed' }}</span></p>
             <p><strong>Price:</strong><span>{{ borrowedBookPrice(book) }}</span></p>
             @if (book.orderId) {
               <p><strong>Order ID:</strong><span>{{ book.orderId }}</span></p>
             }
-            <p><strong>Status:</strong><span>{{ borrowStatusLabel(book.status) }}</span></p>
+            <p><strong>Status:</strong><span>{{ book.status }}</span></p>
+            @if (book.kind === 'Borrow' && book.status === 'Approved' && book.dueDate) {
+              <p><strong>Due:</strong><span>{{ book.dueDate | date:'mediumDate' }}</span></p>
+            }
           </div>
-          @if (book.rating !== undefined || book.reviews !== undefined) {
+          @if (book.rating != null || book.reviews != null) {
             <div class="book-details-reviews">
               <strong>Reviews:</strong>
-              @if (book.rating !== undefined) {
+              @if (book.rating != null) {
                 <span class="book-details-stars">{{ starsFor(book.rating) }}</span>
               }
-              @if (book.reviews !== undefined) {
+              @if (book.reviews != null) {
                 <span>({{ book.reviews }})</span>
               }
             </div>
           }
           <h3>Synopsis:</h3>
           <p class="book-details-synopsis">{{ book.synopsis || 'No synopsis is available for this book.' }}</p>
-          @if (book.status === 'Approved') {
+          @if (book.kind === 'Borrow' && book.status === 'Approved') {
             <div class="book-details-actions">
               <ion-button expand="block" class="borrow-book-button" (click)="readBorrowRequest(book)">
                 Read this Book
               </ion-button>
-              <ion-button expand="block" class="details-cart-button" (click)="returnBorrowRequest(book.id); closeBorrowedBookDetails()">
-                Return Book
+              <ion-button expand="block" class="details-cart-button" [disabled]="changingLoan()" (click)="returnBorrowRequest(book.id)">
+                Request Return
               </ion-button>
             </div>
           }
@@ -505,7 +536,9 @@
         }
         <div class="profile-editor-actions">
           <ion-button fill="outline" class="profile-editor-cancel" type="button" (click)="closeProfileEditor()">Cancel</ion-button>
-          <ion-button class="profile-editor-save" type="submit">Save Changes</ion-button>
+          <ion-button class="profile-editor-save" type="submit" [disabled]="profileSaving()">
+            {{ profileSaving() ? 'Saving...' : 'Save Changes' }}
+          </ion-button>
         </div>
       </form>
     </section>

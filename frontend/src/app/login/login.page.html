@@ -21,19 +21,21 @@
 
         <form (ngSubmit)="login()">
 
-          <!-- Username Input -->
+          <!-- Email or Username Input -->
           <div class="input-container">
 
             <ion-icon name="person" class="input-icon"></ion-icon>
 
             <ion-input
-              label="Username"
+              label="Email or username"
               labelPlacement="floating"
               type="text"
               name="username"
-              [(ngModel)]="username"
+              [(ngModel)]="identifier"
               required
-              autocomplete="username">
+              autocomplete="username"
+              autocapitalize="off"
+              spellcheck="false">
             </ion-input>
 
           </div>

@@ -1254,42 +1254,40 @@ ion-modal ion-input {
 }
 
 .request-status-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
   flex: 0 0 auto;
   margin: 0 0 9px;
-  padding: 3px;
+  padding: 4px;
   border: 1px solid #e0d4bd;
   border-radius: 13px;
   background: #eee6d4;
-  --background: transparent;
-  --indicator-color: transparent;
-  --color: #716b5e;
-  --color-checked: #fffaf0;
 }
 
-.request-status-tabs ion-segment-button {
-  min-height: 32px;
-  --border-radius: 10px;
-  --background-checked: #365341;
-  --color-checked: #fffaf0;
-  --indicator-box-shadow: none;
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: none;
+.request-status-filter {
+  min-width: 0;
+  min-height: 44px;
+  padding: 5px 3px;
+  border: 1px solid #d8cbb0;
+  border-radius: 9px;
+  background: #faf5e8;
+  color: #34493f;
+  font: 600 12px/1.2 Arial, sans-serif;
+  overflow-wrap: anywhere;
+  cursor: pointer;
 }
 
-.request-status-tabs ion-segment-button::part(indicator) {
-  display: none;
-}
-
-.request-status-tabs ion-segment-button.segment-button-checked::part(native) {
-  border-radius: 10px;
+.request-status-filter[aria-pressed='true'] {
+  border-color: #365341;
   background: #365341;
   color: #fffaf0;
 }
 
-.request-status-tabs ion-label {
-  margin: 0;
-  white-space: nowrap;
+.request-status-filter:focus-visible,
+.purchased-customer-row:focus-visible {
+  outline: 2px solid #365341;
+  outline-offset: 1px;
 }
 
 .request-buttons {
@@ -1453,8 +1451,10 @@ ion-modal ion-input {
   background: #fcf9f2;
 }
 
-.purchased-item-main {
-  min-width: 0;
+.purchased-customer-row {
+  width: 100%;
+  text-align: start;
+  cursor: pointer;
 }
 
 .purchased-item-title-row {
@@ -1464,7 +1464,8 @@ ion-modal ion-input {
   gap: 8px;
 }
 
-.purchased-list-item h3 {
+.purchased-list-item h3,
+.purchased-item-name {
   min-width: 0;
   margin: 0;
   color: #334536;
@@ -1472,8 +1473,15 @@ ion-modal ion-input {
   overflow-wrap: anywhere;
 }
 
+.purchased-order-line {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e7dcc8;
+}
+
 .purchased-price-badge {
   flex: 0 0 auto;
+  white-space: nowrap;
   padding: 5px 8px;
   border-radius: 10px;
   background: #e4ecdf;
@@ -1482,7 +1490,6 @@ ion-modal ion-input {
   font-weight: 700;
 }
 
-.purchased-list-item p,
 .purchased-list-item small {
   display: block;
   margin: 5px 0 0;
@@ -1689,10 +1696,6 @@ ion-modal ion-input {
     gap: 7px;
     padding: 8px 5px;
     font-size: 11px;
-  }
-
-  .request-status-tabs ion-segment-button {
-    font-size: 8px;
   }
 
   .log-filter-options {
