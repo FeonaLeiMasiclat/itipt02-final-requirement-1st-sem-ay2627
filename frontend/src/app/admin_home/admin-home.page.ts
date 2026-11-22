@@ -14,7 +14,10 @@ import {
   IonIcon,
   IonCard,
   IonBadge,
+  IonLabel,
   IonModal,
+  IonSegment,
+  IonSegmentButton,
   IonSearchbar,
   IonInput,
   IonTextarea,
@@ -31,13 +34,22 @@ import {
   documentTextOutline,
   listOutline,
   bookOutline,
+  personOutline,
+  bookmarkOutline,
+  pricetagOutline,
+  starOutline,
+  star,
   createOutline,
   archiveOutline,
   refreshOutline,
   trashOutline,
   informationCircleOutline,
   closeOutline,
+  checkmarkCircleOutline,
+  downloadOutline,
+  checkmarkOutline,
   bagOutline,
+  bagCheckOutline,
   chevronForwardOutline,
   chevronDownOutline,
   layersOutline,
@@ -59,6 +71,27 @@ interface BorrowRequest {
   status: string;
   requestedAt?: string;
   author?: string;
+}
+
+type RequestStatusFilter = 'All' | 'Approved' | 'Returned';
+type AdminLogCategory = 'Books' | 'Requests' | 'Reports';
+type AdminLogFilter = 'All' | AdminLogCategory;
+
+interface AdminLogEntry {
+  id: number;
+  message: string;
+  category: AdminLogCategory;
+  dateKey: string;
+  dateLabel: string;
+  timeLabel: string;
+  iconName: string;
+  iconTone: 'book' | 'request' | 'report' | 'archive';
+}
+
+interface AdminLogGroup {
+  dateKey: string;
+  dateLabel: string;
+  entries: AdminLogEntry[];
 }
 
 interface PurchaseItem {
@@ -89,7 +122,10 @@ interface PurchaseOrder {
     IonIcon,
     IonCard,
     IonBadge,
+    IonLabel,
     IonModal,
+    IonSegment,
+    IonSegmentButton,
     IonSearchbar,
     IonInput,
     IonTextarea,
@@ -115,6 +151,19 @@ export class AdminHomePage {
       status: request.status === 'Rejected' ? 'Declined' : request.status
     }))
   );
+  requestStatusFilter = signal<RequestStatusFilter>('All');
+  requestCounts = computed(() => {
+    const requests = this.requests();
+    return {
+      all: requests.length,
+      approved: requests.filter(request => request.status === 'Approved').length,
+      returned: requests.filter(request => request.status === 'Returned').length
+    };
+  });
+  filteredRequests = computed(() => {
+    const status = this.requestStatusFilter();
+    return this.requests().filter(request => status === 'All' || request.status === status);
+  });
   purchasedOrders = signal<PurchaseOrder[]>(this.loadData<PurchaseOrder[]>('orderHistory', []));
   purchasedItems = computed(() => this.purchasedOrders().flatMap(order =>
     (order.items || []).map(item => ({ ...item, orderId: order.orderId, date: order.date }))
@@ -126,6 +175,33 @@ export class AdminHomePage {
     'Book catalog opened.',
     'Dashboard viewed.'
   ]));
+  logFilter = signal<AdminLogFilter>('All');
+  logEntries = computed(() => this.logs().map((entry, index) => this.parseAdminLog(entry, index)));
+  logCounts = computed(() => {
+    const entries = this.logEntries();
+    return {
+      all: entries.length,
+      books: entries.filter(entry => entry.category === 'Books').length,
+      requests: entries.filter(entry => entry.category === 'Requests').length,
+      reports: entries.filter(entry => entry.category === 'Reports').length
+    };
+  });
+  filteredLogEntries = computed(() => {
+    const filter = this.logFilter();
+    return this.logEntries().filter(entry => filter === 'All' || entry.category === filter);
+  });
+  logGroups = computed(() => {
+    const groups: AdminLogGroup[] = [];
+    for (const entry of this.filteredLogEntries()) {
+      let group = groups.find(item => item.dateKey === entry.dateKey);
+      if (!group) {
+        group = { dateKey: entry.dateKey, dateLabel: entry.dateLabel, entries: [] };
+        groups.push(group);
+      }
+      group.entries.push(entry);
+    }
+    return groups;
+  });
 
   private loadData<T>(key: string, fallback: T): T {
     try {
@@ -219,13 +295,22 @@ export class AdminHomePage {
       documentTextOutline,
       listOutline,
       bookOutline,
+      personOutline,
+      bookmarkOutline,
+      pricetagOutline,
+      starOutline,
+      star,
       createOutline,
       archiveOutline,
       refreshOutline,
       trashOutline,
       informationCircleOutline,
       closeOutline,
+      checkmarkCircleOutline,
+      downloadOutline,
+      checkmarkOutline,
       bagOutline,
+      bagCheckOutline,
       chevronForwardOutline,
       chevronDownOutline,
       layersOutline,
@@ -482,6 +567,12 @@ export class AdminHomePage {
     if (this.activeAdminAction() === 'requests') this.activeAdminAction.set(null);
   }
 
+  setRequestStatusFilter(value: unknown): void {
+    if (value === 'All' || value === 'Approved' || value === 'Returned') {
+      this.requestStatusFilter.set(value);
+    }
+  }
+
   // Approve or Reject Request
   updateRequest(id: number, status: string) {
 
@@ -595,6 +686,59 @@ export class AdminHomePage {
     this.books.update(bookList => bookList.filter(item => item.id !== id));
     this.catalog.save();
     this.addLog('Deleted book: ' + book.title);
+  }
+
+  private parseAdminLog(log: string, id: number): AdminLogEntry {
+    const separatorIndex = log.indexOf(' - ');
+    const timestampText = separatorIndex >= 0 ? log.slice(0, separatorIndex) : '';
+    const message = separatorIndex >= 0 ? log.slice(separatorIndex + 3) : log;
+    const timestamp = new Date(timestampText);
+    const hasTimestamp = timestampText.length > 0 && !Number.isNaN(timestamp.getTime());
+    const normalizedMessage = message.toLocaleLowerCase();
+    const category: AdminLogCategory = normalizedMessage.startsWith('request ')
+      ? 'Requests'
+      : normalizedMessage.includes('report')
+        ? 'Reports'
+        : 'Books';
+    const iconName = category === 'Reports'
+      ? 'download-outline'
+      : category === 'Requests'
+        ? normalizedMessage.includes('approv') ? 'checkmark-outline' : 'close-outline'
+        : normalizedMessage.startsWith('added book:')
+          ? 'add'
+          : normalizedMessage.startsWith('archived book')
+            ? 'archive-outline'
+            : normalizedMessage.startsWith('restored book')
+              ? 'refresh-outline'
+              : normalizedMessage.startsWith('deleted book')
+                ? 'trash-outline'
+                : normalizedMessage.startsWith('updated book')
+                  ? 'create-outline'
+                  : 'book-outline';
+    const dateKey = hasTimestamp
+      ? `${timestamp.getFullYear()}-${timestamp.getMonth() + 1}-${timestamp.getDate()}`
+      : 'undated';
+
+    return {
+      id,
+      message,
+      category,
+      dateKey,
+      dateLabel: hasTimestamp
+        ? timestamp.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase()
+        : 'EARLIER ACTIVITY',
+      timeLabel: hasTimestamp
+        ? timestamp.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' })
+        : '',
+      iconName,
+      iconTone: category === 'Reports'
+        ? 'report'
+        : category === 'Requests'
+          ? 'request'
+          : normalizedMessage.startsWith('archived book')
+            ? 'archive'
+            : 'book'
+    };
   }
 
   // Add User Log
