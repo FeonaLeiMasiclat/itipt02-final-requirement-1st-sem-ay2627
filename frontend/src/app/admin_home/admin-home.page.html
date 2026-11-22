@@ -1,7 +1,10 @@
 
 <ion-content [fullscreen]="true">
 
-  <div class="admin-page" [class.genre-filter-active]="genreFilterOpen()">
+  <div
+    class="admin-page"
+    [class.genre-filter-active]="genreFilterOpen()"
+    [class.admin-modal-active]="isModalOpen() || detailsOpen() || requestsOpen() || logsOpen() || purchasedBooksOpen() || genreFilterOpen()">
 
     <!-- Admin Header -->
     <ion-header class="admin-header">
@@ -32,6 +35,15 @@
 
       </ion-toolbar>
     </ion-header>
+
+    <ion-searchbar
+      class="admin-book-search"
+      aria-label="Search managed books"
+      placeholder="Search book title or keyword..."
+      [debounce]="100"
+      [value]="bookSearchQuery()"
+      (ionInput)="searchBooks($event.detail.value)">
+    </ion-searchbar>
 
     <!-- Welcome Section -->
     <section class="welcome-card">
@@ -130,7 +142,6 @@
           class="genre-picker-trigger"
           aria-label="Filter books by genre"
           (click)="openGenreFilter()">
-          <span class="management-divider">·</span>
           <span>{{ filterGenre() || 'All Genres' }}</span>
           <ion-icon name="chevron-down-outline"></ion-icon>
         </ion-button>
@@ -139,15 +150,6 @@
         {{ filteredBooks().length }} {{ filteredBooks().length === 1 ? 'Book' : 'Books' }}
       </span>
     </div>
-
-    <ion-searchbar
-      class="admin-book-search"
-      aria-label="Search managed books"
-      placeholder="Search book title or keyword..."
-      [debounce]="100"
-      [value]="bookSearchQuery()"
-      (ionInput)="searchBooks($event.detail.value)">
-    </ion-searchbar>
 
     <ion-modal
       cssClass="admin-unified-modal genre-filter-modal"
@@ -261,67 +263,94 @@
 
     <!-- Add/Edit Book Modal -->
     <ion-modal
-      cssClass="admin-unified-modal"
+      cssClass="admin-unified-modal book-form-modal"
       [isOpen]="isModalOpen()"
       (didDismiss)="closeModal()">
       <ng-template>
-        <div class="book-form-card">
-          <header class="admin-list-header">
+        <section class="book-form-card" role="dialog" aria-modal="true" aria-labelledby="book-form-title">
+          <header class="admin-list-header book-form-header">
             <div class="admin-list-title">
-              <ion-icon name="create-outline"></ion-icon>
-              <h2>{{ isEditing() ? 'Edit Book' : 'Add a Book' }}</h2>
+              <span class="book-form-heading-icon">
+                <ion-icon name="create-outline"></ion-icon>
+              </span>
+              <h2 id="book-form-title">{{ isEditing() ? 'Edit Book' : 'Add a Book' }}</h2>
             </div>
-            <ion-button class="admin-list-close" fill="clear" aria-label="Close" (click)="closeModal()">×</ion-button>
+            <ion-button class="admin-list-close" fill="clear" aria-label="Close" (click)="closeModal()">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
           </header>
 
           <form (ngSubmit)="saveBook()">
-            <label for="book-title">Book title</label>
-            <ion-input id="book-title" name="title" [(ngModel)]="formTitle" required></ion-input>
+            <div class="book-form-fields">
+              <div class="book-form-field">
+                <label for="book-title">Book title</label>
+                <ion-input id="book-title" name="title" placeholder="Enter book title" [(ngModel)]="formTitle" required></ion-input>
+              </div>
 
-            <label for="book-author">Author</label>
-            <ion-input id="book-author" name="author" [(ngModel)]="formAuthor" required></ion-input>
+              <div class="book-form-field">
+                <label for="book-author">Author</label>
+                <ion-input id="book-author" name="author" placeholder="Enter author name" [(ngModel)]="formAuthor" required></ion-input>
+              </div>
 
-            <label for="book-copies">Copies</label>
-            <ion-input id="book-copies" type="number" min="1" name="copies" [(ngModel)]="formCopies" required></ion-input>
+              <div class="book-form-field-row">
+                <div class="book-form-field">
+                  <label for="book-copies">Copies</label>
+                  <ion-input id="book-copies" type="number" min="1" name="copies" [(ngModel)]="formCopies" required></ion-input>
+                </div>
+                <div class="book-form-field">
+                  <label for="book-price">Price (₱)</label>
+                  <div class="book-price-input">
+                    <span aria-hidden="true">₱</span>
+                    <ion-input id="book-price" type="number" min="0" step="0.01" name="price" [(ngModel)]="formPrice" required></ion-input>
+                  </div>
+                </div>
+              </div>
 
-            <label for="book-genre">Genre</label>
-            <ion-select id="book-genre" name="genre" [(ngModel)]="formGenre" interface="popover" required>
-              <ion-select-option value="Romance">Romance</ion-select-option>
-              <ion-select-option value="Horror">Horror</ion-select-option>
-              <ion-select-option value="Sci-fi">Sci-fi</ion-select-option>
-              <ion-select-option value="Comedy">Comedy</ion-select-option>
-              <ion-select-option value="Mythology">Mythology</ion-select-option>
-            </ion-select>
+              <div class="book-form-field">
+                <label for="book-genre">Genre</label>
+                <ion-select id="book-genre" name="genre" [(ngModel)]="formGenre" interface="popover" required>
+                  <ion-select-option value="Romance">Romance</ion-select-option>
+                  <ion-select-option value="Horror">Horror</ion-select-option>
+                  <ion-select-option value="Sci-fi">Sci-fi</ion-select-option>
+                  <ion-select-option value="Comedy">Comedy</ion-select-option>
+                  <ion-select-option value="Mythology">Mythology</ion-select-option>
+                </ion-select>
+              </div>
 
-            <label for="book-price">Price (₱)</label>
-            <ion-input id="book-price" type="number" min="0" step="0.01" name="price" [(ngModel)]="formPrice" required></ion-input>
+              <div class="book-form-field-row">
+                <div class="book-form-field">
+                  <label for="book-rating">Review rating (0–5)</label>
+                  <ion-input id="book-rating" type="number" min="0" max="5" step="0.1" name="rating" [(ngModel)]="formRating" required></ion-input>
+                </div>
+                <div class="book-form-field">
+                  <label for="book-reviews">Number of reviews</label>
+                  <ion-input id="book-reviews" type="number" min="0" step="1" name="reviews" [(ngModel)]="formReviews" required></ion-input>
+                </div>
+              </div>
 
-            <label for="book-rating">Review rating (0–5)</label>
-            <ion-input id="book-rating" type="number" min="0" max="5" step="0.1" name="rating" [(ngModel)]="formRating" required></ion-input>
-
-            <label for="book-reviews">Number of reviews</label>
-            <ion-input id="book-reviews" type="number" min="0" step="1" name="reviews" [(ngModel)]="formReviews" required></ion-input>
-
-            <label for="book-synopsis">Synopsis</label>
-            <ion-textarea id="book-synopsis" name="synopsis" [(ngModel)]="formSynopsis" rows="4" autoGrow="true" placeholder="Write a short description of the book" required></ion-textarea>
+              <div class="book-form-field">
+                <label for="book-synopsis">Synopsis</label>
+                <ion-textarea id="book-synopsis" name="synopsis" rows="4" autoGrow="true" placeholder="Write a short description of the book" [(ngModel)]="formSynopsis" required></ion-textarea>
+              </div>
+            </div>
 
             <div class="form-actions">
               <ion-button type="button" class="cancel-button" fill="outline" (click)="closeModal()">Cancel</ion-button>
               <ion-button type="submit" class="save-button">{{ isEditing() ? 'Update Book' : 'Save Book' }}</ion-button>
             </div>
           </form>
-        </div>
+        </section>
       </ng-template>
     </ion-modal>
 
     <!-- Book Details Modal -->
     <ion-modal
-      cssClass="admin-unified-modal"
+      cssClass="admin-unified-modal book-details-modal"
       [isOpen]="detailsOpen()"
       (didDismiss)="detailsOpen.set(false)">
       <ng-template>
-        <section class="admin-list-panel" role="dialog" aria-modal="true" aria-labelledby="book-details-title">
-          <header class="admin-list-header">
+        <section class="admin-list-panel book-details-panel" role="dialog" aria-modal="true" aria-labelledby="book-details-title">
+          <header class="admin-list-header book-details-header">
             <div class="admin-list-title">
               <ion-icon name="information-circle-outline"></ion-icon>
               <h2 id="book-details-title">Book Details</h2>
@@ -330,17 +359,47 @@
               <ion-icon name="close-outline"></ion-icon>
             </ion-button>
           </header>
-          <div class="admin-list-content">
+          <div class="admin-list-content book-details-content">
             @if (selectedBook()) {
-              <article class="admin-list-item book-detail-item"><strong>Title</strong><span>{{ selectedBook()?.title }}</span></article>
-              <article class="admin-list-item book-detail-item"><strong>Author</strong><span>{{ selectedBook()?.author }}</span></article>
-              <article class="admin-list-item book-detail-item"><strong>Copies</strong><span>{{ selectedBook()?.copies }}</span></article>
-              <article class="admin-list-item book-detail-item"><strong>Genre</strong><span>{{ selectedBook()?.genre }}</span></article>
-              <article class="admin-list-item book-detail-item"><strong>Price</strong><span>₱{{ selectedBook()?.price?.toFixed(2) }}</span></article>
-              <article class="admin-list-item book-detail-item"><strong>Rating</strong><span>{{ selectedBook()?.rating }} / 5 ({{ selectedBook()?.reviews }} reviews)</span></article>
-              <article class="admin-list-item book-detail-item book-detail-synopsis"><strong>Synopsis</strong><span>{{ selectedBook()?.synopsis || 'No synopsis provided.' }}</span></article>
-              <article class="admin-list-item book-detail-item"><strong>Status</strong><span>{{ selectedBook()?.status }}</span></article>
-              <article class="admin-list-item book-detail-item"><strong>Last Updated</strong><span>{{ selectedBook()?.lastUpdated }}</span></article>
+              <article class="admin-list-item book-detail-item">
+                <div class="book-detail-label"><ion-icon name="book-outline"></ion-icon><strong>Title</strong></div>
+                <span>{{ selectedBook()?.title }}</span>
+              </article>
+              <article class="admin-list-item book-detail-item">
+                <div class="book-detail-label"><ion-icon name="person-outline"></ion-icon><strong>Author</strong></div>
+                <span>{{ selectedBook()?.author }}</span>
+              </article>
+              <article class="admin-list-item book-detail-item">
+                <div class="book-detail-label"><ion-icon name="archive-outline"></ion-icon><strong>Copies</strong></div>
+                <span>{{ selectedBook()?.copies }}</span>
+              </article>
+              <article class="admin-list-item book-detail-item">
+                <div class="book-detail-label"><ion-icon name="bookmark-outline"></ion-icon><strong>Genre</strong></div>
+                <span>{{ selectedBook()?.genre }}</span>
+              </article>
+              <article class="admin-list-item book-detail-item">
+                <div class="book-detail-label"><ion-icon name="pricetag-outline"></ion-icon><strong>Price</strong></div>
+                <span class="book-detail-price">₱{{ selectedBook()?.price?.toFixed(2) }}</span>
+              </article>
+              <article class="admin-list-item book-detail-item">
+                <div class="book-detail-label"><ion-icon name="star-outline"></ion-icon><strong>Rating</strong></div>
+                <span class="book-detail-rating"><ion-icon name="star"></ion-icon>{{ selectedBook()?.rating }} / 5 ({{ selectedBook()?.reviews }} reviews)</span>
+              </article>
+              <article class="admin-list-item book-detail-item book-detail-synopsis">
+                <div class="book-detail-label"><ion-icon name="list-outline"></ion-icon><strong>Synopsis</strong></div>
+                <span>{{ selectedBook()?.synopsis || 'No synopsis provided.' }}</span>
+              </article>
+              <article class="admin-list-item book-detail-item">
+                <div class="book-detail-label"><ion-icon name="checkmark-circle-outline"></ion-icon><strong>Status</strong></div>
+                <ion-badge class="book-detail-status" [class.status-archived]="selectedBook()?.status === 'Archived'" [class.status-active]="selectedBook()?.status === 'Active'">
+                  <span class="book-detail-status-dot" aria-hidden="true"></span>
+                  {{ selectedBook()?.status }}
+                </ion-badge>
+              </article>
+              <article class="admin-list-item book-detail-item">
+                <div class="book-detail-label"><ion-icon name="time-outline"></ion-icon><strong>Last Updated</strong></div>
+                <span>{{ selectedBook()?.lastUpdated }}</span>
+              </article>
             }
           </div>
         </section>
@@ -348,29 +407,38 @@
     </ion-modal>
     <!-- Borrow Requests Modal -->
     <ion-modal
-      cssClass="admin-unified-modal"
+      cssClass="admin-unified-modal borrow-requests-modal"
       [isOpen]="requestsOpen()"
       (didDismiss)="closeRequests()">
 
       <ng-template>
-        <section class="admin-list-panel" role="dialog" aria-modal="true" aria-labelledby="requests-title">
-          <header class="admin-list-header">
+        <section class="admin-list-panel borrow-requests-panel" role="dialog" aria-modal="true" aria-labelledby="requests-title">
+          <header class="admin-list-header borrow-requests-header">
             <div class="admin-list-title">
-              <ion-icon name="time-outline"></ion-icon>
+              <span class="request-heading-icon">
+                <ion-icon name="time-outline"></ion-icon>
+              </span>
               <h2 id="requests-title">Borrow Requests</h2>
             </div>
             <ion-button fill="clear" class="admin-list-close" aria-label="Close borrow requests" (click)="requestsOpen.set(false)">
               <ion-icon name="close-outline"></ion-icon>
             </ion-button>
           </header>
+          <ion-segment
+            class="request-status-tabs"
+            [value]="requestStatusFilter()"
+            (ionChange)="setRequestStatusFilter($event.detail.value)">
+            <ion-segment-button value="All"><ion-label>All ({{ requestCounts().all }})</ion-label></ion-segment-button>
+            <ion-segment-button value="Approved"><ion-label>Approved ({{ requestCounts().approved }})</ion-label></ion-segment-button>
+            <ion-segment-button value="Returned"><ion-label>Returned ({{ requestCounts().returned }})</ion-label></ion-segment-button>
+          </ion-segment>
           <div class="admin-list-content">
-            @for (request of requests(); track request.id) {
+            @for (request of filteredRequests(); track request.id) {
               <article class="admin-list-item request-list-item">
                 <div class="request-item-heading">
-                  <div>
+                  <div class="request-book-info">
                     <h3>{{ request.bookTitle }}</h3>
                     <p>Reader: {{ request.reader }}</p>
-                    @if (request.requestedAt) { <small>Requested: {{ request.requestedAt }}</small> }
                   </div>
                   <ion-badge
                     class="request-status-badge"
@@ -378,9 +446,13 @@
                     [class.status-declined]="request.status === 'Declined' || request.status === 'Rejected'"
                     [class.status-returned]="request.status === 'Returned'"
                     [class.status-pending]="request.status === 'Pending'">
+                    <span class="request-status-dot" aria-hidden="true"></span>
                     {{ request.status === 'Rejected' ? 'Declined' : request.status }}
                   </ion-badge>
                 </div>
+                @if (request.requestedAt) {
+                  <small class="request-requested-at">Requested: {{ request.requestedAt }}</small>
+                }
                 @if (request.status === 'Pending') {
                   <div class="request-buttons">
                     <ion-button class="approve-request-button" (click)="updateRequest(request.id, 'Approved')">Approve</ion-button>
@@ -389,10 +461,10 @@
                 }
               </article>
             }
-            @if (requests().length === 0) {
+            @if (filteredRequests().length === 0) {
               <div class="admin-panel-empty">
                 <ion-icon name="time-outline"></ion-icon>
-                <p>No borrow requests yet</p>
+                <p>{{ requestStatusFilter() === 'All' ? 'No borrow requests yet' : 'No ' + requestStatusFilter().toLowerCase() + ' requests yet' }}</p>
                 <small>Reader acquisition requests will appear here.</small>
               </div>
             }
@@ -404,51 +476,87 @@
 
     <!-- User Logs Modal -->
     <ion-modal
-      cssClass="admin-unified-modal"
+      cssClass="admin-unified-modal admin-logs-modal"
       [isOpen]="logsOpen()"
       (didDismiss)="closeLogs()">
 
       <ng-template>
-
-        <section class="admin-list-panel" role="dialog" aria-modal="true" aria-labelledby="logs-title">
-          <header class="admin-list-header">
+        <section class="admin-list-panel admin-logs-panel" role="dialog" aria-modal="true" aria-labelledby="logs-title">
+          <header class="admin-list-header admin-logs-header">
             <div class="admin-list-title">
-              <ion-icon name="list-outline"></ion-icon>
+              <span class="logs-heading-icon">
+                <ion-icon name="list-outline"></ion-icon>
+              </span>
               <h2 id="logs-title">Admin Logs</h2>
             </div>
             <ion-button fill="clear" class="admin-list-close" aria-label="Close user logs" (click)="logsOpen.set(false)">
               <ion-icon name="close-outline"></ion-icon>
-            </ion-button> 
+            </ion-button>
           </header>
+          <div class="log-filter-bar">
+            <div class="log-filter-options" role="group" aria-label="Filter admin logs">
+              <ion-button fill="solid" class="log-filter-button" [class.active]="logFilter() === 'All'" [attr.aria-pressed]="logFilter() === 'All'" (click)="logFilter.set('All')">
+                All ({{ logCounts().all }})
+              </ion-button>
+              <ion-button fill="solid" class="log-filter-button" [class.active]="logFilter() === 'Books'" [attr.aria-pressed]="logFilter() === 'Books'" (click)="logFilter.set('Books')">
+                Books ({{ logCounts().books }})
+              </ion-button>
+              <ion-button fill="solid" class="log-filter-button" [class.active]="logFilter() === 'Requests'" [attr.aria-pressed]="logFilter() === 'Requests'" (click)="logFilter.set('Requests')">
+                Requests ({{ logCounts().requests }})
+              </ion-button>
+              <ion-button fill="solid" class="log-filter-button" [class.active]="logFilter() === 'Reports'" [attr.aria-pressed]="logFilter() === 'Reports'" (click)="logFilter.set('Reports')">
+                Reports ({{ logCounts().reports }})
+              </ion-button>
+            </div>
+          </div>
           <div class="admin-list-content log-list-content">
-            @for (log of logs(); track $index) {
-              <article class="admin-list-item log-list-item">
-                <ion-icon name="document-text-outline"></ion-icon>
-                <p>{{ log }}</p>
-              </article>
+            @for (group of logGroups(); track group.dateKey) {
+              <section class="log-day-group">
+                <div class="log-day-heading">
+                  <span>{{ group.dateLabel }}</span>
+                  <span class="log-day-rule"></span>
+                </div>
+                @for (log of group.entries; track log.id) {
+                  <article class="log-entry-card" [class.log-entry-request]="log.category === 'Requests'">
+                    <span
+                      class="log-entry-icon"
+                      [class.log-tone-book]="log.iconTone === 'book'"
+                      [class.log-tone-request]="log.iconTone === 'request'"
+                      [class.log-tone-report]="log.iconTone === 'report'"
+                      [class.log-tone-archive]="log.iconTone === 'archive'">
+                      <ion-icon [name]="log.iconName"></ion-icon>
+                    </span>
+                    <div class="log-entry-copy">
+                      <p>{{ log.message }}</p>
+                      @if (log.timeLabel) { <small>{{ log.timeLabel }}</small> }
+                    </div>
+                    <ion-badge class="log-category-badge">{{ log.category }}</ion-badge>
+                  </article>
+                }
+              </section>
             }
-            @if (logs().length === 0) {
+            @if (filteredLogEntries().length === 0) {
               <div class="admin-panel-empty">
                 <ion-icon name="list-outline"></ion-icon>
-                <p>No user logs yet</p>
+                <p>{{ logCounts().all === 0 ? 'No admin logs yet' : 'No logs in this category yet' }}</p>
               </div>
             }
           </div>
         </section>
-
       </ng-template>
-
     </ion-modal>
 
     <ion-modal
-      cssClass="admin-unified-modal"
+      cssClass="admin-unified-modal purchased-books-modal"
       [isOpen]="purchasedBooksOpen()"
       (didDismiss)="closePurchasedBooks()">
       <ng-template>
-        <section class="admin-list-panel" role="dialog" aria-modal="true" aria-labelledby="purchased-books-title">
-          <header class="admin-list-header">
+        <section class="admin-list-panel purchased-books-panel" role="dialog" aria-modal="true" aria-labelledby="purchased-books-title">
+          <header class="admin-list-header purchased-books-header">
             <div class="admin-list-title">
-              <ion-icon name="bag-outline"></ion-icon>
+              <span class="purchased-books-heading-icon">
+                <ion-icon name="bag-check-outline"></ion-icon>
+              </span>
               <h2 id="purchased-books-title">Purchased Books</h2>
             </div>
             <ion-button fill="clear" class="admin-list-close" aria-label="Close purchased books" (click)="purchasedBooksOpen.set(false)">
@@ -458,12 +566,14 @@
           <div class="admin-list-content">
             @for (item of purchasedItems(); track $index) {
               <article class="admin-list-item purchased-list-item">
-                <div>
-                  <h3>{{ item.title }}</h3>
+                <div class="purchased-item-main">
+                  <div class="purchased-item-title-row">
+                    <h3>{{ item.title }}</h3>
+                    <ion-badge class="purchased-price-badge">₱{{ (item.price * item.quantity).toFixed(2) }}</ion-badge>
+                  </div>
                   <p>By {{ item.author }} · {{ item.quantity }} {{ item.quantity === 1 ? 'copy' : 'copies' }}</p>
                   <small>Order {{ item.orderId }} · {{ item.date }}</small>
                 </div>
-                <strong>₱{{ (item.price * item.quantity).toFixed(2) }}</strong>
               </article>
             }
             @if (purchasedItems().length === 0) {

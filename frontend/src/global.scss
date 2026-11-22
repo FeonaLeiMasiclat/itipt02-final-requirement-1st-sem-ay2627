@@ -137,6 +137,42 @@ ion-modal.admin-unified-modal::part(content) {
   background: #eee0c2;
 }
 
+ion-modal.admin-unified-modal.book-form-modal,
+ion-modal.admin-unified-modal.book-details-modal,
+ion-modal.admin-unified-modal.borrow-requests-modal,
+ion-modal.admin-unified-modal.admin-logs-modal,
+ion-modal.admin-unified-modal.purchased-books-modal {
+  --width: min(88vw, 390px);
+  --height: min(76vh, 600px);
+  --max-height: calc(100% - 32px);
+  --background: transparent;
+  --border-radius: 22px;
+  --box-shadow: none;
+  --backdrop-opacity: 0.3;
+  --backdrop-filter: blur(10px);
+}
+
+ion-modal.admin-unified-modal.book-form-modal::part(backdrop),
+ion-modal.admin-unified-modal.book-details-modal::part(backdrop),
+ion-modal.admin-unified-modal.borrow-requests-modal::part(backdrop),
+ion-modal.admin-unified-modal.admin-logs-modal::part(backdrop),
+ion-modal.admin-unified-modal.purchased-books-modal::part(backdrop) {
+  background: rgb(36 39 33 / 28%);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+ion-modal.admin-unified-modal.book-form-modal::part(content),
+ion-modal.admin-unified-modal.book-details-modal::part(content),
+ion-modal.admin-unified-modal.borrow-requests-modal::part(content),
+ion-modal.admin-unified-modal.admin-logs-modal::part(content),
+ion-modal.admin-unified-modal.purchased-books-modal::part(content) {
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 ion-modal.admin-unified-modal.genre-filter-modal {
   --width: min(92.7vw, 430px);
   --height: min(82vh, 620px);
@@ -144,6 +180,12 @@ ion-modal.admin-unified-modal.genre-filter-modal {
   --background: transparent;
   --border-radius: 30px;
   --backdrop-opacity: 0.3;
+  --backdrop-filter: blur(10px);
+}
+
+ion-modal.admin-unified-modal.genre-filter-modal::part(backdrop) {
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
 ion-modal.admin-unified-modal.genre-filter-modal::part(content) {
