@@ -37,7 +37,16 @@ import {
   informationCircleOutline,
   closeOutline,
   bagOutline,
-  chevronForwardOutline
+  chevronForwardOutline,
+  chevronDownOutline,
+  layersOutline,
+  sparklesOutline,
+  heartOutline,
+  skullOutline,
+  planetOutline,
+  happyOutline,
+  flameOutline,
+  checkmarkCircle
 } from 'ionicons/icons';
 
 type Book = CatalogBook;
@@ -152,7 +161,15 @@ export class AdminHomePage {
   filterStatus = signal('Active');
   filterGenre = signal('');
   genreFilterOpen = signal(false);
-  readonly bookGenres = ['Romance', 'Horror', 'Sci-fi', 'Comedy', 'Mythology'];
+  readonly bookGenreOptions = [
+    { name: 'Romance', icon: 'heart-outline' },
+    { name: 'Horror', icon: 'skull-outline' },
+    { name: 'Sci-fi', icon: 'planet-outline' },
+    { name: 'Comedy', icon: 'happy-outline' },
+    { name: 'Mythology', icon: 'flame-outline' }
+  ];
+  readonly bookGenres = this.bookGenreOptions.map(option => option.name);
+  activeBookCount = computed(() => this.books().filter(book => book.status === 'Active').length);
 
   selectedBook = signal<Book | null>(null);
   editingId = signal<number | null>(null);
@@ -203,7 +220,16 @@ export class AdminHomePage {
       informationCircleOutline,
       closeOutline,
       bagOutline,
-      chevronForwardOutline
+      chevronForwardOutline,
+      chevronDownOutline,
+      layersOutline,
+      sparklesOutline,
+      heartOutline,
+      skullOutline,
+      planetOutline,
+      happyOutline,
+      flameOutline,
+      checkmarkCircle
     });
 
   }
@@ -542,6 +568,10 @@ export class AdminHomePage {
     this.filterGenre.set(genre);
     this.filterStatus.set('Active');
     this.genreFilterOpen.set(false);
+  }
+
+  genreBookCount(genre: string): number {
+    return this.books().filter(book => book.status === 'Active' && book.genre === genre).length;
   }
 
   private showDialog(title: string, message: string): void {
