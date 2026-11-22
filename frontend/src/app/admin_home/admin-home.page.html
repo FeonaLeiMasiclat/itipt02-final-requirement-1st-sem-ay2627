@@ -1,7 +1,7 @@
 
 <ion-content [fullscreen]="true">
 
-  <div class="admin-page">
+  <div class="admin-page" [class.genre-filter-active]="genreFilterOpen()">
 
     <!-- Admin Header -->
     <ion-header class="admin-header">
@@ -116,36 +116,52 @@
 
     <!-- Book Management Header -->
     <div class="management-header" id="book-management">
-
-      <h3>
+      <div class="manage-books-control">
+        <ion-button
+          fill="clear"
+          class="manage-books-button"
+          aria-label="Manage active books"
+          (click)="showActiveBooks()">
+          <ion-icon name="list-outline"></ion-icon>
+          <span>Manage Books</span>
+        </ion-button>
         <ion-button
           fill="clear"
           class="genre-picker-trigger"
           aria-label="Filter books by genre"
           (click)="openGenreFilter()">
-          <ion-icon name="list-outline"></ion-icon>
+          <span class="management-divider">·</span>
+          <span>{{ filterGenre() || 'All Genres' }}</span>
+          <ion-icon name="chevron-down-outline"></ion-icon>
         </ion-button>
-        <ion-button
-          fill="clear"
-          class="manage-books-button"
-          (click)="showActiveBooks()">
-          Manage Books
-        </ion-button>
-        @if (filterGenre()) { <span class="selected-genre-label">· {{ filterGenre() }}</span> }
-      </h3>
-
+      </div>
+      <span class="management-book-count">
+        {{ filteredBooks().length }} {{ filteredBooks().length === 1 ? 'Book' : 'Books' }}
+      </span>
     </div>
 
+    <ion-searchbar
+      class="admin-book-search"
+      aria-label="Search managed books"
+      placeholder="Search book title or keyword..."
+      [debounce]="100"
+      [value]="bookSearchQuery()"
+      (ionInput)="searchBooks($event.detail.value)">
+    </ion-searchbar>
+
     <ion-modal
-      cssClass="admin-unified-modal"
+      cssClass="admin-unified-modal genre-filter-modal"
       [isOpen]="genreFilterOpen()"
       (didDismiss)="genreFilterOpen.set(false)">
       <ng-template>
         <section class="admin-list-panel genre-picker-panel" role="dialog" aria-modal="true" aria-labelledby="genre-picker-title">
           <header class="admin-list-header">
             <div class="admin-list-title">
-              <ion-icon name="list-outline"></ion-icon>
-              <h2 id="genre-picker-title">Browse Books by Genre</h2>
+              <ion-icon name="layers-outline"></ion-icon>
+              <div>
+                <h2 id="genre-picker-title">Browse Books by Genre</h2>
+                <p>Select a category to filter managed books</p>
+              </div>
             </div>
             <ion-button fill="clear" class="admin-list-close" aria-label="Close genre filter" (click)="genreFilterOpen.set(false)">
               <ion-icon name="close-outline"></ion-icon>
@@ -153,13 +169,21 @@
           </header>
           <div class="genre-option-list">
             <ion-button fill="clear" class="genre-option" [class.selected]="!filterGenre()" (click)="selectBookGenre('')">
-              <span>All Genres</span>
-              <ion-icon name="chevron-forward-outline"></ion-icon>
+              <span class="genre-option-icon"><ion-icon name="sparkles-outline"></ion-icon></span>
+              <span class="genre-option-copy">
+                <strong>All Genres</strong>
+                <small>{{ activeBookCount() }} books</small>
+              </span>
+              <ion-icon class="genre-option-indicator" [name]="!filterGenre() ? 'checkmark-circle' : 'chevron-forward-outline'"></ion-icon>
             </ion-button>
-            @for (genre of bookGenres; track genre) {
-              <ion-button fill="clear" class="genre-option" [class.selected]="filterGenre() === genre" (click)="selectBookGenre(genre)">
-                <span>{{ genre }}</span>
-                <ion-icon name="chevron-forward-outline"></ion-icon>
+            @for (option of bookGenreOptions; track option.name) {
+              <ion-button fill="clear" class="genre-option" [class.selected]="filterGenre() === option.name" (click)="selectBookGenre(option.name)">
+                <span class="genre-option-icon"><ion-icon [name]="option.icon"></ion-icon></span>
+                <span class="genre-option-copy">
+                  <strong>{{ option.name }}</strong>
+                  <small>{{ genreBookCount(option.name) }} {{ genreBookCount(option.name) === 1 ? 'book' : 'books' }}</small>
+                </span>
+                <ion-icon class="genre-option-indicator" [name]="filterGenre() === option.name ? 'checkmark-circle' : 'chevron-forward-outline'"></ion-icon>
               </ion-button>
             }
           </div>
@@ -222,8 +246,12 @@
 
         <div class="empty-list">
           <ion-icon name="book-outline"></ion-icon>
-          <p>No {{ filterStatus() === 'All' ? '' : filterStatus().toLowerCase() }} books found</p>
-          <small>Add a book or choose another status filter.</small>
+          <p>{{ bookSearchQuery().trim() ? 'No books match your search' : 'No books found' }}</p>
+          <small>
+            {{ bookSearchQuery().trim()
+              ? 'Try another title or keyword.'
+              : 'Add a book or choose another filter.' }}
+          </small>
           <ion-button (click)="openAddBook()">Add a book</ion-button>
         </div>
 

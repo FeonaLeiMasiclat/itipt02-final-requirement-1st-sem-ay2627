@@ -1,6 +1,9 @@
 
 <ion-content>
-  <div class="shop-page" [class.modal-open]="showCheckout() || showReceipt()">
+  <div
+    class="shop-page"
+    [class.modal-open]="(showCheckout() || showReceipt()) && !showCart()"
+    [class.cart-open]="showCart()">
 
     <section class="shop-welcome" aria-label="Book shop introduction">
       <h1>Ready to purchase a book?</h1>

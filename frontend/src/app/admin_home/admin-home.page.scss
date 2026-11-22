@@ -13,6 +13,14 @@ ion-content {
   background: #f3e9d9;
 }
 
+.admin-page > * {
+  transition: filter 180ms ease;
+}
+
+.admin-page.genre-filter-active > :not(ion-modal) {
+  filter: blur(7px);
+}
+
 /* Admin Header */
 .admin-header {
   position: relative;
@@ -195,52 +203,26 @@ ion-content {
 /* Management Header */
 .management-header {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  margin: 15px 0 10px;
+  gap: 12px;
+  margin: 15px 0 12px;
 }
 
-.management-header h3 {
+.manage-books-control {
   display: flex;
+  min-width: 0;
   align-items: center;
-  gap: 8px;
-
-  font-size: 13px;
-  font-weight: normal;
-  color: #33291f;
+  overflow: hidden;
+  border: 1px solid #c9bda4;
+  border-radius: 24px;
+  background: #eee5d2;
 }
 
-.management-header h3 ion-icon {
-  font-size: 19px;
-}
-
-.management-header h3 .genre-picker-trigger {
-  width: 30px;
-  height: 30px;
+.manage-books-control ion-button {
+  height: 38px;
   margin: 0;
-  --color: #33291f;
-  --padding-start: 0;
-  --padding-end: 0;
-}
-
-.management-header h3 .genre-picker-trigger ion-icon {
-  font-size: 19px;
-}
-
-.management-header h3 .manage-books-button {
-  height: 32px;
-  margin: 0;
-  --background: #ead8bd;
-  --background-hover: #d6c2a3;
-  --background-activated: #9eae89;
-  --background-focused: #d6c2a3;
-  --border-color: #c0ad8c;
-  --border-style: solid;
-  --border-width: 1px;
-  --border-radius: 20px;
-  --box-shadow: none;
-  --color: #392c20;
+  --color: #40382b;
   --padding-start: 12px;
   --padding-end: 12px;
   font-size: 12px;
@@ -248,16 +230,74 @@ ion-content {
   text-transform: none;
 }
 
-.management-header h3 .manage-books-button::part(native) {
-  border: 1px solid #c0ad8c;
-  border-radius: 20px;
-  transition: background-color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+.manage-books-button {
+  flex: 0 0 auto;
 }
 
-.selected-genre-label {
-  color: #55724c;
-  font-size: 11px;
+.manage-books-button ion-icon {
+  margin-right: 5px;
+  font-size: 16px;
+}
+
+.genre-picker-trigger {
+  min-width: 0;
+  --padding-start: 4px;
+  --padding-end: 14px;
+}
+
+.genre-picker-trigger span:not(.management-divider) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.management-divider {
+  padding: 0 2px;
+  color: #8d7e5d;
+}
+
+.genre-picker-trigger ion-icon {
+  flex: 0 0 auto;
+  margin-left: 9px;
+  font-size: 15px;
+}
+
+.management-book-count {
+  flex: 0 0 auto;
+  color: #716b5e;
+  font-size: 12px;
   font-weight: 600;
+}
+
+.admin-book-search {
+  box-sizing: border-box;
+  width: 94%;
+  max-width: 400px;
+  height: 34px;
+  margin: 16px auto 20px;
+  padding: 0;
+  font-size: 12px;
+  --background: #faf7f0;
+  --border-radius: 24px;
+  --box-shadow: none;
+  --color: #40382b;
+  --icon-color: #827765;
+  --placeholder-color: #827765;
+  --placeholder-opacity: 1;
+  --clear-button-color: #827765;
+  --height: 34px;
+  --icon-size: 15px;
+  --padding-start: 11px;
+  --padding-end: 11px;
+  --padding-top: 0;
+  --padding-bottom: 0;
+}
+
+.admin-book-search::part(container) {
+  height: 34px;
+  border: 1px solid #c9bda4;
+  border-radius: 24px;
+  box-shadow: none;
 }
 
 /* Management List */
@@ -356,7 +396,7 @@ ion-content {
   display: block;
   font-size: 10px;
   color: #806c57;
-  margin-top: 4px;
+  margin-top: 14px;
 }
 
 .book-details .book-genre {
@@ -678,6 +718,59 @@ ion-modal ion-input {
   background: #eee0c2;
 }
 
+.genre-picker-panel {
+  padding: 24px 24px 18px;
+  color: #44392c;
+  background: #f4eee2;
+  border: 1px solid #d5cbb8;
+  border-radius: 30px;
+}
+
+.genre-picker-panel .admin-list-header {
+  gap: 14px;
+  margin-bottom: 16px;
+  padding-bottom: 17px;
+  border-color: #d8cdbb;
+}
+
+.genre-picker-panel .admin-list-title {
+  gap: 14px;
+  color: #6a5a3f;
+}
+
+.genre-picker-panel .admin-list-title > ion-icon {
+  box-sizing: content-box;
+  padding: 12px;
+  border-radius: 14px;
+  color: #fffaf0;
+  background: #8b7b5c;
+  font-size: 22px;
+}
+
+.genre-picker-panel .admin-list-title h2 {
+  color: #40362b;
+  font: 700 17px Georgia, serif;
+}
+
+.genre-picker-panel .admin-list-title p {
+  margin: 5px 0 0;
+  color: #7b7467;
+  font: 10px/1.35 Arial, sans-serif;
+}
+
+.genre-picker-panel .admin-list-close {
+  border: 1px solid #d5cbb8;
+  border-radius: 50%;
+  background: #f1e9d8;
+}
+
+.genre-picker-panel .genre-option-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 2px 1px 5px;
+}
+
 .admin-list-header {
   display: flex;
   flex: 0 0 auto;
@@ -716,6 +809,10 @@ ion-modal ion-input {
   --color: #716b5e;
   --padding-start: 0;
   --padding-end: 0;
+}
+
+.genre-picker-panel .admin-list-close ion-icon {
+  font-size: 20px;
 }
 
 .admin-list-close ion-icon {
@@ -758,28 +855,82 @@ ion-modal ion-input {
   width: 100%;
   height: auto;
   margin: 0;
-  --color: #4e5548;
+  --color: #51493c;
   --padding-start: 10px;
-  --padding-end: 10px;
+  --padding-end: 12px;
   text-transform: none;
 }
 
 .genre-option::part(native) {
   display: flex;
-  min-height: 52px;
-  justify-content: space-between;
-  border-bottom: 1px solid #cfc2a9;
-  border-radius: 0;
+  min-height: 68px;
+  justify-content: flex-start;
+  gap: 13px;
+  border: 1px solid #ddd4c3;
+  border-radius: 21px;
+  background: #fcfaf5;
+  box-shadow: 0 2px 3px rgb(68 57 42 / 7%);
   text-align: left;
 }
 
 .genre-option.selected {
-  --color: #365341;
+  --color: #44392c;
   font-weight: 700;
 }
 
 .genre-option.selected::part(native) {
-  background: #f6f0e2;
+  border: 2px solid #8a7a5a;
+  background: #e7dcc6;
+}
+
+.genre-option-icon {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  place-items: center;
+  border-radius: 14px;
+  color: #756d5d;
+  background: #eee6d4;
+}
+
+.genre-option.selected .genre-option-icon {
+  color: #fffaf0;
+  background: #8b7b5c;
+}
+
+.genre-option-icon ion-icon {
+  font-size: 17px;
+}
+
+.genre-option-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 3px;
+  margin-left: 8px;
+}
+
+.genre-option-copy strong {
+  color: #40362b;
+  font: 700 15px Georgia, serif;
+}
+
+.genre-option-copy small {
+  color: #7b7467;
+  font: 10px Arial, sans-serif;
+}
+
+.genre-option-indicator {
+  flex: 0 0 auto;
+  margin-left: auto;
+  color: #9a8f78;
+  font-size: 17px;
+}
+
+.genre-option.selected .genre-option-indicator {
+  color: #594d38;
 }
 
 .admin-list-item {
@@ -966,8 +1117,37 @@ ion-modal ion-input {
     flex-wrap: wrap;
   }
 
-  .management-header h3 {
+  .manage-books-control {
+    max-width: 100%;
+  }
+
+  .manage-books-control ion-button {
+    height: 38px;
+    --padding-start: 9px;
+    --padding-end: 9px;
+    font-size: 12px;
+  }
+
+  .manage-books-button ion-icon {
+    font-size: 15px;
+  }
+
+  .management-book-count {
+    font-size: 12px;
+  }
+
+  .admin-book-search {
+    width: 94%;
+    height: 32px;
+    margin-top: 4px;
+    margin-bottom: 16px;
     font-size: 11px;
+    --height: 32px;
+    --icon-size: 14px;
+  }
+
+  .admin-book-search::part(container) {
+    height: 32px;
   }
 
   .admin-book-cover {
@@ -990,6 +1170,28 @@ ion-modal ion-input {
 
   .admin-list-title h2 {
     font-size: 18px;
+  }
+
+  .genre-picker-panel .admin-list-title h2 {
+    font-size: 15px;
+  }
+
+  .genre-picker-panel .admin-list-title p {
+    font-size: 9px;
+  }
+
+  .genre-option::part(native) {
+    min-height: 64px;
+  }
+
+  .genre-option-icon {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+  }
+
+  .genre-option-copy strong {
+    font-size: 14px;
   }
 
 }

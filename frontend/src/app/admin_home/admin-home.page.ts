@@ -15,6 +15,7 @@ import {
   IonCard,
   IonBadge,
   IonModal,
+  IonSearchbar,
   IonInput,
   IonTextarea,
   IonSelect,
@@ -37,7 +38,16 @@ import {
   informationCircleOutline,
   closeOutline,
   bagOutline,
-  chevronForwardOutline
+  chevronForwardOutline,
+  chevronDownOutline,
+  layersOutline,
+  sparklesOutline,
+  heartOutline,
+  skullOutline,
+  planetOutline,
+  happyOutline,
+  flameOutline,
+  checkmarkCircle
 } from 'ionicons/icons';
 
 type Book = CatalogBook;
@@ -80,6 +90,7 @@ interface PurchaseOrder {
     IonCard,
     IonBadge,
     IonModal,
+    IonSearchbar,
     IonInput,
     IonTextarea,
     IonSelect,
@@ -151,8 +162,17 @@ export class AdminHomePage {
 
   filterStatus = signal('Active');
   filterGenre = signal('');
+  bookSearchQuery = signal('');
   genreFilterOpen = signal(false);
-  readonly bookGenres = ['Romance', 'Horror', 'Sci-fi', 'Comedy', 'Mythology'];
+  readonly bookGenreOptions = [
+    { name: 'Romance', icon: 'heart-outline' },
+    { name: 'Horror', icon: 'skull-outline' },
+    { name: 'Sci-fi', icon: 'planet-outline' },
+    { name: 'Comedy', icon: 'happy-outline' },
+    { name: 'Mythology', icon: 'flame-outline' }
+  ];
+  readonly bookGenres = this.bookGenreOptions.map(option => option.name);
+  activeBookCount = computed(() => this.books().filter(book => book.status === 'Active').length);
 
   selectedBook = signal<Book | null>(null);
   editingId = signal<number | null>(null);
@@ -178,10 +198,13 @@ export class AdminHomePage {
 
     const filter = this.filterStatus();
     const genre = this.filterGenre();
+    const query = this.bookSearchQuery().trim().toLocaleLowerCase();
 
     return this.books().filter(book =>
       (filter === 'All' || book.status === filter) &&
-      (!genre || book.genre === genre)
+      (!genre || book.genre === genre) &&
+      (!query || [book.title, book.author, book.genre, book.synopsis]
+        .some(value => value.toLocaleLowerCase().includes(query)))
     );
 
   });
@@ -203,7 +226,16 @@ export class AdminHomePage {
       informationCircleOutline,
       closeOutline,
       bagOutline,
-      chevronForwardOutline
+      chevronForwardOutline,
+      chevronDownOutline,
+      layersOutline,
+      sparklesOutline,
+      heartOutline,
+      skullOutline,
+      planetOutline,
+      happyOutline,
+      flameOutline,
+      checkmarkCircle
     });
 
   }
@@ -542,6 +574,14 @@ export class AdminHomePage {
     this.filterGenre.set(genre);
     this.filterStatus.set('Active');
     this.genreFilterOpen.set(false);
+  }
+
+  searchBooks(value: string | null | undefined): void {
+    this.bookSearchQuery.set(value ?? '');
+  }
+
+  genreBookCount(genre: string): number {
+    return this.books().filter(book => book.status === 'Active' && book.genre === genre).length;
   }
 
   private showDialog(title: string, message: string): void {

@@ -137,6 +137,21 @@ ion-modal.admin-unified-modal::part(content) {
   background: #eee0c2;
 }
 
+ion-modal.admin-unified-modal.genre-filter-modal {
+  --width: min(92.7vw, 430px);
+  --height: min(82vh, 620px);
+  --max-height: calc(100% - 32px);
+  --background: transparent;
+  --border-radius: 30px;
+  --backdrop-opacity: 0.3;
+}
+
+ion-modal.admin-unified-modal.genre-filter-modal::part(content) {
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+}
+
 ion-modal.app-message-modal {
   --width: min(88vw, 380px);
   --height: auto;
