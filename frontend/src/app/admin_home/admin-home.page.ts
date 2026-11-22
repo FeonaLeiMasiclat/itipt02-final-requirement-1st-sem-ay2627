@@ -15,6 +15,7 @@ import {
   IonCard,
   IonBadge,
   IonModal,
+  IonSearchbar,
   IonInput,
   IonTextarea,
   IonSelect,
@@ -89,6 +90,7 @@ interface PurchaseOrder {
     IonCard,
     IonBadge,
     IonModal,
+    IonSearchbar,
     IonInput,
     IonTextarea,
     IonSelect,
@@ -160,6 +162,7 @@ export class AdminHomePage {
 
   filterStatus = signal('Active');
   filterGenre = signal('');
+  bookSearchQuery = signal('');
   genreFilterOpen = signal(false);
   readonly bookGenreOptions = [
     { name: 'Romance', icon: 'heart-outline' },
@@ -195,10 +198,13 @@ export class AdminHomePage {
 
     const filter = this.filterStatus();
     const genre = this.filterGenre();
+    const query = this.bookSearchQuery().trim().toLocaleLowerCase();
 
     return this.books().filter(book =>
       (filter === 'All' || book.status === filter) &&
-      (!genre || book.genre === genre)
+      (!genre || book.genre === genre) &&
+      (!query || [book.title, book.author, book.genre, book.synopsis]
+        .some(value => value.toLocaleLowerCase().includes(query)))
     );
 
   });
@@ -568,6 +574,10 @@ export class AdminHomePage {
     this.filterGenre.set(genre);
     this.filterStatus.set('Active');
     this.genreFilterOpen.set(false);
+  }
+
+  searchBooks(value: string | null | undefined): void {
+    this.bookSearchQuery.set(value ?? '');
   }
 
   genreBookCount(genre: string): number {

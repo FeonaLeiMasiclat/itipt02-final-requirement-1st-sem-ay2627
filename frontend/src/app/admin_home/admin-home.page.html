@@ -135,8 +135,19 @@
           <ion-icon name="chevron-down-outline"></ion-icon>
         </ion-button>
       </div>
-      <span class="management-book-count">{{ activeBookCount() }} Books</span>
+      <span class="management-book-count">
+        {{ filteredBooks().length }} {{ filteredBooks().length === 1 ? 'Book' : 'Books' }}
+      </span>
     </div>
+
+    <ion-searchbar
+      class="admin-book-search"
+      aria-label="Search managed books"
+      placeholder="Search book title or keyword..."
+      [debounce]="100"
+      [value]="bookSearchQuery()"
+      (ionInput)="searchBooks($event.detail.value)">
+    </ion-searchbar>
 
     <ion-modal
       cssClass="admin-unified-modal genre-filter-modal"
@@ -235,8 +246,12 @@
 
         <div class="empty-list">
           <ion-icon name="book-outline"></ion-icon>
-          <p>No {{ filterStatus() === 'All' ? '' : filterStatus().toLowerCase() }} books found</p>
-          <small>Add a book or choose another status filter.</small>
+          <p>{{ bookSearchQuery().trim() ? 'No books match your search' : 'No books found' }}</p>
+          <small>
+            {{ bookSearchQuery().trim()
+              ? 'Try another title or keyword.'
+              : 'Add a book or choose another filter.' }}
+          </small>
           <ion-button (click)="openAddBook()">Add a book</ion-button>
         </div>
 

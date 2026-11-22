@@ -269,6 +269,37 @@ ion-content {
   font-weight: 600;
 }
 
+.admin-book-search {
+  box-sizing: border-box;
+  width: 94%;
+  max-width: 400px;
+  height: 34px;
+  margin: 16px auto 20px;
+  padding: 0;
+  font-size: 12px;
+  --background: #faf7f0;
+  --border-radius: 24px;
+  --box-shadow: none;
+  --color: #40382b;
+  --icon-color: #827765;
+  --placeholder-color: #827765;
+  --placeholder-opacity: 1;
+  --clear-button-color: #827765;
+  --height: 34px;
+  --icon-size: 15px;
+  --padding-start: 11px;
+  --padding-end: 11px;
+  --padding-top: 0;
+  --padding-bottom: 0;
+}
+
+.admin-book-search::part(container) {
+  height: 34px;
+  border: 1px solid #c9bda4;
+  border-radius: 24px;
+  box-shadow: none;
+}
+
 /* Management List */
 .management-list {
   display: flex;
@@ -365,7 +396,7 @@ ion-content {
   display: block;
   font-size: 10px;
   color: #806c57;
-  margin-top: 4px;
+  margin-top: 14px;
 }
 
 .book-details .book-genre {
@@ -1103,6 +1134,20 @@ ion-modal ion-input {
 
   .management-book-count {
     font-size: 12px;
+  }
+
+  .admin-book-search {
+    width: 94%;
+    height: 32px;
+    margin-top: 4px;
+    margin-bottom: 16px;
+    font-size: 11px;
+    --height: 32px;
+    --icon-size: 14px;
+  }
+
+  .admin-book-search::part(container) {
+    height: 32px;
   }
 
   .admin-book-cover {
