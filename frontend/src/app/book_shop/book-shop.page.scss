@@ -947,65 +947,66 @@ ion-button::part(native) {
 
 /* Warm, rounded cart drawer to match the wishlist panel */
 .drawer-backdrop {
-  inset: 78px 0 0;
+  inset: 0;
   background: rgb(28 31 27 / 12%);
 }
 
 .side-drawer {
-  top: 34px;
-  right: auto;
-  bottom: 0;
-  left: calc(50% - 5px);
-  width: 92.7vw;
-  max-width: 760px;
+  top: 8px;
+  right: max(12px, calc((100vw - 458px) / 2 + 12px));
+  bottom: auto;
+  left: auto;
+  width: min(340px, calc(100vw - 24px));
+  max-width: 340px;
   height: auto;
-  transform: translateX(-50%);
+  max-height: min(70vh, 520px);
+  transform: none;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding: 31px 26px 19px;
-  border: 1px solid #d5c6aa;
-  border-radius: 32px;
+  padding: 14px 12px 10px;
+  border: 1px solid rgb(98 85 62 / 18%);
+  border-radius: 16px;
   color: #334536;
-  background: #eee0c2;
-  box-shadow: 0 12px 32px rgb(42 39 31 / 18%);
+  background: #ead9bd;
+  box-shadow: 0 12px 32px rgb(42 39 31 / 22%);
 }
 
 .side-drawer .drawer-header {
   align-items: center;
   flex: 0 0 auto;
-  margin-bottom: 22px;
-  padding-bottom: 19px;
-  border-bottom: 1px solid #cfc2a9;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #978b76;
 }
 
 .side-drawer .drawer-header h2 {
-  color: #365341;
-  font: 600 24px Arial, sans-serif;
+  color: #385344;
+  font: 600 16px Arial, sans-serif;
 }
 
 .side-drawer .drawer-title {
   display: flex;
   align-items: center;
-  gap: 14px;
-  color: #365341;
+  gap: 8px;
+  color: #385344;
 }
 
 .side-drawer .drawer-title > ion-icon {
-  font-size: 28px;
+  font-size: 18px;
 }
 
 .side-drawer .close-button {
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   --color: #716b5e;
   --padding-start: 0;
   --padding-end: 0;
 }
 
 .side-drawer .close-button ion-icon {
-  font-size: 23px;
+  font-size: 18px;
 }
 
 .side-drawer .cart-items {
@@ -1013,7 +1014,7 @@ ion-button::part(native) {
   min-height: 0;
   flex: 1 1 auto;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
   overflow-y: auto;
   padding: 2px 0 12px;
   scrollbar-width: thin;
@@ -1023,10 +1024,10 @@ ion-button::part(native) {
   min-width: 0;
   flex: 0 0 auto;
   margin: 0;
-  padding: 21px 18px 20px;
+  padding: 12px 11px 10px;
   border: 1px solid #e1d6c3;
-  border-radius: 20px;
-  background: #f6f0e2;
+  border-radius: 14px;
+  background: #f7ead6;
 }
 
 .side-drawer .cart-item {
@@ -1038,26 +1039,26 @@ ion-button::part(native) {
 
 .cart-item-top {
   display: grid;
-  grid-template-columns: 26px 60px minmax(0, 1fr);
+  grid-template-columns: 20px 42px minmax(0, 1fr);
   align-items: center;
-  gap: 14px;
+  gap: 8px;
   min-width: 0;
 }
 
 .side-drawer .drawer-book-icon {
   display: flex;
-  width: 60px;
-  min-width: 60px;
-  height: 60px;
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
   align-items: center;
   justify-content: center;
-  border-radius: 15px;
+  border-radius: 11px;
   color: #47684e;
   background: #d9e3d0;
 }
 
 .side-drawer .drawer-book-icon ion-icon {
-  font-size: 28px;
+  font-size: 21px;
 }
 
 .side-drawer .drawer-item-details {
@@ -1068,7 +1069,7 @@ ion-button::part(native) {
   overflow: hidden;
   margin: 0 0 4px;
   color: #302d26;
-  font: 600 18px Arial, sans-serif;
+  font: 600 13px Arial, sans-serif;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1078,7 +1079,7 @@ ion-button::part(native) {
   overflow: hidden;
   margin-bottom: 5px;
   color: #776d5d;
-  font: 16px Arial, sans-serif;
+  font: 11px Arial, sans-serif;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1086,12 +1087,12 @@ ion-button::part(native) {
 .side-drawer .drawer-item-details p {
   margin: 0;
   color: #466b4d;
-  font: 14px Arial, sans-serif;
+  font: 11px Arial, sans-serif;
 }
 
 .side-drawer .cart-item ion-checkbox {
   flex: 0 0 auto;
-  --size: 23px;
+  --size: 18px;
   --border-radius: 50%;
   --checkbox-background-checked: #557b51;
   --border-color-checked: #557b51;
@@ -1102,9 +1103,9 @@ ion-button::part(native) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-top: 16px;
-  padding-top: 16px;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
   border-top: 1px solid #e0d5c1;
 }
 
@@ -1116,13 +1117,13 @@ ion-button::part(native) {
 
 .cart-item-subtotal span {
   color: #766b5b;
-  font: 13px Arial, sans-serif;
+  font: 10px Arial, sans-serif;
   letter-spacing: 0.6px;
 }
 
 .cart-item-subtotal strong {
   color: #375341;
-  font: 700 20px Arial, sans-serif;
+  font: 700 14px Arial, sans-serif;
 }
 
 .cart-item-actions {
@@ -1143,12 +1144,12 @@ ion-button::part(native) {
 }
 
 .side-drawer .quantity-control ion-button {
-  width: 36px;
-  min-width: 36px;
-  height: 36px;
-  min-height: 36px;
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  min-height: 26px;
   margin: 0;
-  --border-radius: 11px;
+  --border-radius: 9px;
   --color: #365341;
   --padding-start: 0;
   --padding-end: 0;
@@ -1164,46 +1165,46 @@ ion-button::part(native) {
 }
 
 .side-drawer .quantity-control ion-icon {
-  font-size: 18px;
+  font-size: 14px;
 }
 
 .side-drawer .quantity-control span {
-  min-width: 28px;
+  min-width: 18px;
   color: #365341;
-  font: 700 14px Arial, sans-serif;
+  font: 700 11px Arial, sans-serif;
   text-align: center;
 }
 
 .side-drawer .remove-cart-button {
-  width: 40px;
-  min-width: 40px;
-  height: 40px;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
   margin: 0;
   --background: #efe5d0;
   --background-activated: #e6d9bf;
-  --border-radius: 16px;
+  --border-radius: 12px;
   --color: #876d57;
   --padding-start: 0;
   --padding-end: 0;
 }
 
 .side-drawer .remove-cart-button ion-icon {
-  font-size: 18px;
+  font-size: 15px;
 }
 
 .side-drawer .cart-summary {
   flex: 0 0 auto;
   margin-top: auto;
-  padding: 25px 20px 23px;
+  padding: 12px 11px 10px;
   border: 1px solid #e1d6c3;
-  border-radius: 20px;
-  background: #f6f0e2;
+  border-radius: 14px;
+  background: #f7ead6;
 }
 
 .side-drawer .summary-line {
   margin-bottom: 12px;
   color: #766b5b;
-  font: 14px Arial, sans-serif;
+  font: 12px Arial, sans-serif;
 }
 
 .side-drawer .summary-line strong,
@@ -1214,10 +1215,10 @@ ion-button::part(native) {
 
 .side-drawer .total-line {
   margin-bottom: 0;
-  padding-top: 16px;
+  padding-top: 10px;
   border-top: 1px solid #d9ccb5;
   color: #365341;
-  font: 600 18px Arial, sans-serif;
+  font: 600 14px Arial, sans-serif;
 }
 
 .side-drawer .empty-state {
@@ -1243,14 +1244,14 @@ ion-button::part(native) {
 }
 
 .side-drawer .checkout-button {
-  min-height: 60px;
-  margin: 20px 0 0;
+  min-height: 42px;
+  margin: 12px 0 0;
   --background: #97a988;
   --background-hover: #879a78;
   --background-activated: #879a78;
-  --border-radius: 30px;
+  --border-radius: 22px;
   --color: #fffaf1;
-  font: 600 16px Arial, sans-serif;
+  font: 600 13px Arial, sans-serif;
   text-transform: none;
 }
 
@@ -1263,8 +1264,8 @@ ion-button::part(native) {
 }
 
 .side-drawer .checkout-button::part(native) {
-  min-height: 60px;
-  border-radius: 30px;
+  min-height: 42px;
+  border-radius: 22px;
 }
 
 .side-drawer .checkout-button[disabled]::part(native) {
@@ -1275,70 +1276,74 @@ ion-button::part(native) {
 
 @media (max-width: 500px) {
   .side-drawer {
-    top: 28px;
-    bottom: 0;
-    width: 92.7vw;
-    padding: 31px 26px 19px;
-    border-radius: 32px;
+    top: 8px;
+    right: 12px;
+    bottom: auto;
+    left: auto;
+    width: min(340px, calc(100vw - 24px));
+    max-height: min(70vh, 520px);
+    padding: 14px 12px 10px;
+    border-radius: 16px;
+    transform: none;
   }
 
   .side-drawer .drawer-header {
-    margin-bottom: 22px;
-    padding-bottom: 19px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
   }
 
   .side-drawer .drawer-header h2 {
-    font-size: 22px;
+    font-size: 16px;
   }
 
   .cart-item-top {
-    grid-template-columns: 26px 60px minmax(0, 1fr);
-    gap: 14px;
+    grid-template-columns: 20px 42px minmax(0, 1fr);
+    gap: 8px;
   }
 
   .side-drawer .drawer-item {
-    padding: 21px 18px 20px;
+    padding: 12px 11px 10px;
   }
 
   .side-drawer .drawer-book-icon {
-    width: 60px;
-    min-width: 60px;
-    height: 60px;
-    border-radius: 15px;
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    border-radius: 11px;
   }
 
   .side-drawer .drawer-book-icon ion-icon {
-    font-size: 28px;
+    font-size: 21px;
   }
 
   .side-drawer .drawer-item-details h3 {
-    font-size: 18px;
+    font-size: 13px;
   }
 
   .side-drawer .drawer-item-details small {
-    font-size: 14px;
+    font-size: 11px;
   }
 
   .side-drawer .drawer-item-details p {
-    font-size: 14px;
+    font-size: 11px;
   }
 
   .cart-item-footer {
-    gap: 10px;
-    margin-top: 16px;
-    padding-top: 16px;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 10px;
   }
 
   .cart-item-subtotal span {
-    font-size: 12px;
+    font-size: 10px;
   }
 
   .cart-item-subtotal strong {
-    font-size: 18px;
+    font-size: 14px;
   }
 
   .cart-item-actions {
-    gap: 10px;
+    gap: 6px;
   }
 
   .side-drawer .quantity-control {
@@ -1346,51 +1351,55 @@ ion-button::part(native) {
   }
 
   .side-drawer .quantity-control ion-button {
-    width: 36px;
-    min-width: 36px;
-    height: 36px;
-    min-height: 36px;
+    width: 26px;
+    min-width: 26px;
+    height: 26px;
+    min-height: 26px;
   }
 
   .side-drawer .quantity-control span {
-    min-width: 28px;
-    font-size: 12px;
+    min-width: 18px;
+    font-size: 11px;
   }
 
   .side-drawer .remove-cart-button {
-    width: 40px;
-    min-width: 40px;
-    height: 40px;
+    width: 30px;
+    min-width: 30px;
+    height: 30px;
   }
 
   .side-drawer .cart-summary {
-    padding: 25px 20px 23px;
+    padding: 12px 11px 10px;
   }
 
   .side-drawer .summary-line {
-    margin-bottom: 12px;
-    font-size: 14px;
+    margin-bottom: 8px;
+    font-size: 11px;
   }
 
   .side-drawer .total-line {
-    padding-top: 16px;
-    font-size: 18px;
+    padding-top: 10px;
+    font-size: 14px;
   }
 
   .side-drawer .checkout-button {
-    min-height: 60px;
-    margin-top: 20px;
-    font-size: 16px;
+    min-height: 42px;
+    margin-top: 12px;
+    font-size: 13px;
   }
 
   .side-drawer .checkout-button::part(native) {
-    min-height: 60px;
+    min-height: 42px;
   }
 }
 
 .shop-page.modal-open > * {
   filter: blur(6px);
   transition: filter 140ms ease;
+}
+
+.shop-page.cart-open > * {
+  filter: none;
 }
 
 .checkout-container,
